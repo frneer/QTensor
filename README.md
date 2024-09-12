@@ -1,0 +1,13 @@
+# QTensor
+
+**QTensor** is an extended repository for Quantization-Aware Training (QAT) with TensorFlow. Focusing on using different quantizers with the goal of benchmarking different ones.
+
+## Installation
+
+To get started with QTensor, clone the repository and install the required dependencies:
+
+```bash
+git clone https://github.com/username/qtensor.git
+cd qtensor
+docker compose run ./docker/run.sh
+```

@@ -1,0 +1,32 @@
+services:
+  qtensor_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERID: $USERID
+        USER: $USER
+        GROUPID: $GROUPID
+        GROUP: $GROUP
+
+    image: qtensor
+    container_name: qtensor_dev
+    hostname: qtensor
+
+    runtime: nvidia
+
+    restart: on-failure
+    stdin_open: true
+    tty: true
+
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/tmp/.docker.xauth
+
+    network_mode: host
+
+    volumes:
+      - ../:/home/$USER/qtensor
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority
