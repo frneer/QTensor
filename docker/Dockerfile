@@ -78,4 +78,7 @@ COPY .bashrc /home/$USER/.bashrc
 
 WORKDIR /home/$USER/qtensor
 
+ENV PYTHONPATH="${PYTHONPATH}:/home/$USER/qtensor/src"
+
+
 CMD ["/bin/bash"]
