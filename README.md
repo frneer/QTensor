@@ -11,3 +11,11 @@ git clone https://github.com/username/qtensor.git
 cd qtensor
 docker compose run ./docker/run.sh
 ```
+
+## How to contribute
+
+Please before pushing, do a linter pass:
+
+```bash
+./src/linter.sh
+```
