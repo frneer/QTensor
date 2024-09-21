@@ -36,17 +36,18 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
 
     def build(self, tensor_shape, name, layer):
         alpha = layer.add_weight(
-            name + '_alpha',
+            name + "_alpha",
             initializer=tf.keras.initializers.Constant(self.alpha),
             trainable=True,
-            dtype=tf.float32)
-        return {'alpha': alpha}
+            dtype=tf.float32,
+        )
+        return {"alpha": alpha}
 
     def __call__(self, inputs, training, weights, **kwargs):
-        min_clip = -weights['alpha'] if self.signed else 0
-        max_clip = weights['alpha']
+        min_clip = -weights["alpha"] if self.signed else 0
+        max_clip = weights["alpha"]
         clipped = tf.clip_by_value(inputs, min_clip, max_clip)
-        return self.quantize_values(clipped, weights['alpha'])
+        return self.quantize_values(clipped, weights["alpha"])
 
     @tf.custom_gradient
     def quantize_values(self, input, alpha):

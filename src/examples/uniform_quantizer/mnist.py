@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
@@ -13,8 +14,6 @@ from tensorflow_model_optimization.quantization.keras import (
 )
 
 from configs.configs import UniformQuantizeConfig
-
-import matplotlib.pyplot as plt
 
 
 def main():
@@ -31,7 +30,8 @@ def main():
     # Build a simple model with both Dense layers quantized
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = quantize_annotate_layer(
-        Dense(128, activation="relu", name ="hidden"), UniformQuantizeConfig(bits=6, alpha=1)
+        Dense(128, activation="relu", name="hidden"),
+        UniformQuantizeConfig(bits=6, alpha=1),
     )
     layer_3 = quantize_annotate_layer(
         Dense(10, activation="softmax", name="output"),
@@ -69,17 +69,17 @@ def main():
     hist = quant_aware_model.fit(
         x_train,
         y_train,
-        epochs=5,
+        epochs=10,
         batch_size=32,
         validation_data=(x_test, y_test),
-        callbacks=[callbacks]
+        callbacks=[callbacks],
     )
 
     plt.figure()
     for callback in callbacks:
         plt.plot(callback.get_history(), label=callback.variable.name)
     plt.legend([callback.variable.name for callback in callbacks])
-    plt.grid(which='both')
+    plt.grid(which="both")
     plt.savefig("alpha_history.png")
 
     # Evaluate the model

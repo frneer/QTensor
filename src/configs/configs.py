@@ -24,7 +24,6 @@ class UniformQuantizeConfig(QuantizeConfig):
         bits: int = 8,
         alpha: float = 1.0,
         signed: bool = True,
-
     ):
         self.bits = bits
         self.alpha = alpha
