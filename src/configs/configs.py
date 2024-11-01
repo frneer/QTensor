@@ -16,7 +16,9 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
 )
 
 from quantizers.uniform_quantizer import UniformQuantizer
+from quantizers.flexible_quantizer import FlexibleQuantizer
 
+from typing import Iterable, Optional
 
 class UniformQuantizeConfig(QuantizeConfig):
     def __init__(
@@ -75,6 +77,85 @@ class UniformQuantizeConfig(QuantizeConfig):
         return {
             "bits": self.bits,
             "signed": self.signed,
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+
+class FlexibleQuantizeConfig(QuantizeConfig):
+    def __init__(
+        self,
+        bits,
+        alpha,
+        n_clusters: Optional[int] = None,
+        cc: Optional[Iterable] = None,
+        cl: Optional[Iterable] = None,
+        signed: bool = True,
+    ):
+        self.bits = bits
+        self.alpha = alpha
+        print("alpha", alpha)
+        self.n_clusters = n_clusters
+        self.cc = cc
+        self.cl = cl
+        self.signed = signed
+
+    # This defines how to quantize weights
+    def get_weights_and_quantizers(
+        self, layer
+    ) -> List[Tuple[tf.Variable, Quantizer]]:
+        return [
+            (
+                layer.kernel,
+                FlexibleQuantizer(
+                    bits=self.bits,
+                    alpha=self.alpha,
+                    signed=self.signed,
+                    n_clusters=self.n_clusters,
+                    cc=self.cc,
+                    cl=self.cl,
+                    name_suffix="_kernel",
+                ),
+            )
+        ]
+
+    def set_quantize_weights(self, layer, quantize_weights):
+        layer.kernel = quantize_weights[0]
+
+    # This defines how to quantize activations
+    def get_activations_and_quantizers(self, layer):
+        return [
+            (
+                layer.activation,
+                FlexibleQuantizer(
+                    bits=self.bits,
+                    alpha=self.alpha,
+                    signed=self.signed,
+                    n_clusters=self.n_clusters,
+                    cc=self.cc,
+                    cl=self.cl,
+                    name_suffix="_activation",
+                ),
+            )
+        ]
+
+    def set_quantize_activations(self, layer, quantize_activations):
+        layer.activation = quantize_activations[0]
+
+    # This defines how to quantize outputs
+    def get_output_quantizers(self, layer):
+        return []
+
+    def get_config(self):
+        return {
+            "bits": self.bits,
+            "alpha": self.alpha,
+            "signed": self.signed,
+            "n_clusters": self.n_clusters,
+            "cc": self.cc,
+            "cl": self.cl,
         }
 
     @classmethod

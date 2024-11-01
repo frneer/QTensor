@@ -19,3 +19,10 @@ Please before pushing, do a linter pass:
 ```bash
 ./src/linter.sh
 ```
+
+
+## Improvements:
+
+Alpha in the quantizers it's been used as an analog value.
+Consider using a quantized alpha for the forward pass, but the alpha is still there as the trainable param of the model.
+This would need to alpha_q(alpha) do ste.

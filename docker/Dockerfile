@@ -39,6 +39,7 @@ RUN pip3 install --upgrade pip \
     numpy \
     matplotlib \
     scikit-learn \
+    pandas \
     dm-tree==0.1.6
 
 # Install tensorflow-model-optimization
