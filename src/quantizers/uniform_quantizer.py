@@ -44,34 +44,47 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         return {"alpha": alpha}
 
     def __call__(self, inputs, training, weights, **kwargs):
-        min_clip = -weights["alpha"] if self.signed else 0
-        max_clip = weights["alpha"]
-        clipped = tf.clip_by_value(inputs, min_clip, max_clip)
-        return self.quantize_values(clipped, weights["alpha"])
+        return self.quantize_values(inputs, weights["alpha"])
 
     @tf.custom_gradient
-    def quantize_values(self, input, alpha):
+    def quantize_values(self, inputs, alpha):
         """Uniform quantization.
 
         :param input: input tensor
         :returns: quantized input tensor
         """
+
+        # Clip values between -alpha and alpha - 1
+        min_clip = - alpha
+        max_clip = alpha * (2**(self.bits - 1) - 1) / 2**(self.bits - 1)
+        # if not self.signed:
+        #     min_clip = 0
+        #     max_clip = alpha
+        clipped_inputs = tf.clip_by_value(inputs, min_clip, max_clip)
+
+        # Do the actual quantization
         quantization_levels = 2**self.bits
-
         scale_factor = quantization_levels / alpha
-        if self.signed:
-            scale_factor /= 2
-        scaled_input = input * scale_factor
+        scale_factor /= 2  # it's signed
+        scaled_inputs = clipped_inputs * scale_factor
+        quantized_output = tf.math.floor(scaled_inputs) / scale_factor
 
-        quantized_output = tf.math.floor(scaled_input) / scale_factor
-
+        # Compute custom gradient (STE)
         def grad(upstream):
             # Gradient for inputs is STE
-            grad_input = tf.ones_like(input) * upstream
+            # grad_input = tf.ones_like(input) * upstream
+            # STE (-alpha y alpha o -min_clip y max_clip)
+            grad_input = tf.where(
+                    tf.logical_and(
+                        tf.greater_equal(inputs, min_clip),
+                        tf.less_equal(inputs, max_clip),
+                    ),
+                    upstream,
+                    tf.zeros_like(inputs))
 
             # Transparent gradient for alpha
             # TODO(Fran): This might not be right.
-            grad_alpha = tf.zeros_like(alpha)
+            grad_alpha = tf.reduce_sum(quantized_output) / alpha
 
             return grad_input, grad_alpha
 
