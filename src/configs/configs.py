@@ -36,6 +36,13 @@ class UniformQuantizeConfig(QuantizeConfig):
             name_suffix="_kernel",
         )
 
+        self.bias_quantizer = UniformQuantizer(
+            bits=self.bits,
+            alpha=self.alpha,
+            signed=self.signed,
+            name_suffix="_bias",
+        )
+
         self.activation_quantizer = UniformQuantizer(
             bits=self.bits,
             alpha=self.alpha,
@@ -44,7 +51,6 @@ class UniformQuantizeConfig(QuantizeConfig):
         )
 
     # This defines how to quantize weights
-    # TODO(Fran): How can I change the config for biases only?
     def get_weights_and_quantizers(
         self, layer
     ) -> List[Tuple[tf.Variable, Quantizer]]:
@@ -52,11 +58,16 @@ class UniformQuantizeConfig(QuantizeConfig):
             (
                 layer.kernel,
                 self.weight_quantizer,
+            ),
+            (
+                layer.bias,
+                self.bias_quantizer,
             )
         ]
 
     def set_quantize_weights(self, layer, quantize_weights):
         layer.kernel = quantize_weights[0]
+        layer.bias = quantize_weights[1]
 
     # This defines how to quantize activations
     def get_activations_and_quantizers(self, layer):
@@ -71,7 +82,6 @@ class UniformQuantizeConfig(QuantizeConfig):
         layer.activation = quantize_activations[0]
 
     # This defines how to quantize outputs
-    # TODO(Fran): WTF is this output is it before the activation function or after?
     def get_output_quantizers(self, layer):
         return []
 
