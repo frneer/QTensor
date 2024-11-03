@@ -71,9 +71,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
 
         # Compute custom gradient (STE)
         def grad(upstream):
-            # Gradient for inputs is STE
-            # grad_input = tf.ones_like(input) * upstream
-            # STE (-alpha y alpha o -min_clip y max_clip)
+            # Gradient only flows through if the input is within the clipping range
             grad_input = tf.where(
                     tf.logical_and(
                         tf.greater_equal(inputs, min_clip),
@@ -82,9 +80,19 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                     upstream,
                     tf.zeros_like(inputs))
 
-            # Transparent gradient for alpha
-            # TODO(Fran): This might not be right.
-            grad_alpha = tf.reduce_sum(quantized_output) / alpha
+            # If values is within min and max clip: grad_alpha = 0,
+            # else < min_clip: grad_alpha = -upstream, else > max_clip: grad_alpha = upstream
+            # Finally reduce sum to match the shape of alpha
+            grad_alpha = tf.where(
+                tf.less(inputs, min_clip),
+                -upstream,  # Negative gradient when inputs are less than min_clip
+                tf.where(
+                    tf.greater(inputs, max_clip),
+                    upstream,  # Positive gradient when inputs are greater than max_clip
+                    tf.zeros_like(inputs)  # No gradient when inputs are within bounds
+                )
+            )
+            grad_alpha = tf.reduce_sum(grad_alpha)
 
             return grad_input, grad_alpha
 
