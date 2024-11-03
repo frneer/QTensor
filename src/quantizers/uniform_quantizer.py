@@ -80,18 +80,38 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                     upstream,
                     tf.zeros_like(inputs))
 
-            # If values is within min and max clip: grad_alpha = 0,
-            # else < min_clip: grad_alpha = -upstream, else > max_clip: grad_alpha = upstream
-            # Finally reduce sum to match the shape of alpha
-            grad_alpha = tf.where(
-                tf.less(inputs, min_clip),
-                -upstream,  # Negative gradient when inputs are less than min_clip
-                tf.where(
-                    tf.greater(inputs, max_clip),
-                    upstream,  # Positive gradient when inputs are greater than max_clip
-                    tf.zeros_like(inputs)  # No gradient when inputs are within bounds
-                )
-            )
+            # Compute gradient for alpha
+            grad_alpha = tf.zeros_like(inputs)
+            step_size = alpha / (quantization_levels / 2)
+
+            # Iterate through all intervals for gradient contributions
+            for k in range(-quantization_levels // 2, quantization_levels // 2):
+                lower_bound = k * step_size
+                upper_bound = (k + 1) * step_size
+                gradient_value = k / (quantization_levels / 2 - 1)  # Normalized gradient step based on position
+
+                if k == -quantization_levels // 2:
+                    # Special case for the left-most interval (-inf to the first upper limit)
+                    grad_alpha += tf.where(
+                        tf.less(inputs, upper_bound),
+                        gradient_value * upstream,
+                        tf.zeros_like(inputs)
+                    )
+                elif k == (quantization_levels // 2) - 1:
+                    # Special case for the right-most interval (last lower limit to +inf)
+                    grad_alpha += tf.where(
+                        tf.greater_equal(inputs, lower_bound),
+                        gradient_value * upstream,
+                        tf.zeros_like(inputs)
+                    )
+                else:
+                    # General case for intermediate intervals
+                    grad_alpha += tf.where(
+                        tf.logical_and(tf.greater_equal(inputs, lower_bound), tf.less(inputs, upper_bound)),
+                        gradient_value * upstream,
+                        tf.zeros_like(inputs)
+                    )
+
             grad_alpha = tf.reduce_sum(grad_alpha)
 
             return grad_input, grad_alpha
