@@ -29,6 +29,20 @@ class UniformQuantizeConfig(QuantizeConfig):
         self.alpha = alpha
         self.signed = signed
 
+        self.weight_quantizer = UniformQuantizer(
+            bits=self.bits,
+            alpha=self.alpha,
+            signed=self.signed,
+            name_suffix="_kernel",
+        )
+
+        self.activation_quantizer = UniformQuantizer(
+            bits=self.bits,
+            alpha=self.alpha,
+            signed=self.signed,
+            name_suffix="_activation",
+        )
+
     # This defines how to quantize weights
     # TODO(Fran): How can I change the config for biases only?
     def get_weights_and_quantizers(
@@ -37,12 +51,7 @@ class UniformQuantizeConfig(QuantizeConfig):
         return [
             (
                 layer.kernel,
-                UniformQuantizer(
-                    bits=self.bits,
-                    alpha=self.alpha,
-                    signed=self.signed,
-                    name_suffix="_kernel",
-                ),
+                self.weight_quantizer,
             )
         ]
 
@@ -54,12 +63,7 @@ class UniformQuantizeConfig(QuantizeConfig):
         return [
             (
                 layer.activation,
-                UniformQuantizer(
-                    bits=self.bits,
-                    alpha=self.alpha,
-                    signed=self.signed,
-                    name_suffix="_activation",
-                ),
+                self.activation_quantizer,
             )
         ]
 
