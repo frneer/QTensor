@@ -66,11 +66,14 @@ def main():
     print(*var_names)
     callbacks = [VariableHistoryCallback(v) for v in vars if "alpha" in v.name]
 
+
+    EPOCHS = 4
+    BATCH_SIZE = 32
     hist = quant_aware_model.fit(
         x_train,
         y_train,
-        epochs=10,
-        batch_size=32,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
         validation_data=(x_test, y_test),
         callbacks=[callbacks],
     )
