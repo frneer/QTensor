@@ -80,6 +80,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                     upstream,
                     tf.zeros_like(inputs))
 
+            """
             # Compute the quantization step size
             step_size = alpha / (quantization_levels // 2)
 
@@ -129,7 +130,9 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
 
             # Sum over all interval contributions to produce the final gradient for `alpha`
             grad_alpha = tf.reduce_sum(grad_alpha_matrix, axis=-1)
-
+            """
+            # Compute gradient wrt alpha
+            grad_alpha = tf.reduce_sum((quantized_output * upstream) / alpha)
 
             return grad_input, grad_alpha
 
