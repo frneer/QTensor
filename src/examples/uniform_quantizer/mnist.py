@@ -33,10 +33,7 @@ def main():
         Dense(128, activation="relu", name="hidden"),
         UniformQuantizeConfig(bits=6, alpha=1),
     )
-    layer_3 = quantize_annotate_layer(
-        Dense(10, activation="softmax", name="output"),
-        UniformQuantizeConfig(bits=4, alpha=1),
-    )
+    layer_3 = Dense(10, activation="softmax", name="output")
     model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
 
     with quantize_scope({"UniformQuantizeConfig": UniformQuantizeConfig}):
@@ -67,8 +64,8 @@ def main():
     callbacks = [VariableHistoryCallback(v) for v in vars if "alpha" in v.name]
 
 
-    EPOCHS = 4
-    BATCH_SIZE = 32
+    EPOCHS = 100
+    BATCH_SIZE = 1024
     hist = quant_aware_model.fit(
         x_train,
         y_train,
