@@ -24,20 +24,17 @@ class UniformQuantizeConfig(QuantizeConfig):
         bits: int = 8,
         alpha: float = 1.0,
         signed: bool = True,
-        regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
     ):
         self.bits = bits
         self.alpha = alpha
         self.signed = signed
-        self.regularizer = regularizer
 
-        print(f"Using regularizer: {regularizer}")
         self.weight_quantizer = UniformQuantizer(
             bits=self.bits,
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_kernel",
-            regularizer=self.regularizer,
+            regularizer=tf.keras.regularizers.l2(0.01),
         )
 
         self.bias_quantizer = UniformQuantizer(
@@ -45,7 +42,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_bias",
-            regularizer=self.regularizer,
+            regularizer=tf.keras.regularizers.l2(0.01),
         )
 
         self.activation_quantizer = UniformQuantizer(
@@ -53,7 +50,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_activation",
-            regularizer=self.regularizer,
+            regularizer=tf.keras.regularizers.l2(0.01),
         )
 
     # This defines how to quantize weights

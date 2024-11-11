@@ -32,7 +32,7 @@ def main():
     layer_2 = quantize_annotate_layer(
         Dense(128, activation="relu", name="hidden"),
         UniformQuantizeConfig(
-            bits=6, alpha=1, regularizer=tf.keras.regularizers.l2(0.01)
+            bits=6, alpha=1
         ),
     )
     layer_3 = Dense(10, activation="softmax", name="output")
