@@ -5,7 +5,7 @@ Feel free to add more configurations as needed, or define them directly on your
 code.
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 import tensorflow as tf
 from tensorflow_model_optimization.python.core.quantization.keras.quantize_config import (
@@ -37,7 +37,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_kernel",
-            regularizer=self.regularizer
+            regularizer=self.regularizer,
         )
 
         self.bias_quantizer = UniformQuantizer(
@@ -45,7 +45,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_bias",
-            regularizer=self.regularizer
+            regularizer=self.regularizer,
         )
 
         self.activation_quantizer = UniformQuantizer(
@@ -53,7 +53,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             alpha=self.alpha,
             signed=self.signed,
             name_suffix="_activation",
-            regularizer=self.regularizer
+            regularizer=self.regularizer,
         )
 
     # This defines how to quantize weights
@@ -68,7 +68,7 @@ class UniformQuantizeConfig(QuantizeConfig):
             (
                 layer.bias,
                 self.bias_quantizer,
-            )
+            ),
         ]
 
     def set_quantize_weights(self, layer, quantize_weights):

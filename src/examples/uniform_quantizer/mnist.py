@@ -31,7 +31,9 @@ def main():
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = quantize_annotate_layer(
         Dense(128, activation="relu", name="hidden"),
-        UniformQuantizeConfig(bits=6, alpha=1, regularizer=tf.keras.regularizers.l2(0.01)),
+        UniformQuantizeConfig(
+            bits=6, alpha=1, regularizer=tf.keras.regularizers.l2(0.01)
+        ),
     )
     layer_3 = Dense(10, activation="softmax", name="output")
     model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
@@ -62,7 +64,6 @@ def main():
     var_names = [v.name for v in vars]
     print(*var_names)
     callbacks = [VariableHistoryCallback(v) for v in vars if "alpha" in v.name]
-
 
     EPOCHS = 100
     BATCH_SIZE = 1024

@@ -59,8 +59,8 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         """
 
         # Clip values between -alpha and alpha - 1
-        min_clip = - alpha
-        max_clip = alpha * (2**(self.bits - 1) - 1) / 2**(self.bits - 1)
+        min_clip = -alpha
+        max_clip = alpha * (2 ** (self.bits - 1) - 1) / 2 ** (self.bits - 1)
         # if not self.signed:
         #     min_clip = 0
         #     max_clip = alpha
@@ -77,12 +77,13 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         def grad(upstream):
             # Gradient only flows through if the input is within the clipping range
             grad_input = tf.where(
-                    tf.logical_and(
-                        tf.greater_equal(inputs, min_clip),
-                        tf.less_equal(inputs, max_clip),
-                    ),
-                    upstream,
-                    tf.zeros_like(inputs))
+                tf.logical_and(
+                    tf.greater_equal(inputs, min_clip),
+                    tf.less_equal(inputs, max_clip),
+                ),
+                upstream,
+                tf.zeros_like(inputs),
+            )
 
             # Compute gradient wrt alpha
             grad_alpha = tf.reduce_sum((quantized_output * upstream) / alpha)
