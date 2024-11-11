@@ -3,6 +3,7 @@
 """This module implements a uniform quantizer for quantizing weights and
 activations."""
 
+from typing import Optional
 
 import tensorflow as tf
 from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
@@ -20,6 +21,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         alpha: float,
         signed: bool = True,
         name_suffix: str = "",
+        regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
     ):
         """
         :param bits: number of bits for quantization
@@ -33,13 +35,15 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         self.alpha = alpha
         self.signed = signed
         self.name_suffix = name_suffix
+        self.regularizer = regularizer
 
-    def build(self, tensor_shape, name, layer):
+    def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
         alpha = layer.add_weight(
             name + "_alpha",
             initializer=tf.keras.initializers.Constant(self.alpha),
             trainable=True,
             dtype=tf.float32,
+            regularizer=self.regularizer,
         )
         return {"alpha": alpha}
 
