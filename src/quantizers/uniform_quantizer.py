@@ -84,57 +84,6 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                     upstream,
                     tf.zeros_like(inputs))
 
-            """
-            # Compute the quantization step size
-            step_size = alpha / (quantization_levels // 2)
-
-            # Generate quantization boundaries centered around 0
-            k_values = tf.range(-quantization_levels // 2, quantization_levels // 2, dtype=tf.float32)
-            boundaries = k_values * step_size
-
-            # Define lower and upper boundaries for each interval
-            lower_bounds = boundaries[:-1]  # Excludes the last boundary (used as lower limit)
-            upper_bounds = boundaries[1:]   # Excludes the first boundary (used as upper limit)
-
-            # Compute gradient scaling factors for each interval (normalized step size)
-            gradient_scaling_factors = k_values[:-1] / (quantization_levels / 2 - 1)
-
-            # Expand inputs and upstream for broadcasting across intervals
-            inputs_expanded = tf.expand_dims(inputs, -1)
-            upstream_expanded = tf.expand_dims(upstream, -1)
-
-            # Compute the gradient contributions for all intervals at once
-            grad_alpha_matrix = tf.where(
-                tf.logical_and(
-                    inputs_expanded >= lower_bounds,
-                    inputs_expanded < upper_bounds
-                ),
-                gradient_scaling_factors * upstream_expanded,
-                tf.zeros_like(inputs_expanded)
-            )
-
-            # Special handling for the first (left-most) and last (right-most) intervals
-            left_most_contribution = tf.where(
-                inputs < upper_bounds[0],
-                gradient_scaling_factors[0] * upstream,
-                tf.zeros_like(upstream)
-            )[..., tf.newaxis]
-
-            right_most_contribution = tf.where(
-                inputs >= lower_bounds[-1],
-                gradient_scaling_factors[-1] * upstream,
-                tf.zeros_like(upstream)
-            )[..., tf.newaxis]
-
-            # Concatenate all contributions into a single tensor
-            grad_alpha_matrix = tf.concat(
-                [left_most_contribution, grad_alpha_matrix, right_most_contribution],
-                axis=-1
-            )
-
-            # Sum over all interval contributions to produce the final gradient for `alpha`
-            grad_alpha = tf.reduce_sum(grad_alpha_matrix, axis=-1)
-            """
             # Compute gradient wrt alpha
             grad_alpha = tf.reduce_sum((quantized_output * upstream) / alpha)
 
