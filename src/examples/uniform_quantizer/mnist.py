@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+
+import argparse
+
 import matplotlib.pyplot as plt
-import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.layers import Dense, Flatten
@@ -14,78 +16,134 @@ from tensorflow_model_optimization.quantization.keras import (
 )
 
 from configs.configs import UniformQuantizeConfig
+from utils.utils import VariableHistoryCallback
 
 
-def main():
+def generate_dataset():
+    """Generate the MNIST dataset."""
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-    # Normalize the data to a range of 0 to 1
     x_train = x_train / 255.0
     x_test = x_test / 255.0
-
-    # Convert the labels to one-hot encoding
     y_train = to_categorical(y_train, 10)
     y_test = to_categorical(y_test, 10)
+    return (x_train, y_train), (x_test, y_test)
 
-    # Build a simple model with both Dense layers quantized
+
+def create_model(bits, alpha, signed):
+    """Create a simple model for MNIST classification."""
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = quantize_annotate_layer(
         Dense(128, activation="relu", name="hidden"),
         UniformQuantizeConfig(
-            bits=6, alpha=1
+            bits=bits,
+            alpha=alpha,
+            signed=signed,
         ),
     )
     layer_3 = Dense(10, activation="softmax", name="output")
     model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
+    return model
 
+
+def plot_training_history(history, callbacks):
+    """Plot the training history including loss, accuracy, and alpha
+    variables."""
+    fig, axs = plt.subplots(3, 1, figsize=(12, 18))
+
+    # Plot training & validation loss values
+    axs[0].plot(history.history["loss"])
+    axs[0].plot(history.history["val_loss"])
+    axs[0].set_title("Model loss")
+    axs[0].set_ylabel("Loss")
+    axs[0].set_xlabel("Epoch")
+    axs[0].legend(["Train", "Validation"], loc="upper left")
+    axs[0].grid(which="both")
+
+    # Plot training & validation accuracy values
+    axs[1].plot(history.history["accuracy"])
+    axs[1].plot(history.history["val_accuracy"])
+    axs[1].set_title("Model accuracy")
+    axs[1].set_ylabel("Accuracy")
+    axs[1].set_xlabel("Epoch")
+    axs[1].legend(["Train", "Validation"], loc="upper left")
+    axs[1].grid(which="both")
+
+    # Plot alpha history
+    for callback in callbacks:
+        axs[2].plot(callback.get_history(), label=callback.variable.name)
+    axs[2].set_title("Alpha history")
+    axs[2].set_ylabel("Alpha")
+    axs[2].set_xlabel("Epoch")
+    axs[2].legend([callback.variable.name for callback in callbacks])
+    axs[2].grid(which="both")
+
+    plt.tight_layout()
+    plt.savefig("training_history.png")
+
+
+def main(bits, alpha, signed):
+    (x_train, y_train), (x_test, y_test) = generate_dataset()
+
+    model = create_model(bits, alpha, signed)
+
+    # Compile the model and get the variables to monitor
     with quantize_scope({"UniformQuantizeConfig": UniformQuantizeConfig}):
         quant_aware_model = quantize_apply(model)
     quant_aware_model.summary()
-
-    # Train the model
     quant_aware_model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
+    callbacks = [
+        VariableHistoryCallback(v)
+        for v in quant_aware_model.variables
+        if "alpha" in v.name
+    ]
 
-    class VariableHistoryCallback(tf.keras.callbacks.Callback):
-        def __init__(self, variable):
-            super(VariableHistoryCallback, self).__init__()
-            self.variable = variable
-            self.variable_values = []
-
-        def on_epoch_end(self, epoch, logs=None):
-            # Record the variable's value at the end of each epoch
-            self.variable_values.append(self.variable.numpy())
-
-        def get_history(self):
-            return self.variable_values
-
-    vars = quant_aware_model.variables
-    var_names = [v.name for v in vars]
-    print(*var_names)
-    callbacks = [VariableHistoryCallback(v) for v in vars if "alpha" in v.name]
-
-    EPOCHS = 100
-    BATCH_SIZE = 1024
     hist = quant_aware_model.fit(
         x_train,
         y_train,
-        epochs=EPOCHS,
-        batch_size=BATCH_SIZE,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
         validation_data=(x_test, y_test),
         callbacks=[callbacks],
     )
 
-    plt.figure()
-    for callback in callbacks:
-        plt.plot(callback.get_history(), label=callback.variable.name)
-    plt.legend([callback.variable.name for callback in callbacks])
-    plt.grid(which="both")
-    plt.savefig("alpha_history.png")
+    plot_training_history(hist, callbacks)
+    plot_alpha_history(callbacks)
 
-    # Evaluate the model
     quant_aware_model.evaluate(x_test, y_test)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--bits",
+        type=int,
+        default=6,
+        help="number of bits for quantization",
+    )
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=1,
+        help="initial quantization limit",
+    )
+    parser.add_argument(
+        "--signed",
+        action="store_true",
+        help="flag to enable signed quantization",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=100,
+        help="number of epochs for training",
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=1024,
+        help="batch size for training",
+    )
+    args = parser.parse_args()
+    main(args.bits, args.alpha, args.signed)

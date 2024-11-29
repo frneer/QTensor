@@ -5,6 +5,7 @@ activations."""
 
 from typing import Optional
 
+import numpy as np
 import tensorflow as tf
 from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
     Quantizer,
@@ -18,7 +19,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
     def __init__(
         self,
         bits: int,
-        alpha: float,
+        alpha_initializer: tf.keras.initializers.Constant,
         signed: bool = True,
         name_suffix: str = "",
         regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
@@ -32,23 +33,47 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         super(UniformQuantizer, self).__init__()
 
         self.bits = bits
-        self.alpha = alpha
+        self.alpha_initializer = alpha_initializer
         self.signed = signed
         self.name_suffix = name_suffix
         self.regularizer = regularizer
 
+        self.quantization_levels = 2**self.bits
+
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
+        class PositiveConstraint(tf.keras.constraints.Constraint):
+            def __call__(self, w):
+                # Use epsilon instead of zero to avoid dividing by zero during backpropagation
+                return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
+
         alpha = layer.add_weight(
             name + "_alpha",
-            initializer=tf.keras.initializers.Constant(self.alpha),
+            initializer=self.alpha_initializer,
             trainable=True,
             dtype=tf.float32,
             regularizer=self.regularizer,
+            constraint=PositiveConstraint(),
         )
         return {"alpha": alpha}
 
     def __call__(self, inputs, training, weights, **kwargs):
         return self.quantize_values(inputs, weights["alpha"])
+
+    def min_clip(self, alpha):
+        return -alpha if self.signed else 0
+
+    def max_clip(self, alpha):
+        return (
+            alpha * (2 ** (self.bits - 1) - 1) / 2 ** (self.bits - 1)
+            if self.signed
+            else alpha
+        )
+
+    def scale_factor(self, alpha):
+        scale_factor = self.quantization_levels / alpha
+        if self.signed:
+            scale_factor /= 2
+        return scale_factor
 
     @tf.custom_gradient
     def quantize_values(self, inputs, alpha):
@@ -57,21 +82,14 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         :param input: input tensor
         :returns: quantized input tensor
         """
-
         # Clip values between -alpha and alpha - 1
-        min_clip = -alpha
-        max_clip = alpha * (2 ** (self.bits - 1) - 1) / 2 ** (self.bits - 1)
-        # if not self.signed:
-        #     min_clip = 0
-        #     max_clip = alpha
+        min_clip = self.min_clip(alpha)
+        max_clip = self.max_clip(alpha)
         clipped_inputs = tf.clip_by_value(inputs, min_clip, max_clip)
 
         # Do the actual quantization
-        quantization_levels = 2**self.bits
-        scale_factor = quantization_levels / alpha
-        scale_factor /= 2  # it's signed
-        scaled_inputs = clipped_inputs * scale_factor
-        quantized_output = tf.math.floor(scaled_inputs) / scale_factor
+        scaled_inputs = clipped_inputs * self.scale_factor(alpha)
+        quantized_output = tf.math.floor(scaled_inputs) / self.scale_factor(alpha)
 
         # Compute custom gradient (STE)
         def grad(upstream):
@@ -95,7 +113,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
     def get_config(self):
         return {
             "bits": self.bits,
-            "alpha": self.alpha,
+            "alpha_initializer": self.alpha_initializer,
             "signed": self.signed,
             "name_suffix": self.name_suffix,
         }
