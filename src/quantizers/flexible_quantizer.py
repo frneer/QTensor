@@ -69,32 +69,47 @@ class FlexibleQuantizer(_QuantizeHelper, Quantizer):
     def build(self, tensor_shape, name, layer):
 
         class OrderedConstraint(tf.keras.constraints.Constraint):
+            def __init__(self, alpha):
+                self.alpha = alpha
             def __call__(self, variable):
                 # Sort the variable values along the last axis (assumed to be the feature axis)
-                sorted_variable = tf.sort(variable, axis=0)
-                low_limit = sorted_variable[0]
-                high_limit = sorted_variable[-1]
-                hard_limit = tf.maximum(abs(low_limit), abs(high_limit))
+                # sorted_variable = tf.sort(variable, axis=0)
+                # low_limit = sorted_variable[0]
+                # high_limit = sorted_variable[-1]
+                # hard_limit = tf.maximum(abs(low_limit), abs(high_limit))
+
 
                 # Ensure that the weights stay between min_val and max_val
-                return tf.clip_by_value(sorted_variable, -hard_limit, hard_limit)
+                return tf.clip_by_value(variable, -self.alpha, self.alpha)
 
             def get_config(self):
                 return {}
+        class PositiveConstraint(tf.keras.constraints.Constraint):
+            def __call__(self, w):
+                # Use epsilon instead of zero to avoid dividing by zero during backpropagation
+                return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
+
+        alpha = layer.add_weight(
+            name + '_alpha',
+            initializer=tf.keras.initializers.Constant(self.alpha),
+            trainable=True,
+            dtype=tf.float32,
+            constraint=PositiveConstraint(),
+        )
         cc = layer.add_weight(
                 name + '_cluster_centers',
                 shape=(self.n_clusters, self.n_ch),
                 initializer=tf.constant_initializer(self.cc),
                 trainable=True,
-                constraint=OrderedConstraint(),
+                constraint=OrderedConstraint(alpha),
                 )
         cl = layer.add_weight(
                 name + '_cluster_limits',
                 shape=(self.n_clusters-1, self.n_ch),
                 initializer=tf.constant_initializer(self.cl),
                 trainable=True,
-                constraint=OrderedConstraint(),
+                constraint=OrderedConstraint(alpha),
                 )
 
         return {"cc": cc, "cl": cl}
