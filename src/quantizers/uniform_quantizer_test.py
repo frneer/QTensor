@@ -128,6 +128,34 @@ class TestUniformQuantizer(unittest.TestCase):
             f"Quantized values are not unique",
         )
 
+    def test_expected_quantization_levels_signed(self):
+        """Test that verifies that the output values are as expected."""
+        bits = 3
+        alpha = 3.0
+        quantizer = UniformQuantizer(
+            bits=bits,
+            alpha_initializer=tf.keras.initializers.Constant(alpha),
+            signed=True,
+            name_suffix="_test",
+        )
+
+        # Build the quantizer weights
+        self.input_shape = (1000, 4)
+        weights = quantizer.build(self.input_shape, "test", self.mock_layer)
+
+        # Generate a random input tensor
+        self.input_tensor = tf.constant(
+            np.random.uniform(-3.0, 3.0, size=self.input_shape),
+            dtype=tf.float32,
+        )
+
+        # Call the quantizer
+        output = quantizer(self.input_tensor, training=True, weights=weights)
+        output_set = sorted(set(output.numpy().flatten()))
+        expected_set = [-3.0, -2.25, -1.5, -0.75, 0.0, 0.75, 1.5, 2.25]
+
+        self.assertListEqual(output_set, expected_set)
+
 
 if __name__ == "__main__":
     unittest.main()
