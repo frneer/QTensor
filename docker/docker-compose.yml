@@ -30,3 +30,20 @@ services:
       - ../:/home/$USER/qtensor
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/.Xauthority:/root/.Xauthority
+
+  qtensor_tex:
+    build:
+      context: ./latex
+      dockerfile: Dockerfile
+
+    image: qtensor_tex
+    container_name: qtensor_tex
+
+    restart: on-failure
+    stdin_open: true
+    tty: true
+
+    network_mode: host
+
+    volumes:
+      - ../docs:/workspace
