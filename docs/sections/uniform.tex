@@ -1,9 +1,8 @@
-El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $s(\alpha, b) = \frac{\alpha}{n\left(b\right)}$, donde $n\left(b\right) = 2^{b-1}$, \
-siendo $b$ el número de bits utilizados para la cuantización. Con cada nivel teniendo el valor:
-
+El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, \
+siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo [0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
 \begin{equation}
     \label{eq:uniform_quantizer_level_value}
-    v_{l_i}\left(\alpha\right) = -\alpha + i \cdot s\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
+    l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
 \end{equation}
 
 La función de cuantización uniforme puede escribirse como en la ecuación \refeq{uniform_quantizer_signed} y se ve como en la \reffig{uniform_signed}.
@@ -11,9 +10,9 @@ La función de cuantización uniforme puede escribirse como en la ecuación \ref
     \label{eq:uniform_quantizer_signed}
     q(x; \alpha) =
     \begin{cases}
-        - \alpha & \text{si $x \leq -\alpha$} \\
-        \frac{1}{k} \cdot \lfloor x \cdot k \rfloor & \text{si $-\alpha < x < \alpha$, con $k = \frac{n}{\alpha}$} \\
-        v_{l_{n\left(b\right) - 1}}\left(\alpha\right) & \text{si $x \geq \alpha$}
+        l_{0} & \text{si $x \leq m$} \\
+        \Delta \cdot \lfloor \frac{x}{\Delta} \rfloor & \text{si } m < x < M \\
+        l_{n\left(b\right) - 1}\left(\alpha\right) & \text{si } x \geq M
     \end{cases}
 \end{equation}
 
@@ -27,7 +26,7 @@ Para determinar las derivadas respecto a la entrda $\frac{\partial q}{\partial x
     \begin{cases}
         - \alpha & \text{si $x \leq -\alpha$} \\
         x \\
-        v_{l_{n\left(b\right) - 1}}\left(\alpha\right) & \text{si $x \geq \alpha$}
+        l_{n\left(b\right) - 1}\left(\alpha\right) & \text{si $x \geq \alpha$}
     \end{cases}
 \end{equation}
 

@@ -31,7 +31,7 @@ class UniformQuantizeConfig(QuantizeConfig):
 
         self.weight_quantizer = UniformQuantizer(
             bits=self.bits,
-            alpha_initializer=tf.keras.initializers.Constant(self.alpha),
+            initializer=tf.keras.initializers.Constant(self.alpha),
             signed=self.signed,
             name_suffix="_kernel",
             regularizer=tf.keras.regularizers.l2(0.01),
@@ -39,7 +39,7 @@ class UniformQuantizeConfig(QuantizeConfig):
 
         self.bias_quantizer = UniformQuantizer(
             bits=self.bits,
-            alpha_initializer=tf.keras.initializers.Constant(self.alpha),
+            initializer=tf.keras.initializers.Constant(self.alpha),
             signed=self.signed,
             name_suffix="_bias",
             regularizer=tf.keras.regularizers.l2(0.01),
@@ -47,14 +47,16 @@ class UniformQuantizeConfig(QuantizeConfig):
 
         self.activation_quantizer = UniformQuantizer(
             bits=self.bits,
-            alpha_initializer=tf.keras.initializers.Constant(self.alpha),
+            initializer=tf.keras.initializers.Constant(self.alpha),
             signed=self.signed,
             name_suffix="_activation",
             regularizer=tf.keras.regularizers.l2(0.01),
         )
 
     # This defines how to quantize weights
-    def get_weights_and_quantizers(self, layer) -> List[Tuple[tf.Variable, Quantizer]]:
+    def get_weights_and_quantizers(
+        self, layer
+    ) -> List[Tuple[tf.Variable, Quantizer]]:
         return [
             (
                 layer.kernel,
