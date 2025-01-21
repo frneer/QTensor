@@ -89,6 +89,8 @@ class QBuilder:
         custom_objects["GenerateConfig"] = GenerateConfig
         custom_objects["UniformQuantizer"] = UniformQuantizer
         custom_objects["Constant"] = tf.keras.initializers.Constant
+        custom_objects["RandomNormal"] = tf.keras.initializers.RandomNormal
+        custom_objects["RandomUniform"] = tf.keras.initializers.RandomUniform
 
         with quantize_scope(custom_objects):
             return quantize_apply(self.model)

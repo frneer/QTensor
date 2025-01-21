@@ -1,9 +1,12 @@
 #!/bin/bash
 
+# Create it in docs
+cd "$(dirname "$0")"
+
+pushd ../docs
 mkdir -p build && \
     rm -f build/main.pdf
-
-cd "$(dirname "$0")"
+popd
 
 # Compile the main.tex file
 docker compose run qtensor_tex \
@@ -11,3 +14,4 @@ docker compose run qtensor_tex \
     -interaction=nonstopmode \
     -output-directory=build \
     main.tex
+

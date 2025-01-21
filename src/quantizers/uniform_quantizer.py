@@ -31,6 +31,10 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         initializer: tf.keras.initializers.Constant = tf.keras.initializers.Constant(
             1.0
         ),
+        #initializer: tf.keras.initializers.RandomNormal = tf.keras.initializers.RandomNormal(
+        #    mean=0.0,
+        #    stddev=0.05,
+        #    ),
         regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
     ):
         """Constructor.

@@ -2,6 +2,8 @@
 from typing import List
 
 import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import newaxis
 from tensorflow.keras import Sequential
 from tensorflow.keras.callbacks import History
 from tensorflow.keras.datasets import mnist
@@ -19,6 +21,8 @@ def generate_dataset():
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     x_train = x_train / 255.0
     x_test = x_test / 255.0
+    x_train = x_train[..., newaxis]
+    x_test = x_test[..., newaxis]
     y_train = to_categorical(y_train, 10)
     y_test = to_categorical(y_test, 10)
     return (x_train, y_train), (x_test, y_test)
@@ -74,7 +78,7 @@ def plot_training_history(
     plt.tight_layout(rect=[0, 0, 0.85, 1])
     plt.savefig("training_history.png")
 
-def lenet5_model(bits: int = 8, hidden_bits: int = 3):
+def lenet5_model(bits: int = 8, hidden_bits: int = 8):
     """Create a LeNet-5 model for MNIST classification."""
     builder = QBuilder(Sequential)
     builder.add(
@@ -82,10 +86,12 @@ def lenet5_model(bits: int = 8, hidden_bits: int = 3):
         weight_quantizer=UniformQuantizer(
             bits=bits,
             signed=True,
+            initializer=tf.keras.initializers.Constant(0.1),
         ),
         activation_quantizer=UniformQuantizer(
             bits=bits,
             signed=False,
+            initializer=tf.keras.initializers.Constant(0.1),
         )
     )
     builder.add(MaxPooling2D(pool_size=(2, 2)))
@@ -94,10 +100,12 @@ def lenet5_model(bits: int = 8, hidden_bits: int = 3):
         weight_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=True,
+            initializer=tf.keras.initializers.Constant(0.1),
         ),
         activation_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=False,
+            initializer=tf.keras.initializers.Constant(0.1),
         )
     )
     builder.add(MaxPooling2D(pool_size=(2, 2)))
@@ -107,21 +115,25 @@ def lenet5_model(bits: int = 8, hidden_bits: int = 3):
         weight_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=True,
+            initializer=tf.keras.initializers.Constant(0.1),
         ),
         activation_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=False,
-    )
+            initializer=tf.keras.initializers.Constant(0.1),
+        )
     )
     builder.add(
         Dense(84, activation="relu"),
         weight_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=True,
+            initializer=tf.keras.initializers.Constant(0.1),
         ),
         activation_quantizer=UniformQuantizer(
             bits=hidden_bits,
             signed=False,
+            initializer=tf.keras.initializers.Constant(0.1),
         )
     )
     builder.add(Dense(10))
@@ -131,7 +143,7 @@ def lenet5_model(bits: int = 8, hidden_bits: int = 3):
 
 (x_train, y_train), (x_test, y_test) = generate_dataset()
 
-quant_aware_model = lenet5_model()
+quant_aware_model = lenet5_model(bits=6, hidden_bits=5)
 
 quant_aware_model.summary()
 quant_aware_model.compile(
@@ -144,7 +156,7 @@ callbacks = [
 ]
 
 EPOCHS = 10
-BATCH_SIZE = 256
+BATCH_SIZE = 256*1
 hist = quant_aware_model.fit(
     x_train,
     y_train,
