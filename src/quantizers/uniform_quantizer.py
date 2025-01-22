@@ -14,106 +14,122 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
 
 
 class UniformQuantizer(_QuantizeHelper, Quantizer):
-    """This class implements an uniform quantizer."""
+    """An uniform quantizer algorithm support both signed and unsigned
+    quantization.
+
+    This class is ment to be used with the QuantizeConfig class to quantize the
+    weights of a given layer. The quantization levels are uniformly distributed
+    between the minimum and maximum values of the input tensor. The alpha
+    parameter is learned during training.
+    """
 
     def __init__(
         self,
         bits: int,
-        alpha_initializer: tf.keras.initializers.Constant,
         signed: bool = True,
         name_suffix: str = "",
+        initializer: tf.keras.initializers.Constant = tf.keras.initializers.Constant(
+            1.0
+        ),
         regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
     ):
-        """
-        :param bits: number of bits for quantization
-        :param alpha: initial quantization range
-        :param signed: Flag to enable signed quantization
-        :param name_suffix: suffix to be added to the layer qParameter names
+        """Constructor.
+
+        :param bits(int): Number of bits to use for quantization.
+        :param signed(bool): Whether to use signed or unsigned quantization. By default, signed quantization is used.
+        :param name_suffix(str): Suffix to append to the layer name.
+        :param initializer(tf.keras.initializers.Initializer): Initializer for the alpha parameter.
+        :param regularizer(tf.keras.regularizers.Regularizer): Regularizer for the alpha parameter.
         """
         super(UniformQuantizer, self).__init__()
 
         self.bits = bits
-        self.alpha_initializer = alpha_initializer
         self.signed = signed
         self.name_suffix = name_suffix
+        self.initializer = initializer
         self.regularizer = regularizer
 
-        self.quantization_levels = 2**self.bits
+        self.n_levels = 2**self.bits
+
+        self.alpha = None
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
         class PositiveConstraint(tf.keras.constraints.Constraint):
+            """Constrains alpha to be positive."""
+
             def __call__(self, w):
-                # Use epsilon instead of zero to avoid dividing by zero during backpropagation
+                # Use epsilon to avoid dividing by zero during backpropagation.
                 return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
         alpha = layer.add_weight(
-            name + "_alpha",
-            initializer=self.alpha_initializer,
+            name.join("_alpha"),
+            initializer=self.initializer,
             trainable=True,
             dtype=tf.float32,
             regularizer=self.regularizer,
             constraint=PositiveConstraint(),
         )
+        self.alpha = alpha
         return {"alpha": alpha}
 
     def __call__(self, inputs, training, weights, **kwargs):
-        return self.quantize_values(inputs, weights["alpha"])
+        return self.quantize(inputs, weights["alpha"])
 
-    def min_clip(self, alpha):
-        return -alpha if self.signed else 0
+    def range(self):
+        return 2 * self.alpha if self.signed else self.alpha
 
-    def max_clip(self, alpha):
-        return (
-            alpha * (2 ** (self.bits - 1) - 1) / 2 ** (self.bits - 1)
-            if self.signed
-            else alpha
-        )
+    def delta(self):
+        return self.range() / self.n_levels
 
-    def scale_factor(self, alpha):
-        scale_factor = self.quantization_levels / alpha
-        if self.signed:
-            scale_factor /= 2
-        return scale_factor
+    def levels(self):
+        """Compute the quantization levels."""
+        start = -self.alpha if self.signed else 0
+        return tf.range(start, start + self.range(), self.delta())
 
     @tf.custom_gradient
-    def quantize_values(self, inputs, alpha):
+    def quantize(self, x, alpha):
         """Uniform quantization.
 
-        :param input: input tensor
+        :param x: input tensor
+        :param alpha: alpha parameter
         :returns: quantized input tensor
         """
-        # Clip values between -alpha and alpha - 1
-        min_clip = self.min_clip(alpha)
-        max_clip = self.max_clip(alpha)
-        clipped_inputs = tf.clip_by_value(inputs, min_clip, max_clip)
+        # Capture alpha
+        self.alpha = alpha
 
-        # Do the actual quantization
-        scaled_inputs = clipped_inputs * self.scale_factor(alpha)
-        quantized_output = tf.math.floor(scaled_inputs) / self.scale_factor(alpha)
+        # Compute quantization levels
+        levels = self.levels()
 
-        # Compute custom gradient (STE)
+        # Clip input values between min and max levels (function is zero outside the range)
+        clipped_x = tf.clip_by_value(x, levels[0], levels[-1])
+
+        # Quantize input values
+        q = self.delta() * tf.math.floor(clipped_x / self.delta())
+
         def grad(upstream):
-            # Gradient only flows through if the input is within the clipping range
-            grad_input = tf.where(
+            # Gradient only flows through if the input is within range
+            ## Use STE to estimate the gradient
+            dq_dx = tf.where(
                 tf.logical_and(
-                    tf.greater_equal(inputs, min_clip),
-                    tf.less_equal(inputs, max_clip),
+                    tf.greater_equal(x, levels[0]),
+                    tf.less_equal(x, levels[-1]),
                 ),
                 upstream,
-                tf.zeros_like(inputs),
+                tf.zeros_like(x),
             )
 
-            # Compute gradient wrt alpha
-            grad_alpha = tf.reduce_sum((quantized_output * upstream) / alpha)
+            # Compute the gradient for alpha
+            dq_dalpha = tf.reduce_sum(q / alpha * upstream)
 
-            return grad_input, grad_alpha
+            return dq_dx, dq_dalpha
 
-        return quantized_output, grad
+        return q, grad
 
     def get_config(self):
         return {
             "bits": self.bits,
-            "alpha_initializer": self.alpha_initializer,
             "signed": self.signed,
             "name_suffix": self.name_suffix,
+            "initializer": tf.keras.initializers.serialize(self.initializer),
+            "regularizer": tf.keras.regularizers.serialize(self.regularizer),
         }

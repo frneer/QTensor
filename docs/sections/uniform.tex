@@ -1,0 +1,56 @@
+El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, \
+siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
+\begin{equation}
+    \label{eq:uniform_quantizer_level_value}
+    l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
+\end{equation}
+
+La función de cuantización uniforme puede escribirse como en la ecuación \refeq{uniform_quantizer_signed} y se ve como en la \reffig{uniform_signed}.
+\begin{equation}
+    \label{eq:uniform_quantizer_signed}
+    q(x; \alpha) =
+    \begin{cases}
+        l_{0} & \text{si $x \leq m$} \\
+        \Delta \cdot \lfloor \frac{x}{\Delta} \rfloor & \text{si } m < x < M \\
+        l_{n\left(b\right) - 1}\left(\alpha\right) & \text{si } x \geq M
+    \end{cases}
+\end{equation}
+
+\defaultfigure{quantizers/uniform/q.png}{Quantización uniforme signada.}{uniform_signed}
+
+Para determinar las derivadas respecto a la entrda $\frac{\partial q}{\partial x}$, se puede utilizar el STE (Straight Through Estimator) que consiste en aproximar la función de cuantización como en la \refeq{uniform_quantizer_ste_signed}, como se muestra en la \reffig{uniform_signed_ste}.
+
+\begin{equation}
+    \label{eq:uniform_quantizer_ste_signed}
+    q\left(x; \alpha\right) =
+    \begin{cases}
+        - \alpha & \text{si $x \leq -\alpha$} \\
+        x \\
+        l_{n\left(b\right) - 1}\left(\alpha\right) & \text{si $x \geq \alpha$}
+    \end{cases}
+\end{equation}
+
+\defaultfigure{quantizers/uniform/q_ste.png}{Aproximación de la cuantización uniforme signada con STE.}{uniform_signed_ste}
+
+Con lo cual resulta evidente que la derivada de la función de cuantización uniforme es la derivada de la función identidad, es:
+
+\begin{equation}
+    \label{eq:uniform_quantizer_ste_signed_derivative}
+    \frac{\partial q}{\partial x}\left(x; \alpha\right) =
+    \begin{cases}
+        0 & \text{si $x \leq -\alpha$} \\
+        1 & \text{si $-\alpha < x < \alpha$} \\
+        0 & \text{si $x \geq \alpha$}
+    \end{cases}
+\end{equation}
+
+Ahora queda resolver la derivada con respecto a $\alpha$ de la función de cuantización uniforme, $\frac{\partial q}{\partial \alpha}$.
+
+Si observamos la \reffig{uniform_signed}, podemos ver que la función de cuantización uniforme signada se puede expresar como:
+
+\begin{equation}
+    \label{eq:uniform_quantizer_signed_dq_dalpha}
+    \frac{\partial q}{\partial \alpha}\left(x; \alpha\right) = \frac{q(x; \alpha)}{\alpha}
+\end{equation}
+
+Pues para un $x$ dado, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción.

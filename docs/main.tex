@@ -1,0 +1,70 @@
+\documentclass[]{article}
+
+% Page layout
+\usepackage[a4paper, lmargin=10mm, rmargin=10mm, tmargin=17mm, bmargin=30mm]{geometry}
+
+% Writing definitions
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}  % Set language to Spanish
+\usepackage[]{biblatex}
+\addbibresource{/workspace/references.bib}
+
+% Extras
+\usepackage[pdftex]{graphicx}
+
+% Set graphics path
+\graphicspath{{/workspace/pics/}}
+
+% Set hyperlinks
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+\urlstyle{same}
+
+% Image control
+\usepackage[pdftex]{graphicx}
+\usepackage{adjustbox}
+\usepackage{float}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+% Custom commands
+\input{commands}
+
+\begin{document}
+
+\input{cover}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Objetivos}
+
+\section{Introducción}
+\subsection{Redes Neuronales y Backpropagation}
+\subsection{Compresión (en general)}
+\subsubsection{Quantización}
+\subsubsection{Quantization Aware Training}
+\subsubsection{Codificación de Huffman}
+\subsection{Compresión de redes}
+\section{Desarrollo}
+\subsection{Quantizadores}
+\subsubsection{Quantizador uniforme}
+\label{sec:uniform}
+\input{sections/uniform}
+\subsubsection{Quantizador flexible}
+\section{Resultados}
+\section{Conclusiones}
+\section{Trabajos Futuros}
+\section{Agradecimientos}
+
+\printbibliography
+\end{document}

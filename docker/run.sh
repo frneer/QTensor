@@ -1,12 +1,17 @@
 #!/bin/bash
 
 HELP="Usage: $me [-b|--build]"
+SERVICE="qtensor_dev"
 
 while [[ "$1" != "" ]]; do
     case "$1" in
     -h | --help)
         echo $HELP
         exit 0
+        ;;
+    -s | --service)
+        SERVICE=$2
+        shift 2
         ;;
     -b | --build)
         BUILD=true
@@ -35,4 +40,4 @@ if [ "$BUILD" = true ]; then
     rm ./.bashrc
 fi
 
-docker compose run qtensor_dev
+docker compose run $SERVICE
