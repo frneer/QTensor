@@ -1,5 +1,5 @@
 El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, \
-siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo [0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
+siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
 \begin{equation}
     \label{eq:uniform_quantizer_level_value}
     l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
@@ -54,4 +54,3 @@ Si observamos la \reffig{uniform_signed}, podemos ver que la función de cuantiz
 \end{equation}
 
 Pues para un $x$ dado, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción.
-
