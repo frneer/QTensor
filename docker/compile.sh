@@ -1,9 +1,10 @@
 #!/bin/bash
 
-mkdir -p build && \
-    rm -f build/main.pdf
-
+# Change to the directory of this script
 cd "$(dirname "$0")"
+
+# Make sure build dir exists
+mkdir -p ../docs/build
 
 # Compile the main.tex file
 docker compose run qtensor_tex \
