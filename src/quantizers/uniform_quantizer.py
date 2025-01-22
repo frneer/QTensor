@@ -130,6 +130,6 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
             "bits": self.bits,
             "signed": self.signed,
             "name_suffix": self.name_suffix,
-            "initializer": tf.keras.initializers.serialize(self.initializer),
-            "regularizer": tf.keras.regularizers.serialize(self.regularizer),
+            "initializer": self.initializer,
+            "regularizer": self.regularizer,
         }

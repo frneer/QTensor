@@ -4,19 +4,16 @@
 import argparse
 
 import matplotlib.pyplot as plt
+import tensorflow as tf
+
 from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.utils import to_categorical
-from tensorflow_model_optimization.quantization.keras import (
-    quantize_annotate_layer,
-    quantize_annotate_model,
-    quantize_apply,
-    quantize_scope,
-)
-
-from configs.configs import UniformQuantizeConfig
+from quantizers.uniform_quantizer import UniformQuantizer
 from utils.utils import VariableHistoryCallback
+
+from builder.builder import QBuilder
 
 
 def generate_dataset():
@@ -30,25 +27,24 @@ def generate_dataset():
 
 
 def create_model(bits, alpha, signed):
-    """Create a simple model for MNIST classification."""
-    layer_1 = Flatten(input_shape=(28, 28), name="input")
-    layer_2 = quantize_annotate_layer(
+    builder = QBuilder(Sequential)
+    builder.add(Flatten(input_shape=(28, 28), name="input"))
+    builder.add(
         Dense(128, activation="relu", name="hidden"),
-        UniformQuantizeConfig(
+        quantizer=UniformQuantizer(
             bits=bits,
-            alpha=alpha,
+            initializer=tf.keras.initializers.Constant(alpha),
             signed=signed,
         ),
     )
-    layer_3 = Dense(10, activation="softmax", name="output")
-    model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
-    return model
+    builder.add(Dense(10, activation="softmax", name="output"))
+    return builder.build()
 
 
 def plot_training_history(history, callbacks):
     """Plot the training history including loss, accuracy, and alpha
     variables."""
-    fig, axs = plt.subplots(3, 1, figsize=(12, 18))
+    _, axs = plt.subplots(3, 1, figsize=(12, 18))
 
     # Plot training & validation loss values
     axs[0].plot(history.history["loss"])
@@ -84,11 +80,7 @@ def plot_training_history(history, callbacks):
 def main(bits, alpha, signed):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
-    model = create_model(bits, alpha, signed)
-
-    # Compile the model and get the variables to monitor
-    with quantize_scope({"UniformQuantizeConfig": UniformQuantizeConfig}):
-        quant_aware_model = quantize_apply(model)
+    quant_aware_model = create_model(bits, alpha, signed)
     quant_aware_model.summary()
     quant_aware_model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
@@ -109,7 +101,6 @@ def main(bits, alpha, signed):
     )
 
     plot_training_history(hist, callbacks)
-    plot_alpha_history(callbacks)
 
     quant_aware_model.evaluate(x_test, y_test)
 
