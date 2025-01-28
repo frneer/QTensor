@@ -47,3 +47,4 @@ services:
 
     volumes:
       - ../docs:/workspace
+      - ~/.bashrc:/home/$USER/.bashrc

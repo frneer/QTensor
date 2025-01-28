@@ -35,9 +35,7 @@ set -o errexit
 cd $(dirname "$(readlink -f "$0")")
 
 if [ "$BUILD" = true ]; then
-    cp ~/.bashrc ./.bashrc
     docker compose build
-    rm ./.bashrc
 fi
 
-docker compose run $SERVICE
+docker compose run --rm $SERVICE
