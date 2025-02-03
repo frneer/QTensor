@@ -8,14 +8,9 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.utils import to_categorical
-from tensorflow_model_optimization.quantization.keras import (
-    quantize_annotate_layer,
-    quantize_annotate_model,
-    quantize_apply,
-    quantize_scope,
-)
+from configs.qmodel import apply_quantization
 
-from configs.configs import UniformQuantizeConfig
+from quantizers.uniform_quantizer import UniformQuantizer
 from utils.utils import VariableHistoryCallback
 
 
@@ -27,23 +22,6 @@ def generate_dataset():
     y_train = to_categorical(y_train, 10)
     y_test = to_categorical(y_test, 10)
     return (x_train, y_train), (x_test, y_test)
-
-
-def create_model(bits, alpha, signed):
-    """Create a simple model for MNIST classification."""
-    layer_1 = Flatten(input_shape=(28, 28), name="input")
-    layer_2 = quantize_annotate_layer(
-        Dense(128, activation="relu", name="hidden"),
-        UniformQuantizeConfig(
-            bits=bits,
-            alpha=alpha,
-            signed=signed,
-        ),
-    )
-    layer_3 = Dense(10, activation="softmax", name="output")
-    model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
-    return model
-
 
 def plot_training_history(history, callbacks):
     """Plot the training history including loss, accuracy, and alpha
@@ -84,22 +62,34 @@ def plot_training_history(history, callbacks):
 def main(bits, alpha, signed):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
-    model = create_model(bits, alpha, signed)
+    layer_1 = Flatten(input_shape=(28, 28), name="input")
+    layer_2 = Dense(128, activation="relu", name="hidden")
+    layer_3 = Dense(10, activation="softmax", name="output")
+    model = Sequential([layer_1, layer_2, layer_3])
 
-    # Compile the model and get the variables to monitor
-    with quantize_scope({"UniformQuantizeConfig": UniformQuantizeConfig}):
-        quant_aware_model = quantize_apply(model)
-    quant_aware_model.summary()
-    quant_aware_model.compile(
+    model.summary()
+
+    qmodel = apply_quantization(model,
+        {
+            "hidden": {
+                "weights": {
+                    "kernel": UniformQuantizer(bits, alpha, signed)
+                }
+            }
+        }
+    )
+
+    qmodel.summary()
+    qmodel.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
     callbacks = [
         VariableHistoryCallback(v)
-        for v in quant_aware_model.variables
+        for v in qmodel.variables
         if "alpha" in v.name
     ]
 
-    hist = quant_aware_model.fit(
+    hist = qmodel.fit(
         x_train,
         y_train,
         epochs=args.epochs,
@@ -109,9 +99,8 @@ def main(bits, alpha, signed):
     )
 
     plot_training_history(hist, callbacks)
-    plot_alpha_history(callbacks)
 
-    quant_aware_model.evaluate(x_test, y_test)
+    qmodel.evaluate(x_test, y_test)
 
 
 if __name__ == "__main__":

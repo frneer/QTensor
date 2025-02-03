@@ -36,10 +36,13 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         """Constructor.
 
         :param bits(int): Number of bits to use for quantization.
-        :param signed(bool): Whether to use signed or unsigned quantization. By default, signed quantization is used.
+        :param signed(bool): Whether to use signed or unsigned quantization. By
+            default, signed quantization is used.
         :param name_suffix(str): Suffix to append to the layer name.
-        :param initializer(tf.keras.initializers.Initializer): Initializer for the alpha parameter.
-        :param regularizer(tf.keras.regularizers.Regularizer): Regularizer for the alpha parameter.
+        :param initializer(tf.keras.initializers.Initializer): Initializer for
+            the alpha parameter.
+        :param regularizer(tf.keras.regularizers.Regularizer): Regularizer for
+            the alpha parameter.
         """
         super(UniformQuantizer, self).__init__()
 
