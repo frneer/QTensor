@@ -4,7 +4,7 @@ This module contains the utilities to quantize a Keras model.
 """
 
 from configs.generate_config import AttributeQuantizerDict, GenerateConfig
-from tensorflow.keras.initializers import Constant
+from tensorflow.keras.initializers import Constant, RandomUniform
 from tensorflow.keras.layers import Layer
 from tensorflow.keras.models import Model, clone_model
 from tensorflow_model_optimization.quantization.keras import (
@@ -14,6 +14,7 @@ from tensorflow_model_optimization.quantization.keras import (
 )
 
 from quantizers.uniform_quantizer import UniformQuantizer
+from quantizers.flex_quantizer import FlexQuantizer
 
 # {layer_name: AttributeQuantizerDict}
 LayerQuantizerDict = dict[str, AttributeQuantizerDict]
@@ -108,7 +109,9 @@ def apply_quantization(model: Model, quantizers: LayerQuantizerDict):
     custom_objects = {}
     custom_objects["GenerateConfig"] = GenerateConfig
     custom_objects["UniformQuantizer"] = UniformQuantizer
+    custom_objects["FlexQuantizer"] = FlexQuantizer
     custom_objects["Constant"] = Constant
+    custom_objects["RandomUniform"] = RandomUniform
 
     with quantize_scope(custom_objects):
         return quantize_apply(quantize_model(model, quantizers))
