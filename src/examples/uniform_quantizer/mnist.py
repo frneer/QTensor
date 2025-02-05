@@ -11,6 +11,7 @@ from tensorflow.keras.utils import to_categorical
 from configs.qmodel import apply_quantization
 
 from quantizers.uniform_quantizer import UniformQuantizer
+from quantizers.flex_quantizer import FlexQuantizer
 from utils.utils import VariableHistoryCallback
 
 

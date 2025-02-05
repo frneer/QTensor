@@ -29,7 +29,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         signed: bool = True,
         name_suffix: str = "",
         initializer: tf.keras.initializers.Constant = tf.keras.initializers.Constant(
-            1.0
+            0.1
         ),
         regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
     ):
