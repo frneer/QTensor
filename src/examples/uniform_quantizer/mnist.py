@@ -69,15 +69,18 @@ def main(bits, alpha, signed):
 
     model.summary()
 
-    qmodel = apply_quantization(model,
-        {
-            "hidden": {
+    qconfig = {
+        "hidden": {
                 "weights": {
                     "kernel": UniformQuantizer(bits, alpha, signed)
-                }
+                },
+                "activations": {
+                    "activation": UniformQuantizer(bits, alpha, signed)
+                },
             }
         }
-    )
+
+    qmodel = apply_quantization(model, qconfig)
 
     qmodel.summary()
     qmodel.compile(
