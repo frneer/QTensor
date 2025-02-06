@@ -8,11 +8,12 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.optimizers import Adam
 from configs.qmodel import apply_quantization
 
 from quantizers.uniform_quantizer import UniformQuantizer
 from quantizers.flex_quantizer import FlexQuantizer
-from utils.utils import VariableHistoryCallback
+from utils.utils import VariableHistoryCallback, plot_snapshot
 
 
 def generate_dataset():
@@ -60,7 +61,7 @@ def plot_training_history(history, callbacks):
     plt.savefig("training_history.png")
 
 
-def main(bits, alpha, signed):
+def main(bits, alpha, signed, levels):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
     layer_1 = Flatten(input_shape=(28, 28), name="input")
@@ -70,14 +71,26 @@ def main(bits, alpha, signed):
 
     model.summary()
 
-    qconfig = {
-        "hidden": {
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+    model.fit(
+        x_train,
+        y_train,
+        epochs=2,
+        batch_size=1024,
+        validation_data=(x_test, y_test),
+    )
+
+    qmodel = apply_quantization(model,
+        {
+            "hidden": {
                 "weights": {
-                    "kernel": UniformQuantizer(bits, alpha, signed)
+                    "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=signed)
                 },
                 "activations": {
-                    "activation": UniformQuantizer(bits, alpha, signed)
-                },
+                    "activation": UniformQuantizer(bits=bits, signed=False)
+                }
             }
         }
 
@@ -85,26 +98,39 @@ def main(bits, alpha, signed):
 
     qmodel.summary()
     qmodel.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer=Adam(learning_rate=0.001 / 10),
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
     )
-    callbacks = [
-        VariableHistoryCallback(v)
-        for v in qmodel.variables
-        if "alpha" in v.name
-    ]
 
+    print([w.name for w in model.layers[1].weights])
+    print([w.name for w in qmodel.layers[1].weights])
+
+
+    alpha_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "alpha" in v.name][0]
+    levels_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "levels" in v.name][0]
+    thresholds_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "thresholds" in v.name][0]
+    callbacks = [alpha_callback, levels_callback, thresholds_callback]
     hist = qmodel.fit(
         x_train,
         y_train,
         epochs=args.epochs,
         batch_size=args.batch_size,
         validation_data=(x_test, y_test),
-        callbacks=[callbacks],
+        callbacks=callbacks,
     )
 
-    plot_training_history(hist, callbacks)
+    # plot_training_history(hist, callbacks)
+    plot_snapshot(
+        alpha=alpha_callback.get_history(),
+        levels=levels_callback.get_history(),
+        thresholds=thresholds_callback.get_history(),
+        accuracy=hist.history["accuracy"],
+        output_path="snapshots",
+        bits=bits,
+    )
 
-    qmodel.evaluate(x_test, y_test)
+    # qmodel.evaluate(x_test, y_test)
 
 
 if __name__ == "__main__":
@@ -129,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--epochs",
         type=int,
-        default=100,
+        default=10,
         help="number of epochs for training",
     )
     parser.add_argument(
@@ -138,5 +164,11 @@ if __name__ == "__main__":
         default=1024,
         help="batch size for training",
     )
+    parser.add_argument(
+        "--levels",
+        type=int,
+        default=10,
+        help="number of levels for quantization",
+    )
     args = parser.parse_args()
-    main(args.bits, args.alpha, args.signed)
+    main(args.bits, args.alpha, args.signed, args.levels)

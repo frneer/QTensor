@@ -4,3 +4,5 @@ old/
 
 .vscode/
 build/
+
+snapshots/
