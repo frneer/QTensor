@@ -209,12 +209,18 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             # dq_dthresholds --> piecewise-STE
             dq_dthresholds = tf.zeros_like(thresholds)
 
-            for i in range(self.thresholds.shape[0]):
+            for i in range(self.thresholds.shape[0] - 1):
                 # i + 2 because first level is already handled
                 delta_y = qlevels[i + 2] - qlevels[i + 1]
                 delta_x = thresholds[i + 1] - thresholds[i]
 
-                dq_dthresholds[i] = slope * tf.reduce_sum(upstream)
+                sub_upstream = tf.where(q == qlevels[i + 1], upstream, tf.zeros_like(x))
+
+                update_value = delta_y / delta_x * tf.reduce_sum(sub_upstream)
+
+                dq_dthresholds = tf.tensor_scatter_nd_update(
+                    dq_dthresholds, indices=[[i]], updates=[update_value]
+                )
 
 
             return dq_dx, dq_dalpha, dq_dlevel, dq_dthresholds
