@@ -25,8 +25,8 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
     def __init__(
         self,
         bits: int,
+        n_levels: int,
         signed: bool = True,
-        name: str = "",
     ):
         """Constructor.
 
@@ -40,12 +40,13 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         self.bits = bits
         self.signed = signed
-        self.name = name
         self.alpha = None  # this is the range of the quantizer
         self.levels = None  # these are possible output values
         self.thresholds = None  # these are the boundaries between levels
 
-        self.n_levels = 2**self.bits
+        self.n_levels = n_levels
+        self.m_levels = 2**self.bits
+
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
         class PositiveConstraint(tf.keras.constraints.Constraint):
@@ -65,52 +66,80 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                 ret = tf.clip_by_value(w, -self.alpha, self.alpha)
                 return tf.sort(ret)
 
+        # TODO(Fran): Support unsigned quantization
+        class LevelConstraint(ClippedAndOrderedConstraint):
+            """Constrains the values to be ordered."""
+
+            def __init__(self, alpha, bits):
+                super().__init__(alpha)
+                self.bits = bits
+
+            def __call__(self, w):
+                w = super().__call__(w)
+                w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
+                max_res_value = 2**self.bits
+                max_value = (max_res_value - 2) * self.alpha / max_res_value
+                tf.clip_by_value(w, -self.alpha, max_value + tf.keras.backend.epsilon())
+                return w
+
+        class ThresholdConstraint(ClippedAndOrderedConstraint):
+            """Constrains the values to be ordered."""
+
+            def __init__(self, alpha):
+                super().__init__(alpha)
+
+            def __call__(self, w):
+                w = super().__call__(w)
+                w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
+                w = tf.tensor_scatter_nd_update(w, [[w.shape[0] - 1]], [self.alpha])
+                return w
+
         alpha = layer.add_weight(
-            name.join("_alpha"),
+            "alpha",
             initializer=tf.keras.initializers.Constant(0.1),
             trainable=True,
             dtype=tf.float32,
-            regularizer=None,
+            # regularizer=tf.keras.regularizers.L2(0.01),
             constraint=PositiveConstraint(),
         )
 
+        self.alpha = alpha
+        max_res_value = 2**self.bits
+        max_value = (max_res_value - 2) * self.alpha / max_res_value
+
         levels = layer.add_weight(
-            name.join("_levels"),
-            initializer=tf.keras.initializers.RandomUniform(-alpha, alpha),
+            "levels",
+            # initializer=tf.keras.initializers.RandomUniform(-self.alpha, self.alpha),
+            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, max_value, self.n_levels)),
             shape=(self.n_levels,),
             trainable=True,
             dtype=tf.float32,
-            constraint=ClippedAndOrderedConstraint(alpha),
+            constraint=LevelConstraint(self.alpha, self.bits),
         )
 
         thresholds = layer.add_weight(
-            name.join("_thresholds"),
-            initializer=tf.keras.initializers.RandomUniform(-alpha, alpha),
-            shape=(self.n_levels - 1,),
+            "thresholds",
+            # initializer=tf.keras.initializers.RandomUniform(-self.alpha, self.alpha),
+            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, self.alpha, self.n_levels + 1)),
+            shape=(self.n_levels + 1,),
             trainable=True,
             dtype=tf.float32,
-            constraint=ClippedAndOrderedConstraint(alpha),
+            constraint=ThresholdConstraint(self.alpha),
         )
-        self.alpha = alpha
+
         self.levels = levels
         self.thresholds = thresholds
 
         return {"alpha": alpha, "levels": levels, "thresholds": thresholds}
 
     def __call__(self, inputs, training, weights, **kwargs):
-
         return self.quantize(inputs, weights["alpha"], weights["levels"], weights["thresholds"])
 
     def range(self):
         return 2 * self.alpha if self.signed else self.alpha
 
     def delta(self):
-        return self.range() / self.n_levels
-
-    # def levels(self):
-    #     """Compute the quantization levels."""
-    #     start = -self.alpha if self.signed else 0
-    #     return tf.range(start, start + self.range(), self.delta())
+        return self.range() / self.m_levels
 
     @tf.custom_gradient
     def quantize(self, x, alpha, levels, thresholds):
@@ -122,6 +151,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         # Capture thresholds
         self.thresholds = thresholds
+        # tf.print(self.thresholds[0], self.thresholds[-1])
 
         # Do we want to save the quantization values? I think not...
         # This is just for forward pass
@@ -132,25 +162,16 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         # Handle special case -alpha, th[0]
         low_limit = -self.alpha if self.signed else 0
 
-        # Quantize input values
-        q = tf.zeros_like(x)
-        q = tf.where(
-            tf.logical_and(
-                tf.greater(x, low_limit), tf.less(x, self.thresholds[0])
-            ),
-            qlevels[0],
-            q
-        )
         # |---|---|---|
         # Are there more efficients ways to do clustering?
-
+        q = tf.zeros_like(x)
         for i in range(self.thresholds.shape[0] - 1):
             q = tf.where(
                 tf.logical_and(
                     tf.greater_equal(x, self.thresholds[i]),
                     tf.less_equal(x, self.thresholds[i + 1]),
                 ),
-                qlevels[i + 1],
+                qlevels[i],
                 q
             )
 
@@ -159,7 +180,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             dq_dx = tf.where(
                 tf.logical_and(
                     tf.greater_equal(x, low_limit),
-                    tf.less_equal(x, self.thresholds[-1]),
+                    tf.less_equal(x, self.thresholds[-1]),  # should it be alpha?
                 ),
                 upstream,
                 tf.zeros_like(x),
@@ -175,7 +196,6 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             ## ==> dq_dlevel = [2, 1, 1]
             # Maybe use digitize?
             bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side='left')
-            print(f"BIN_INDICES shape: {bin_indices.shape}")
             # x = [0.1, 0.3, 0.7, 1.5, 2.5] size = 5
             # q(x) = [0, 0.4, 1, 1, 3] size =5
             # q_digit = [0, 1, 2, 2, 3] size = 5
@@ -186,37 +206,26 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             # 0 0 1 0
             # 0 0 1 0
             # 0 0 0 1
-            print(f"Q_ONE_HOT shape: {q_one_hot.shape}")
-            print(f"UPSTREAM shape: {upstream.shape}")
-            print(f"QLEVELS shape: {qlevels.shape}")
-            print(f"UPSTEAM with reshaped: {tf.reshape(upstream, (-1, 1)).shape}")
             dq_dlevel = tf.matmul(tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1)))
             dq_dlevel = tf.reshape(dq_dlevel, (-1,))
-            print(f"DQ_DL shape: {dq_dlevel.shape}")
-            print(f"DQ_DL: {dq_dlevel}")
             # dq_dlevel = tf.zeros_like(qlevels)
 
-
-            # Handle special case alpha (it's a threshold)
-            # Think about composing the thresholds and alphafor this?
-            dq_dalpha = 0
-            delta_y = qlevels[1] - qlevels[0]
-            delta_x = thresholds[1] - thresholds[0]
-            slope = delta_y / delta_x
-            # idx = tf.where(q == qlevels[0])  # # Only those on that level, right?
-            dq_dalpha = slope * tf.reduce_sum(upstream)
+            # Alpha is the range of the quantizer
+            dq_dalpha = tf.reduce_sum(q / alpha * upstream)
 
             # dq_dthresholds --> piecewise-STE
             dq_dthresholds = tf.zeros_like(thresholds)
 
-            for i in range(self.thresholds.shape[0] - 1):
+            for i in range(1, self.thresholds.shape[0] - 1):
                 # i + 2 because first level is already handled
-                delta_y = qlevels[i + 2] - qlevels[i + 1]
-                delta_x = thresholds[i + 1] - thresholds[i]
+                delta_y = qlevels[i - 1] - qlevels[i]
+                delta_x = thresholds[i + 1] - thresholds[i - 1] + tf.keras.backend.epsilon()
+                tf.debugging.check_numerics(delta_x, "Delta x")
+                tf.debugging.check_numerics(delta_y, "Delta y")
+                # sub_upstream = tf.where(q == qlevels[i + 1], upstream, tf.zeros_like(x))
 
-                sub_upstream = tf.where(q == qlevels[i + 1], upstream, tf.zeros_like(x))
-
-                update_value = delta_y / delta_x * tf.reduce_sum(sub_upstream)
+                update_value = delta_y / delta_x * tf.reduce_sum(upstream)
+                # print(delta_x)
 
                 dq_dthresholds = tf.tensor_scatter_nd_update(
                     dq_dthresholds, indices=[[i]], updates=[update_value]
@@ -228,7 +237,6 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         return q, grad
 
 
-    @tf.custom_gradient
     def quantize_levels(self, x, alpha):
         """Uniform quantization.
 
@@ -241,24 +249,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         # That was handled by tf range
         q = self.delta() * tf.math.floor(self.levels / self.delta())
 
-        def grad(upstream):
-            # Gradient only flows through if the input is within range
-            ## Use STE to estimate the gradient
-            dq_dx = tf.where(
-                tf.logical_and(
-                    tf.greater_equal(x, self.levels[0]),
-                    tf.less_equal(x, self.levels[-1]),
-                ),
-                upstream,
-                tf.zeros_like(x),
-            )
-
-            # Compute the gradient for alpha
-            dq_dalpha = tf.reduce_sum(q / alpha * upstream)
-
-            return dq_dx, dq_dalpha
-
-        return q, grad
+        return q
 
     def get_config(self):
         return {
