@@ -25,42 +25,6 @@ def generate_dataset():
     y_test = to_categorical(y_test, 10)
     return (x_train, y_train), (x_test, y_test)
 
-def plot_training_history(history, callbacks):
-    """Plot the training history including loss, accuracy, and alpha
-    variables."""
-    fig, axs = plt.subplots(3, 1, figsize=(12, 18))
-
-    # Plot training & validation loss values
-    axs[0].plot(history.history["loss"])
-    axs[0].plot(history.history["val_loss"])
-    axs[0].set_title("Model loss")
-    axs[0].set_ylabel("Loss")
-    axs[0].set_xlabel("Epoch")
-    axs[0].legend(["Train", "Validation"], loc="upper left")
-    axs[0].grid(which="both")
-
-    # Plot training & validation accuracy values
-    axs[1].plot(history.history["accuracy"])
-    axs[1].plot(history.history["val_accuracy"])
-    axs[1].set_title("Model accuracy")
-    axs[1].set_ylabel("Accuracy")
-    axs[1].set_xlabel("Epoch")
-    axs[1].legend(["Train", "Validation"], loc="upper left")
-    axs[1].grid(which="both")
-
-    # Plot alpha history
-    for callback in callbacks:
-        axs[2].plot(callback.get_history(), label=callback.variable.name)
-    axs[2].set_title("Alpha history")
-    axs[2].set_ylabel("Alpha")
-    axs[2].set_xlabel("Epoch")
-    axs[2].legend([callback.variable.name for callback in callbacks])
-    axs[2].grid(which="both")
-
-    plt.tight_layout()
-    plt.savefig("training_history.png")
-
-
 def main(bits, alpha, signed, levels):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
@@ -82,17 +46,16 @@ def main(bits, alpha, signed, levels):
         validation_data=(x_test, y_test),
     )
 
-    qmodel = apply_quantization(model,
-        {
-            "hidden": {
-                "weights": {
-                    "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=signed)
-                },
-                "activations": {
-                    "activation": UniformQuantizer(bits=bits, signed=False)
-                }
+    qconfig = {
+        "hidden": {
+            "weights": {
+                "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=signed)
+            },
+            "activations": {
+                "activation": UniformQuantizer(bits=bits, signed=False)
             }
         }
+    }
 
     qmodel = apply_quantization(model, qconfig)
 
@@ -120,7 +83,6 @@ def main(bits, alpha, signed, levels):
         callbacks=callbacks,
     )
 
-    # plot_training_history(hist, callbacks)
     plot_snapshot(
         alpha=alpha_callback.get_history(),
         levels=levels_callback.get_history(),

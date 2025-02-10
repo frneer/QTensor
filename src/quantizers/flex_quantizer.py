@@ -11,6 +11,7 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
     _QuantizeHelper,
 )
 
+from quantizers.constraints.constraints import PositiveConstraint, ClippedConstraint, OrderedConstraint, FixValueConstraint, CompositeConstraint
 
 class FlexQuantizer(_QuantizeHelper, Quantizer):
     """An flexible quantizer algorithm support both signed and unsigned
@@ -49,51 +50,6 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
-        class PositiveConstraint(tf.keras.constraints.Constraint):
-            """Constrains alpha to be positive."""
-
-            def __call__(self, w):
-                # Use epsilon to avoid dividing by zero during backpropagation.
-                return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
-
-        class ClippedAndOrderedConstraint(tf.keras.constraints.Constraint):
-            """Constrains the values to be ordered."""
-
-            def __init__(self, alpha):
-                self.alpha = alpha
-
-            def __call__(self, w):
-                ret = tf.clip_by_value(w, -self.alpha, self.alpha)
-                return tf.sort(ret)
-
-        # TODO(Fran): Support unsigned quantization
-        class LevelConstraint(ClippedAndOrderedConstraint):
-            """Constrains the values to be ordered."""
-
-            def __init__(self, alpha, bits):
-                super().__init__(alpha)
-                self.bits = bits
-
-            def __call__(self, w):
-                w = super().__call__(w)
-                w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
-                max_res_value = 2**self.bits
-                max_value = (max_res_value - 2) * self.alpha / max_res_value
-                tf.clip_by_value(w, -self.alpha, max_value + tf.keras.backend.epsilon())
-                return w
-
-        class ThresholdConstraint(ClippedAndOrderedConstraint):
-            """Constrains the values to be ordered."""
-
-            def __init__(self, alpha):
-                super().__init__(alpha)
-
-            def __call__(self, w):
-                w = super().__call__(w)
-                w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
-                w = tf.tensor_scatter_nd_update(w, [[w.shape[0] - 1]], [self.alpha])
-                return w
-
         alpha = layer.add_weight(
             "alpha",
             initializer=tf.keras.initializers.Constant(0.1),
@@ -102,32 +58,37 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             # regularizer=tf.keras.regularizers.L2(0.01),
             constraint=PositiveConstraint(),
         )
-
         self.alpha = alpha
-        max_res_value = 2**self.bits
-        max_value = (max_res_value - 2) * self.alpha / max_res_value
+
+        self.max_value = (self.m_levels - 2) * self.alpha / self.m_levels
 
         levels = layer.add_weight(
             "levels",
-            # initializer=tf.keras.initializers.RandomUniform(-self.alpha, self.alpha),
-            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, max_value, self.n_levels)),
+            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, self.max_value, self.n_levels)),
             shape=(self.n_levels,),
             trainable=True,
             dtype=tf.float32,
-            constraint=LevelConstraint(self.alpha, self.bits),
+            constraint=CompositeConstraint(
+                ClippedConstraint(-self.alpha, self.max_value + tf.keras.backend.epsilon()),
+                OrderedConstraint(),
+                FixValueConstraint(value=-self.alpha, idx=0),
+            ),
         )
+        self.levels = levels
 
         thresholds = layer.add_weight(
             "thresholds",
-            # initializer=tf.keras.initializers.RandomUniform(-self.alpha, self.alpha),
             initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, self.alpha, self.n_levels + 1)),
             shape=(self.n_levels + 1,),
             trainable=True,
             dtype=tf.float32,
-            constraint=ThresholdConstraint(self.alpha),
+            constraint=CompositeConstraint(
+                ClippedConstraint(-self.alpha, self.alpha),
+                OrderedConstraint(),
+                FixValueConstraint(value=-self.alpha, idx=0),
+                FixValueConstraint(value=self.alpha, idx=self.n_levels),
+            ),
         )
-
-        self.levels = levels
         self.thresholds = thresholds
 
         return {"alpha": alpha, "levels": levels, "thresholds": thresholds}
@@ -217,15 +178,10 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             dq_dthresholds = tf.zeros_like(thresholds)
 
             for i in range(1, self.thresholds.shape[0] - 1):
-                # i + 2 because first level is already handled
                 delta_y = qlevels[i - 1] - qlevels[i]
                 delta_x = thresholds[i + 1] - thresholds[i - 1] + tf.keras.backend.epsilon()
-                tf.debugging.check_numerics(delta_x, "Delta x")
-                tf.debugging.check_numerics(delta_y, "Delta y")
-                # sub_upstream = tf.where(q == qlevels[i + 1], upstream, tf.zeros_like(x))
 
                 update_value = delta_y / delta_x * tf.reduce_sum(upstream)
-                # print(delta_x)
 
                 dq_dthresholds = tf.tensor_scatter_nd_update(
                     dq_dthresholds, indices=[[i]], updates=[update_value]
