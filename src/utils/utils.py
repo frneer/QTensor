@@ -26,6 +26,9 @@ import numpy as np
 def plot_snapshot(alpha, levels, thresholds, accuracy, bits, output_path):
     m_levels = 2**bits
     for epoch in range(len(alpha)):
+
+        #pot_alpha = tf.math.round(tf.math.log(alpha[epoch]) / tf.math.log(2.0)) 
+
         plt.figure()
         # LEVELS
         plt.step(thresholds[epoch], np.concatenate((levels[epoch], [levels[epoch][-1]])), where='post')
@@ -41,6 +44,8 @@ def plot_snapshot(alpha, levels, thresholds, accuracy, bits, output_path):
 
         plt.text(0.05, 0.95, f"Epoch {epoch + 1}", transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
         plt.text(0.05, 0.90, f"Accuracy: {accuracy[epoch]:.3f}", transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
+        plt.text(0.05, 0.85, f"Alpha: {alpha[epoch]:.4f}", transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
+        #plt.text(0.05, 0.75, f"PotAlpha: {pot_alpha:.4f}", transform=plt.gca().transAxes, fontsize=12, verticalalignment='top')
         plt.legend(loc='lower right')
         max_value = (m_levels - 2) * alpha[epoch] / m_levels
 
