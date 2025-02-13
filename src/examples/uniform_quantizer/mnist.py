@@ -6,7 +6,7 @@ import argparse
 import matplotlib.pyplot as plt
 from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, AveragePooling2D
 from tensorflow.keras.utils import to_categorical
 from configs.qmodel import apply_quantization
 
@@ -58,17 +58,80 @@ def plot_training_history(history, callbacks):
     plt.tight_layout()
     plt.savefig("training_history.png")
 
+def create_model_and_qconfig(args):
+    if args.example_name == "mlp":
+        layer_1 = Flatten(input_shape=(28, 28), name="input")
+        layer_2 = Dense(128, activation="relu", name="hidden")
+        layer_3 = Dense(10, activation="softmax", name="output")
+        model = Sequential([layer_1, layer_2, layer_3])
 
+<<<<<<< Updated upstream
 def main(bits, alpha, signed):
+=======
+        qconfig = {
+                "hidden": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                }
+            }
+
+    if args.example_name == "lenet":
+        model = Sequential([
+            Conv2D(
+                filters=6,
+                kernel_size=(5, 5),
+                activation="relu",
+                padding="same",
+                input_shape=(28, 28, 1)
+                ),
+            AveragePooling2D(pool_size=(2, 2), strides=2),
+            Conv2D(
+                filters=16,
+                kernel_size=(5, 5),
+                activation="relu"
+                ),
+            AveragePooling2D(pool_size=(2, 2), strides=2),
+            Flatten(),
+            Dense(120, activation="relu"),
+            Dense(84, activation="relu"),
+            Dense(10, activation="softmax")  # 10 classes (digits 0-9)
+        ])
+
+        qconfig = {
+                "conv2d": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                },
+                "conv2d_1": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                },
+                "dense": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                },
+                "dense_1": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                },
+                "dense_2": {
+                    "weights": {"kernel": FlexQuantizer(bits=args.bits, n_levels=args.levels , signed=True)},
+                    "activations": {"activation": UniformQuantizer(bits=args.bits, signed=False)},
+                },
+            }
+
+    return model, qconfig
+
+
+
+
+def main(args):
+>>>>>>> Stashed changes
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
-    layer_1 = Flatten(input_shape=(28, 28), name="input")
-    layer_2 = Dense(128, activation="relu", name="hidden")
-    layer_3 = Dense(10, activation="softmax", name="output")
-    model = Sequential([layer_1, layer_2, layer_3])
+    model, qconfig = create_model_and_qconfig(args)
 
-    model.summary()
-
+<<<<<<< Updated upstream
     qconfig = {
         "hidden": {
                 "weights": {
@@ -79,10 +142,23 @@ def main(bits, alpha, signed):
                 },
             }
         }
+=======
+    model.summary(line_length=120)
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+    hist = model.fit(
+        x_train,
+        y_train,
+        epochs=2,
+        batch_size=args.batch_size,
+        validation_data=(x_test, y_test),
+    )
+>>>>>>> Stashed changes
 
     qmodel = apply_quantization(model, qconfig)
 
-    qmodel.summary()
+    qmodel.summary(line_length=120)
     qmodel.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
@@ -92,6 +168,16 @@ def main(bits, alpha, signed):
         if "alpha" in v.name
     ]
 
+<<<<<<< Updated upstream
+=======
+    print([w.name for w in model.layers[1].weights])
+    print([w.name for w in qmodel.layers[1].weights])
+
+    alpha_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "alpha" in v.name][0]
+    levels_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "levels" in v.name][0]
+    thresholds_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "thresholds" in v.name][0]
+    callbacks = [alpha_callback, levels_callback, thresholds_callback]
+>>>>>>> Stashed changes
     hist = qmodel.fit(
         x_train,
         y_train,
@@ -101,7 +187,19 @@ def main(bits, alpha, signed):
         callbacks=[callbacks],
     )
 
+<<<<<<< Updated upstream
     plot_training_history(hist, callbacks)
+=======
+    # plot_training_history(hist, callbacks)
+    plot_snapshot(
+        alpha=alpha_callback.get_history(),
+        levels=levels_callback.get_history(),
+        thresholds=thresholds_callback.get_history(),
+        accuracy=hist.history["accuracy"],
+        output_path="snapshots",
+        bits=args.bits,
+    )
+>>>>>>> Stashed changes
 
     qmodel.evaluate(x_test, y_test)
 
@@ -121,21 +219,34 @@ if __name__ == "__main__":
         help="initial quantization limit",
     )
     parser.add_argument(
-        "--signed",
-        action="store_true",
-        help="flag to enable signed quantization",
-    )
-    parser.add_argument(
         "--epochs",
         type=int,
         default=100,
         help="number of epochs for training",
     )
     parser.add_argument(
-        "--batch_size",
+        "--batch-size",
         type=int,
         default=1024,
         help="batch size for training",
     )
+<<<<<<< Updated upstream
     args = parser.parse_args()
     main(args.bits, args.alpha, args.signed)
+=======
+    parser.add_argument(
+        "--levels",
+        type=int,
+        default=10,
+        help="number of levels for quantization",
+    )
+    parser.add_argument(
+        "--example-name",
+        choices=['mlp', 'lenet',],
+        type=str,
+        default='mlp',
+        help="name of the example to be used",
+    )
+    args = parser.parse_args()
+    main(args)
+>>>>>>> Stashed changes
