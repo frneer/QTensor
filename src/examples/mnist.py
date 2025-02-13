@@ -89,12 +89,14 @@ def create_model_and_qconfig(args):
 
 
 def main(args):
+    (x_train, y_train), (x_test, y_test) = generate_dataset()
+
     model, qconfig = create_model_and_qconfig(args)
 
     model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
-    qmodel.summary(line_length=120)
+    model.summary(line_length=120)
     hist = model.fit(
         x_train,
         y_train,
