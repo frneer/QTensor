@@ -41,13 +41,13 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         self.bits = bits
         self.signed = signed
-        self.alpha = None  # this is the range of the quantizer
-        self.levels = None  # these are possible output values
-        self.thresholds = None  # these are the boundaries between levels
 
         self.n_levels = n_levels
         self.m_levels = 2**self.bits
 
+        self.alpha = None  # this is the range of the quantizer
+        self.levels = None  # these are possible output values
+        self.thresholds = None  # these are the boundaries between levels
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
         alpha = layer.add_weight(
@@ -104,27 +104,15 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
     @tf.custom_gradient
     def quantize(self, x, alpha, levels, thresholds):
-        # Capture alpha
+        # Capture the values of the parameters
         self.alpha = alpha
-
-        # Capture quantization levels
         self.levels = levels
-
-        # Capture thresholds
         self.thresholds = thresholds
-        # tf.print(self.thresholds[0], self.thresholds[-1])
 
-        # Do we want to save the quantization values? I think not...
-        # This is just for forward pass
-        # self.levels = self.quantize_levels(alpha)
-        qlevels = self.quantize_levels(self.levels, alpha)
+        # Quantize levels (uniform quantization)
+        qlevels = self.delta() * tf.math.floor(self.levels / self.delta())
 
-
-        # Handle special case -alpha, th[0]
-        low_limit = -self.alpha if self.signed else 0
-
-        # |---|---|---|
-        # Are there more efficients ways to do clustering?
+        # Quantize input
         q = tf.zeros_like(x)
         for i in range(self.thresholds.shape[0] - 1):
             q = tf.where(
@@ -137,75 +125,77 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             )
 
         def grad(upstream):
-            ## dq_dx --> STE
+            ##### dq_dx uses STE #####
             dq_dx = tf.where(
                 tf.logical_and(
-                    tf.greater_equal(x, low_limit),
+                    tf.greater_equal(x, self.thresholds[0]),
                     tf.less_equal(x, self.thresholds[-1]),  # should it be alpha?
                 ),
                 upstream,
                 tf.zeros_like(x),
             )
 
-            #  dq_dlevel --> ... amount of weights in the level
-            # Example:
+            ##### dq_dlevel #####
+
+            # General idea is to match the input to a level and then
+            # match that with the part of the upstream that is associated with that level
             # 3 levels, 4 inputs
             ## 1 0 0 -- > u1 0 0
             ## 1 0 0 -- > u2 0 0
             ## 0 0 1 -- > 0 0 u3
             ## 0 1 0 -- > 0 u4 0
             ## ==> dq_dlevel = [2, 1, 1]
-            # Maybe use digitize?
-            bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side='left')
+
+            # So first we find the bin index of each input
             # x = [0.1, 0.3, 0.7, 1.5, 2.5] size = 5
-            # q(x) = [0, 0.4, 1, 1, 3] size =5
-            # q_digit = [0, 1, 2, 2, 3] size = 5
-            q_one_hot = tf.one_hot(bin_indices, depth=qlevels.shape[0])
+            # q(x) = [0, 0.4, 1, 1, 3] size = 5
+            # bin_indices = [0, 1, 2, 2, 3] size = 5
+            bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side='left')
+
+            # Then we one-hot encode the bin indices
             # q_one_hot =
             # 1 0 0 0
             # 0 1 0 0
             # 0 0 1 0
             # 0 0 1 0
             # 0 0 0 1
+            q_one_hot = tf.one_hot(bin_indices, depth=qlevels.shape[0])
+
+            # Finally we multiply the one-hot encoded bin indices with the upstream
+            # transforming this into a 1D array
             dq_dlevel = tf.matmul(tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1)))
             dq_dlevel = tf.reshape(dq_dlevel, (-1,))
-            # dq_dlevel = tf.zeros_like(qlevels)
 
-            # Alpha is the range of the quantizer
+            ##### dq_dalpha is STE (same as in uniform quantizer) #####
             dq_dalpha = tf.reduce_sum(q / alpha * upstream)
 
-            # dq_dthresholds --> piecewise-STE
+            ##### dq_dthresholds using piecewise-STE #####
             dq_dthresholds = tf.zeros_like(thresholds)
 
             for i in range(1, self.thresholds.shape[0] - 1):
                 delta_y = qlevels[i - 1] - qlevels[i]
-                delta_x = thresholds[i + 1] - thresholds[i - 1] + tf.keras.backend.epsilon()
+                delta_x = thresholds[i + 1] - thresholds[i - 1]
 
-                update_value = delta_y / delta_x * tf.reduce_sum(upstream)
+                # Only those associated with the 'x' values that
+                # Fall within the range of the two borderline levels
+                masked_upstream = tf.where(
+                    tf.logical_and(
+                        tf.greater_equal(x, self.thresholds[i - 1]),
+                        tf.less_equal(x, self.thresholds[i + 1]),
+                    ),
+                    upstream,
+                    tf.zeros_like(x),
+                )
+
+                update_value = delta_y / delta_x * tf.reduce_sum(masked_upstream)
 
                 dq_dthresholds = tf.tensor_scatter_nd_update(
                     dq_dthresholds, indices=[[i]], updates=[update_value]
                 )
 
-
             return dq_dx, dq_dalpha, dq_dlevel, dq_dthresholds
 
         return q, grad
-
-
-    def quantize_levels(self, x, alpha):
-        """Uniform quantization.
-
-        :param x: input tensor
-        :param alpha: alpha parameter
-        :returns: quantized input tensor
-        """
-        # Quantize input values
-        # Problem is that levels doesn't have the upper limit set right
-        # That was handled by tf range
-        q = self.delta() * tf.math.floor(self.levels / self.delta())
-
-        return q
 
     def get_config(self):
         return {
