@@ -11,7 +11,7 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
     _QuantizeHelper,
 )
 
-from quantizers.constraints.constraints import PositiveConstraint, ClippedConstraint, OrderedConstraint, FixValueConstraint, CompositeConstraint
+from quantizers.constraints.constraints import PositiveConstraint, ClippedConstraint, OrderedConstraint, FixedValueConstraint, CompositeConstraint
 
 class FlexQuantizer(_QuantizeHelper, Quantizer):
     """An flexible quantizer algorithm support both signed and unsigned
@@ -71,7 +71,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             constraint=CompositeConstraint(
                 ClippedConstraint(-self.alpha, self.max_value + tf.keras.backend.epsilon()),
                 OrderedConstraint(),
-                FixValueConstraint(value=-self.alpha, idx=0),
+                FixedValueConstraint(value=-self.alpha, idx=0),
             ),
         )
         self.levels = levels
@@ -85,8 +85,8 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             constraint=CompositeConstraint(
                 ClippedConstraint(-self.alpha, self.alpha),
                 OrderedConstraint(),
-                FixValueConstraint(value=-self.alpha, idx=0),
-                FixValueConstraint(value=self.alpha, idx=self.n_levels),
+                FixedValueConstraint(value=-self.alpha, idx=0),
+                FixedValueConstraint(value=self.alpha, idx=self.n_levels),
             ),
         )
         self.thresholds = thresholds
