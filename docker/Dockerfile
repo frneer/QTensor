@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.18.0-gpu AS base
+FROM tensorflow/tensorflow:2.17.0-gpu AS base
 
 # Install python packages
 RUN pip3 install \
@@ -7,7 +7,7 @@ RUN pip3 install \
     tensorflow-model-optimization
 
 # Set backward compatibility for tfmot
-RUN pip3 install tf_keras
+RUN pip3 install tf_keras --no-deps
 ENV TF_USE_LEGACY_KERAS=1
 
 # Install linting tools
@@ -37,6 +37,7 @@ USER $USER:$GROUP
 WORKDIR /home/$USER/qtensor
 
 ENV PYTHONPATH="${PYTHONPATH}:/home/$USER/qtensor/src"
-
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 CMD ["/bin/bash"]
