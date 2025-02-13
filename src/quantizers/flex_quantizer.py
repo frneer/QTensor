@@ -50,6 +50,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.thresholds = None  # these are the boundaries between levels
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
+
         alpha = layer.add_weight(
             "alpha",
             initializer=tf.keras.initializers.Constant(0.1),
@@ -73,6 +74,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                 OrderedConstraint(),
                 FixedValueConstraint(value=-self.alpha, idx=0),
             ),
+            # constraint=LevelConstraint(self.alpha, self.bits),
         )
         self.levels = levels
 
@@ -88,6 +90,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                 FixedValueConstraint(value=-self.alpha, idx=0),
                 FixedValueConstraint(value=self.alpha, idx=self.n_levels),
             ),
+            constraint=ThresholdConstraint(self.alpha),
         )
         self.thresholds = thresholds
 
