@@ -25,7 +25,7 @@ def generate_dataset():
     y_test = to_categorical(y_test, 10)
     return (x_train, y_train), (x_test, y_test)
 
-def main(bits, alpha, signed, levels):
+def main(bits, alpha, levels):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
 
     layer_1 = Flatten(input_shape=(28, 28), name="input")
@@ -49,7 +49,7 @@ def main(bits, alpha, signed, levels):
     qconfig = {
         "hidden": {
             "weights": {
-                "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=signed)
+                "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=True)
             },
             "activations": {
                 "activation": UniformQuantizer(bits=bits, signed=False)
@@ -84,10 +84,11 @@ def main(bits, alpha, signed, levels):
     )
 
     plot_snapshot(
-        alpha=alpha_callback.get_history(),
-        levels=levels_callback.get_history(),
-        thresholds=thresholds_callback.get_history(),
-        accuracy=hist.history["accuracy"],
+        alpha_hist=alpha_callback.get_history(),
+        level_hist=levels_callback.get_history(),
+        threshold_hist=thresholds_callback.get_history(),
+        accuracy_hist=hist.history["accuracy"],
+        signed=True,
         output_path="snapshots",
         bits=bits,
     )
@@ -110,11 +111,6 @@ if __name__ == "__main__":
         help="initial quantization limit",
     )
     parser.add_argument(
-        "--signed",
-        action="store_true",
-        help="flag to enable signed quantization",
-    )
-    parser.add_argument(
         "--epochs",
         type=int,
         default=10,
@@ -133,4 +129,4 @@ if __name__ == "__main__":
         help="number of levels for quantization",
     )
     args = parser.parse_args()
-    main(args.bits, args.alpha, args.signed, args.levels)
+    main(args.bits, args.alpha, args.levels)

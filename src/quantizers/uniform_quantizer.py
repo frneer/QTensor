@@ -52,7 +52,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         self.initializer = initializer
         self.regularizer = regularizer
 
-        self.n_levels = 2**self.bits
+        self.m_levels = 2**self.bits
 
         self.alpha = None
 
@@ -82,7 +82,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         return 2 * self.alpha if self.signed else self.alpha
 
     def delta(self):
-        return self.range() / self.n_levels
+        return self.range() / self.m_levels
 
     def levels(self):
         """Compute the quantization levels."""

@@ -1,87 +1,63 @@
 import numpy as np
 import tensorflow as tf
 
-class CompositeConstraint(tf.keras.constraints.Constraint):
-    """Applies multiple constraints in sequential order."""
-    def __init__(self, *constraints):
-        self.constraints = constraints
+from quantizers.common import min_value, span, max_value, delta
 
-    def __call__(self, w):
-        for constraint in self.constraints:
-            print(constraint.__class__.__name__)
-            w = constraint(w)
-        return w
-
-    def get_config(self):
-        return {"constraints": [c.get_config() for c in self.constraints]}
-class PositiveConstraint(ClippedConstraint):
+class PositiveConstraint(tf.keras.constraints.Constraint):
     """Constrains the values to be positive."""
-    def __init__(self):
-        super().__init__(tf.keras.backend.epsilon(), np.inf)
-
-class OrderedConstraint(tf.keras.constraints.Constraint):
-    """Constrains the values to be ordered."""
-    def __init__(self, axis=-1, ascending=True):
-        self.axis = axis
-        self.ascending = ascending
-
     def __call__(self, w):
-        return tf.sort(w, self.axis, direction="ASCENDING" if self.ascending else "DESCENDING")
-
-class ClippedConstraint(tf.keras.constraints.Constraint):
-    """Constrains the values to be clipped."""
-    def __init__(self, min_value, max_value):
-        self.min_value = min_value
-        self.max_value = max_value
-
-    def __call__(self, w):
-        return tf.clip_by_value(w, self.min_value, self.max_value)
-
-    def get_config(self):
-        return {"min_value": self.min_value, "max_value": self.max_value}
+        return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
 
-class FixedValueConstraint(tf.keras.constraints.Constraint):
-    """Constrains certain values to be fixed defined by a list of indices."""
-    def __init__(self, value, idx: int):
-        self.value = value
-        self.idx = idx
+class LevelConstraint(tf.keras.constraints.Constraint):
+    """Constrains the values to:
+    1. Be clipped between min_value and max_value of the quantization levels
+    2. Be ordered
+    3. Have the first value to be fixed at the min_value
+    """
 
-    def __call__(self, w):
-        w = tf.tensor_scatter_nd_update(w, [[self.idx]], [self.value])
-        return w
-
-    def get_config(self):
-        return {"value": self.value, "idx": self.idx}
-
-
-class ClippedAndOrderedConstraint(tf.keras.constraints.Constraint):
-    """Constrains the values to be ordered."""
-    def __init__(self, alpha):
+    def __init__(self, alpha: tf.Variable, m_levels: int, signed: bool = True):
+        assert isinstance(alpha, tf.Variable), "alpha must be a tf.Variable"
         self.alpha = alpha
-    def __call__(self, w):
-        ret = tf.clip_by_value(w, -self.alpha, self.alpha)
-        return tf.sort(ret)
+        self.m_levels = m_levels
+        self.signed = signed
 
-class LevelConstraint(ClippedAndOrderedConstraint):
-    """Constrains the values to be ordered."""
-    def __init__(self, alpha, bits):
-        super().__init__(alpha)
-        self.bits = bits
     def __call__(self, w):
-        w = super().__call__(w)
-        w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
-        max_res_value = 2**self.bits
-        max_value = (max_res_value - 2) * self.alpha / max_res_value
-        tf.clip_by_value(w, -self.alpha, max_value + tf.keras.backend.epsilon())
+        # Compute the min and max value in each step, to evaluate alpha along the way
+        min_level = min_value(self.alpha, self.signed)
+        max_level = max_value(self.alpha, self.m_levels, self.signed)
+
+        w = tf.clip_by_value(w, min_level, max_level + tf.keras.backend.epsilon())
+        w = tf.sort(w)
+        w = tf.tensor_scatter_nd_update(w, [[0]], [min_level])
         return w
 
-class ThresholdConstraint(ClippedAndOrderedConstraint):
-    """Constrains the values to be ordered."""
-    def __init__(self, alpha):
-        super().__init__(alpha)
+    def get_config(self):
+        return {"alpha": self.alpha, "m_levels": self.m_levels, "signed": self.signed}
+
+
+class ThresholdConstraint(tf.keras.constraints.Constraint):
+    """Constrains the values to:
+
+    1. Be clipped between -alpha and alpha
+    2. Be ordered
+    3. Have the first value to be fixed at -alpha
+    4. Have the last value to be fixed at alpha
+    """
+
+    def __init__(self, alpha, signed):
+        self.alpha = alpha
+        self.signed = signed
+
     def __call__(self, w):
-        w = super().__call__(w)
-        w = tf.tensor_scatter_nd_update(w, [[0]], [-self.alpha])
+        # Compute the min value in each step, to evaluate alpha along the way
+        min_level = min_value(self.alpha, self.signed)
+
+        w = tf.clip_by_value(w, -self.alpha, self.alpha)
+        w = tf.sort(w)
+        w = tf.tensor_scatter_nd_update(w, [[0]], [min_level])
         w = tf.tensor_scatter_nd_update(w, [[w.shape[0] - 1]], [self.alpha])
         return w
+
+    def get_config(self):
+        return {"alpha": self.alpha}

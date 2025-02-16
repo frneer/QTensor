@@ -11,7 +11,9 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
     _QuantizeHelper,
 )
 
-from quantizers.constraints.constraints import PositiveConstraint, ClippedConstraint, OrderedConstraint, FixedValueConstraint, CompositeConstraint
+from quantizers.constraints.constraints import PositiveConstraint, LevelConstraint, ThresholdConstraint
+
+from quantizers.common import min_value, max_value
 
 class FlexQuantizer(_QuantizeHelper, Quantizer):
     """An flexible quantizer algorithm support both signed and unsigned
@@ -45,9 +47,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.n_levels = n_levels
         self.m_levels = 2**self.bits
 
-        self.alpha = None  # this is the range of the quantizer
-        self.levels = None  # these are possible output values
-        self.thresholds = None  # these are the boundaries between levels
+        self.alpha = None  # defines the range of the quantizer
+        self.levels = None  # possible output values
+        self.thresholds = None  # boundaries between levels
 
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
 
@@ -61,36 +63,23 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         )
         self.alpha = alpha
 
-        self.max_value = (self.m_levels - 2) * self.alpha / self.m_levels
-
         levels = layer.add_weight(
             "levels",
-            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, self.max_value, self.n_levels)),
+            initializer=tf.keras.initializers.Constant(np.linspace(min_value(self.alpha, self.signed), max_value(self.alpha, self.m_levels, self.signed), self.n_levels)),
             shape=(self.n_levels,),
             trainable=True,
             dtype=tf.float32,
-            constraint=CompositeConstraint(
-                ClippedConstraint(-self.alpha, self.max_value + tf.keras.backend.epsilon()),
-                OrderedConstraint(),
-                FixedValueConstraint(value=-self.alpha, idx=0),
-            ),
-            # constraint=LevelConstraint(self.alpha, self.bits),
+            constraint=LevelConstraint(self.alpha, self.m_levels, self.signed),
         )
         self.levels = levels
 
         thresholds = layer.add_weight(
             "thresholds",
-            initializer=tf.keras.initializers.Constant(np.linspace(-self.alpha, self.alpha, self.n_levels + 1)),
+            initializer=tf.keras.initializers.Constant(np.linspace(min_value(self.alpha, self.signed), self.alpha, self.n_levels + 1)),
             shape=(self.n_levels + 1,),
             trainable=True,
             dtype=tf.float32,
-            constraint=CompositeConstraint(
-                ClippedConstraint(-self.alpha, self.alpha),
-                OrderedConstraint(),
-                FixedValueConstraint(value=-self.alpha, idx=0),
-                FixedValueConstraint(value=self.alpha, idx=self.n_levels),
-            ),
-            constraint=ThresholdConstraint(self.alpha),
+            constraint=ThresholdConstraint(self.alpha, self.signed),
         )
         self.thresholds = thresholds
 
