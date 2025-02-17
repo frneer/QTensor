@@ -41,8 +41,8 @@ def main(bits, alpha, levels):
     model.fit(
         x_train,
         y_train,
-        epochs=2,
-        batch_size=1024,
+        epochs=10,
+        batch_size=1024//4,
         validation_data=(x_test, y_test),
     )
 
@@ -63,7 +63,7 @@ def main(bits, alpha, levels):
 
     qmodel.summary()
     qmodel.compile(
-        optimizer=Adam(learning_rate=0.001 / 10),
+        optimizer=Adam(learning_rate=0.001),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
