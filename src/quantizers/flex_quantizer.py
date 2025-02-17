@@ -11,9 +11,13 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
     _QuantizeHelper,
 )
 
-from quantizers.constraints.constraints import PositiveConstraint, LevelConstraint, ThresholdConstraint
+from quantizers.common import max_value, min_value
+from quantizers.constraints.constraints import (
+    LevelConstraint,
+    PositiveConstraint,
+    ThresholdConstraint,
+)
 
-from quantizers.common import min_value, max_value
 
 class FlexQuantizer(_QuantizeHelper, Quantizer):
     """An flexible quantizer algorithm support both signed and unsigned
@@ -34,10 +38,13 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         """Constructor.
 
         :param bits(int): Number of bits to use for quantization.
-        :param signed(bool): Whether to use signed or unsigned quantization. By default, signed quantization is used.
+        :param signed(bool): Whether to use signed or unsigned quantization. By
+            default, signed quantization is used.
         :param name(str): Suffix to append to the layer name.
-        :param initializer(tf.keras.initializers.Initializer): Initializer for the alpha parameter.
-        :param regularizer(tf.keras.regularizers.Regularizer): Regularizer for the alpha parameter.
+        :param initializer(tf.keras.initializers.Initializer): Initializer for
+            the alpha parameter.
+        :param regularizer(tf.keras.regularizers.Regularizer): Regularizer for
+            the alpha parameter.
         """
         super(FlexQuantizer, self).__init__()
 
@@ -65,7 +72,13 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         levels = layer.add_weight(
             "levels",
-            initializer=tf.keras.initializers.Constant(np.linspace(min_value(self.alpha, self.signed), max_value(self.alpha, self.m_levels, self.signed), self.n_levels)),
+            initializer=tf.keras.initializers.Constant(
+                np.linspace(
+                    min_value(self.alpha, self.signed),
+                    max_value(self.alpha, self.m_levels, self.signed),
+                    self.n_levels,
+                )
+            ),
             shape=(self.n_levels,),
             trainable=True,
             dtype=tf.float32,
@@ -75,7 +88,13 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         thresholds = layer.add_weight(
             "thresholds",
-            initializer=tf.keras.initializers.Constant(np.linspace(min_value(self.alpha, self.signed), self.alpha, self.n_levels + 1)),
+            initializer=tf.keras.initializers.Constant(
+                np.linspace(
+                    min_value(self.alpha, self.signed),
+                    self.alpha,
+                    self.n_levels + 1,
+                )
+            ),
             shape=(self.n_levels + 1,),
             trainable=True,
             dtype=tf.float32,
@@ -86,7 +105,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         return {"alpha": alpha, "levels": levels, "thresholds": thresholds}
 
     def __call__(self, inputs, training, weights, **kwargs):
-        return self.quantize(inputs, weights["alpha"], weights["levels"], weights["thresholds"])
+        return self.quantize(
+            inputs, weights["alpha"], weights["levels"], weights["thresholds"]
+        )
 
     def range(self):
         return 2 * self.alpha if self.signed else self.alpha
@@ -113,7 +134,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                     tf.less_equal(x, self.thresholds[i + 1]),
                 ),
                 qlevels[i],
-                q
+                q,
             )
 
         def grad(upstream):
@@ -121,7 +142,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             dq_dx = tf.where(
                 tf.logical_and(
                     tf.greater_equal(x, self.thresholds[0]),
-                    tf.less_equal(x, self.thresholds[-1]),  # should it be alpha?
+                    tf.less_equal(
+                        x, self.thresholds[-1]
+                    ),  # should it be alpha?
                 ),
                 upstream,
                 tf.zeros_like(x),
@@ -142,7 +165,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             # x = [0.1, 0.3, 0.7, 1.5, 2.5] size = 5
             # q(x) = [0, 0.4, 1, 1, 3] size = 5
             # bin_indices = [0, 1, 2, 2, 3] size = 5
-            bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side='left')
+            bin_indices = tf.searchsorted(
+                qlevels, tf.reshape(q, (-1,)), side="left"
+            )
 
             # Then we one-hot encode the bin indices
             # q_one_hot =
@@ -155,7 +180,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
             # Finally we multiply the one-hot encoded bin indices with the upstream
             # transforming this into a 1D array
-            dq_dlevel = tf.matmul(tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1)))
+            dq_dlevel = tf.matmul(
+                tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1))
+            )
             dq_dlevel = tf.reshape(dq_dlevel, (-1,))
 
             ##### dq_dalpha is STE (same as in uniform quantizer) #####
@@ -179,7 +206,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                     tf.zeros_like(x),
                 )
 
-                update_value = delta_y / delta_x * tf.reduce_sum(masked_upstream)
+                update_value = (
+                    delta_y / delta_x * tf.reduce_sum(masked_upstream)
+                )
 
                 dq_dthresholds = tf.tensor_scatter_nd_update(
                     dq_dthresholds, indices=[[i]], updates=[update_value]

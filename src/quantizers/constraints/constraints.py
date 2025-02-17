@@ -1,10 +1,12 @@
 import numpy as np
 import tensorflow as tf
 
-from quantizers.common import min_value, span, max_value, delta
+from quantizers.common import max_value, min_value
+
 
 class PositiveConstraint(tf.keras.constraints.Constraint):
     """Constrains the values to be positive."""
+
     def __call__(self, w):
         return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
@@ -27,13 +29,19 @@ class LevelConstraint(tf.keras.constraints.Constraint):
         min_level = min_value(self.alpha, self.signed)
         max_level = max_value(self.alpha, self.m_levels, self.signed)
 
-        w = tf.clip_by_value(w, min_level, max_level + tf.keras.backend.epsilon())
+        w = tf.clip_by_value(
+            w, min_level, max_level + tf.keras.backend.epsilon()
+        )
         w = tf.sort(w)
         w = tf.tensor_scatter_nd_update(w, [[0]], [min_level])
         return w
 
     def get_config(self):
-        return {"alpha": self.alpha, "m_levels": self.m_levels, "signed": self.signed}
+        return {
+            "alpha": self.alpha,
+            "m_levels": self.m_levels,
+            "signed": self.signed,
+        }
 
 
 class ThresholdConstraint(tf.keras.constraints.Constraint):

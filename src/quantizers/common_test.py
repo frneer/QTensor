@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import unittest
-from common import min_value, span, max_value, delta
+
+from common import delta, max_value, min_value, span
+
 
 class TestQuantizersCommon(unittest.TestCase):
 
@@ -14,13 +16,13 @@ class TestQuantizersCommon(unittest.TestCase):
         self.assertEqual(span(alpha=10, signed=False), 10)
 
     def test_delta(self):
-        self.assertEqual(delta(alpha=1, signed=True, m_levels=8), 1/4)
-        self.assertEqual(delta(alpha=1, signed=False, m_levels=8), 1/8)
+        self.assertEqual(delta(alpha=1, signed=True, m_levels=8), 1 / 4)
+        self.assertEqual(delta(alpha=1, signed=False, m_levels=8), 1 / 8)
 
     def test_max_value(self):
-        self.assertEqual(max_value(alpha=1, m_levels=8, signed=True), 3/4)
-        self.assertEqual(max_value(alpha=1, m_levels=8, signed=False), 7/8)
+        self.assertEqual(max_value(alpha=1, m_levels=8, signed=True), 3 / 4)
+        self.assertEqual(max_value(alpha=1, m_levels=8, signed=False), 7 / 8)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

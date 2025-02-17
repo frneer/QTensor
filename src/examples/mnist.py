@@ -3,16 +3,15 @@
 
 import argparse
 
-import matplotlib.pyplot as plt
 from tensorflow.keras import Sequential
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.optimizers import Adam
-from configs.qmodel import apply_quantization
+from tensorflow.keras.utils import to_categorical
 
-from quantizers.uniform_quantizer import UniformQuantizer
+from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
+from quantizers.uniform_quantizer import UniformQuantizer
 from utils.utils import VariableHistoryCallback, plot_snapshot
 
 
@@ -24,6 +23,7 @@ def generate_dataset():
     y_train = to_categorical(y_train, 10)
     y_test = to_categorical(y_test, 10)
     return (x_train, y_train), (x_test, y_test)
+
 
 def main(bits, alpha, levels):
     (x_train, y_train), (x_test, y_test) = generate_dataset()
@@ -49,11 +49,13 @@ def main(bits, alpha, levels):
     qconfig = {
         "hidden": {
             "weights": {
-                "kernel": FlexQuantizer(bits=bits, n_levels=levels , signed=True)
+                "kernel": FlexQuantizer(
+                    bits=bits, n_levels=levels, signed=True
+                )
             },
             "activations": {
                 "activation": UniformQuantizer(bits=bits, signed=False)
-            }
+            },
         }
     }
 
@@ -63,16 +65,27 @@ def main(bits, alpha, levels):
     qmodel.compile(
         optimizer=Adam(learning_rate=0.001 / 10),
         loss="categorical_crossentropy",
-        metrics=["accuracy"]
+        metrics=["accuracy"],
     )
 
     print([w.name for w in model.layers[1].weights])
     print([w.name for w in qmodel.layers[1].weights])
 
-
-    alpha_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "alpha" in v.name][0]
-    levels_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "levels" in v.name][0]
-    thresholds_callback = [VariableHistoryCallback(v) for v in qmodel.layers[1].weights if "thresholds" in v.name][0]
+    alpha_callback = [
+        VariableHistoryCallback(v)
+        for v in qmodel.layers[1].weights
+        if "alpha" in v.name
+    ][0]
+    levels_callback = [
+        VariableHistoryCallback(v)
+        for v in qmodel.layers[1].weights
+        if "levels" in v.name
+    ][0]
+    thresholds_callback = [
+        VariableHistoryCallback(v)
+        for v in qmodel.layers[1].weights
+        if "thresholds" in v.name
+    ][0]
     callbacks = [alpha_callback, levels_callback, thresholds_callback]
     hist = qmodel.fit(
         x_train,
@@ -93,7 +106,7 @@ def main(bits, alpha, levels):
         bits=bits,
     )
 
-    # qmodel.evaluate(x_test, y_test)
+    qmodel.evaluate(x_test, y_test)
 
 
 if __name__ == "__main__":
