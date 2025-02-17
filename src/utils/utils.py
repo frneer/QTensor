@@ -56,6 +56,9 @@ def plot_snapshot(
         plt.axvline(x=alpha, color="red", linestyle="--", alpha=0.5)
         plt.axhline(y=alpha, color="red", linestyle="--", alpha=0.5)
 
+        plt.axvline(x=0, color="black", linestyle=":", alpha=0.3)
+        plt.axhline(y=0, color="black", linestyle=":", alpha=0.3)
+
         # Annotate the plot
         plt.text(
             0.05,
@@ -82,6 +85,8 @@ def plot_snapshot(
             ),
             labels=[f"" for _ in range(m_levels)],
         )
+        ax = plt.gca()
+        ax.yaxis.set_tick_params(width=0)
         plt.grid(which="both", alpha=0.3, linestyle=":")
         plt.savefig(f"{output_path}/snapshot_{epoch:05d}.png")
         plt.close()
