@@ -3,7 +3,6 @@
 This module contains the utilities to quantize a Keras model.
 """
 
-from configs.generate_config import AttributeQuantizerDict, GenerateConfig
 from tensorflow.keras.initializers import Constant
 from tensorflow.keras.layers import Layer
 from tensorflow.keras.models import Model, clone_model
@@ -13,6 +12,8 @@ from tensorflow_model_optimization.quantization.keras import (
     quantize_scope,
 )
 
+from configs.generate_config import AttributeQuantizerDict, GenerateConfig
+from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
 
 # {layer_name: AttributeQuantizerDict}
@@ -36,8 +37,8 @@ def clone_layer(layer: Layer):
 
 
 def quantize_layer(layer: Layer, layer_quantizers: AttributeQuantizerDict):
-    """Quantize a Keras layer.
-    Annotates a cloned layer with the quantizers specified in the layer_quantizers dict.
+    """Quantize a Keras layer. Annotates a cloned layer with the quantizers
+    specified in the layer_quantizers dict.
 
     param(layer): Keras layer to quantize.
     param(layer_quantizers): Dictionary with the quantizers to apply to the layer.
@@ -53,7 +54,6 @@ def quantize_layer(layer: Layer, layer_quantizers: AttributeQuantizerDict):
         },
     )
     ```
-
     """
     return quantize_annotate_layer(
         clone_layer(layer), GenerateConfig(**layer_quantizers)
@@ -63,10 +63,10 @@ def quantize_layer(layer: Layer, layer_quantizers: AttributeQuantizerDict):
 def quantize_model(model: Model, quantizers: LayerQuantizerDict):
     """Quantize a Keras model.
 
-    param(model): Keras model to quantize.
-    param(quantizers): Dictionary with the quantizers to apply to the model.
-
+    param(model): Keras model to quantize. param(quantizers): Dictionary with
+    the quantizers to apply to the model.
     """
+
     def clone_function(layer: Layer):
         if layer.name in quantizers:
             return quantize_layer(layer, quantizers[layer.name])
@@ -102,12 +102,15 @@ def apply_quantization(model: Model, quantizers: LayerQuantizerDict):
     model_layers = [layer.name for layer in model.layers]
     for layer_name in quantizers.keys():
         if layer_name not in model_layers:
-            raise ValueError(f"Layer {layer_name} not found in model {model.name}.")
+            raise ValueError(
+                f"Layer {layer_name} not found in model {model.name}."
+            )
     # TODO(Fran): get below dict objects from the quantizers passed in add method (Constant comes from UniformQuantizer)
     # So maybe if there are custom objects to register each class should have a method to return them
     custom_objects = {}
     custom_objects["GenerateConfig"] = GenerateConfig
     custom_objects["UniformQuantizer"] = UniformQuantizer
+    custom_objects["FlexQuantizer"] = FlexQuantizer
     custom_objects["Constant"] = Constant
 
     with quantize_scope(custom_objects):
