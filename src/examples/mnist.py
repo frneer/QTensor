@@ -42,7 +42,7 @@ def main(bits, alpha, levels):
         x_train,
         y_train,
         epochs=10,
-        batch_size=1024//4,
+        batch_size=1024 // 4,
         validation_data=(x_test, y_test),
     )
 
@@ -63,7 +63,7 @@ def main(bits, alpha, levels):
 
     qmodel.summary()
     qmodel.compile(
-        optimizer=Adam(learning_rate=0.001),
+        optimizer=Adam(learning_rate=0.001 / 10),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
