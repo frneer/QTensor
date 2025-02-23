@@ -145,7 +145,6 @@ def main(args):
         callbacks=callbacks,
     )
 
-    plot_training_history(hist, callbacks)
     plot_snapshot(
         alpha_hist=alpha_callback.get_history(),
         level_hist=levels_callback.get_history(),
