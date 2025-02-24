@@ -15,10 +15,7 @@ def span(alpha, signed):
 
 def max_value(alpha, m_levels, signed):
     """Return the maximum possible value of the quantization range."""
-    return (
-        min_value(alpha, signed)
-        + span(alpha, signed) * (m_levels - 1) / m_levels
-    )
+    return min_value(alpha, signed) + span(alpha, signed) * (m_levels - 1) / m_levels
 
 
 def delta(alpha, m_levels, signed):

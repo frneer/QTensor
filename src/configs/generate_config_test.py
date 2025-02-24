@@ -2,14 +2,15 @@
 
 import unittest
 
-from generate_config import (
+from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
+    Quantizer,
+)
+
+from configs.generate_config import (
     GenerateConfig,
     flatten_nested_dict,
     get_nested_attribute,
     set_nested_attribute,
-)
-from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
-    Quantizer,
 )
 
 
@@ -229,12 +230,8 @@ class GetNestedAttributeTest(unittest.TestCase):
         self.assertEqual(
             get_nested_attribute(self.layer, "cell.bias"), self.layer.cell.bias
         )
-        self.assertEqual(
-            get_nested_attribute(self.layer, "kernel"), self.layer.kernel
-        )
-        self.assertEqual(
-            get_nested_attribute(self.layer, "bias"), self.layer.bias
-        )
+        self.assertEqual(get_nested_attribute(self.layer, "kernel"), self.layer.kernel)
+        self.assertEqual(get_nested_attribute(self.layer, "bias"), self.layer.bias)
 
 
 class SetNestedAttributeTest(unittest.TestCase):
@@ -257,9 +254,7 @@ class SetNestedAttributeTest(unittest.TestCase):
         set_nested_attribute(self.layer, "cell.kernel", self.quantizer)
         self.assertEqual(self.layer.cell.kernel, self.quantizer)
 
-        set_nested_attribute(
-            self.layer, "cell.recurrent_kernel", self.quantizer
-        )
+        set_nested_attribute(self.layer, "cell.recurrent_kernel", self.quantizer)
         self.assertEqual(self.layer.cell.recurrent_kernel, self.quantizer)
 
         set_nested_attribute(self.layer, "cell.bias", self.quantizer)

@@ -2,6 +2,7 @@
 
 HELP="Usage: $me [-b|--build]"
 SERVICE="qtensor_dev"
+COMMAND=""
 
 while [[ "$1" != "" ]]; do
     case "$1" in
@@ -11,6 +12,10 @@ while [[ "$1" != "" ]]; do
         ;;
     -s | --service)
         SERVICE=$2
+        shift 2
+        ;;
+    -c | --command)
+        COMMAND=$2
         shift 2
         ;;
     -b | --build)
@@ -38,4 +43,10 @@ if [ "$BUILD" = true ]; then
     docker compose build
 fi
 
-docker compose run --rm $SERVICE
+echo "Running $SERVICE with command: $COMMAND"
+
+if [ -n "$COMMAND" ]; then
+    docker compose run --rm $SERVICE /bin/bash -c "$COMMAND"
+else
+    docker compose run --rm $SERVICE
+fi

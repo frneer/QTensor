@@ -63,12 +63,8 @@ class GenerateConfig(QuantizeConfig):
             )
         return weights_and_quantizers
 
-    def set_quantize_weights(
-        self, layer: Layer, quantize_weights: list[Tensor]
-    ):
-        for attribute, quantized_weight in zip(
-            self.weights.keys(), quantize_weights
-        ):
+    def set_quantize_weights(self, layer: Layer, quantize_weights: list[Tensor]):
+        for attribute, quantized_weight in zip(self.weights.keys(), quantize_weights):
             set_nested_attribute(layer, attribute, quantized_weight)
 
     def get_activations_and_quantizers(

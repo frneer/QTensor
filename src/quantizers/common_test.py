@@ -2,7 +2,7 @@
 
 import unittest
 
-from common import delta, max_value, min_value, span
+from quantizers.common import delta, max_value, min_value, span
 
 
 class TestQuantizersCommon(unittest.TestCase):

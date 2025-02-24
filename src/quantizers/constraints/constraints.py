@@ -29,9 +29,7 @@ class LevelConstraint(tf.keras.constraints.Constraint):
         min_level = min_value(self.alpha, self.signed)
         max_level = max_value(self.alpha, self.m_levels, self.signed)
 
-        w = tf.clip_by_value(
-            w, min_level, max_level + tf.keras.backend.epsilon()
-        )
+        w = tf.clip_by_value(w, min_level, max_level + tf.keras.backend.epsilon())
         w = tf.sort(w)
         w = tf.tensor_scatter_nd_update(w, [[0]], [min_level])
         return w

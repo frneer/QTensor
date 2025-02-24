@@ -73,9 +73,7 @@ def quantize_model(model: Model, quantizers: LayerQuantizerDict):
         else:
             return clone_layer(layer)
 
-    return clone_model(
-        model, clone_function=lambda layer: clone_function(layer)
-    )
+    return clone_model(model, clone_function=lambda layer: clone_function(layer))
 
 
 def apply_quantization(model: Model, quantizers: LayerQuantizerDict):
@@ -102,9 +100,7 @@ def apply_quantization(model: Model, quantizers: LayerQuantizerDict):
     model_layers = [layer.name for layer in model.layers]
     for layer_name in quantizers.keys():
         if layer_name not in model_layers:
-            raise ValueError(
-                f"Layer {layer_name} not found in model {model.name}."
-            )
+            raise ValueError(f"Layer {layer_name} not found in model {model.name}.")
     # TODO(Fran): get below dict objects from the quantizers passed in add method (Constant comes from UniformQuantizer)
     # So maybe if there are custom objects to register each class should have a method to return them
     custom_objects = {}
