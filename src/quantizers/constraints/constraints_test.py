@@ -3,6 +3,7 @@
 import unittest
 
 import tensorflow as tf
+
 from quantizers.constraints.constraints import (
     LevelConstraint,
     PositiveConstraint,
@@ -13,9 +14,7 @@ from quantizers.constraints.constraints import (
 def assertListAlmostEqual(self, list1, list2):
     self.assertEqual(len(list1), len(list2))
     for i in range(len(list1)):
-        self.assertAlmostEqual(
-            list1[i], list2[i], delta=2 * tf.keras.backend.epsilon()
-        )
+        self.assertAlmostEqual(list1[i], list2[i], delta=2 * tf.keras.backend.epsilon())
 
 
 class TestPositiveContraint(unittest.TestCase):
@@ -56,9 +55,7 @@ class TestLevelConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-1.0, -1.0, 0.0, 3 / 4, 3 / 4],
         )
 
@@ -68,9 +65,7 @@ class TestLevelConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            lc(tf.constant([2, 1, 0, -1, -2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            lc(tf.constant([2, 1, 0, -1, -2], dtype=tf.float32)).numpy().tolist(),
             [-100, -1, 0, 1, 2],
         )
 
@@ -80,18 +75,14 @@ class TestLevelConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-1.0, -1.0, 0.0, 3 / 4, 3 / 4],
         )
 
         alpha.assign(2.0)
         assertListAlmostEqual(
             self,
-            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            lc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-2.0, -1.0, 0.0, 1.0, 1.5],
         )
 
@@ -103,9 +94,7 @@ class TestThresholdConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-1.0, -1.0, 0.0, 1.0, 1.0],
         )
 
@@ -115,9 +104,7 @@ class TestThresholdConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            tc(tf.constant([2, 1, 0, -1, -2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            tc(tf.constant([2, 1, 0, -1, -2], dtype=tf.float32)).numpy().tolist(),
             [-100, -1, 0, 1, 100],
         )
 
@@ -127,18 +114,14 @@ class TestThresholdConstraint(unittest.TestCase):
 
         assertListAlmostEqual(
             self,
-            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-1.0, -1.0, 0.0, 1.0, 1.0],
         )
 
         alpha.assign(2.0)
         assertListAlmostEqual(
             self,
-            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32))
-            .numpy()
-            .tolist(),
+            tc(tf.constant([-2, -1, 0, 1, 2], dtype=tf.float32)).numpy().tolist(),
             [-2.0, -1.0, 0.0, 1.0, 2.0],
         )
 

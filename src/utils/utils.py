@@ -47,12 +47,8 @@ def plot_snapshot(
         )
 
         # Domain of the quantizer
-        plt.axvline(
-            x=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5
-        )
-        plt.axhline(
-            y=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5
-        )
+        plt.axvline(x=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5)
+        plt.axhline(y=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5)
         plt.axvline(x=alpha, color="red", linestyle="--", alpha=0.5)
         plt.axhline(y=alpha, color="red", linestyle="--", alpha=0.5)
 
@@ -80,9 +76,7 @@ def plot_snapshot(
 
         # Ticks and grid configuration
         plt.yticks(
-            np.linspace(
-                level[0], max_value(alpha, m_levels, signed), m_levels
-            ),
+            np.linspace(level[0], max_value(alpha, m_levels, signed), m_levels),
             labels=[f"" for _ in range(m_levels)],
         )
         ax = plt.gca()

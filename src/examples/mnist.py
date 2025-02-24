@@ -49,13 +49,9 @@ def main(bits, alpha, levels):
     qconfig = {
         "hidden": {
             "weights": {
-                "kernel": FlexQuantizer(
-                    bits=bits, n_levels=levels, signed=True
-                )
+                "kernel": FlexQuantizer(bits=bits, n_levels=levels, signed=True)
             },
-            "activations": {
-                "activation": UniformQuantizer(bits=bits, signed=False)
-            },
+            "activations": {"activation": UniformQuantizer(bits=bits, signed=False)},
         }
     }
 

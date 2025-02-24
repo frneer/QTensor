@@ -142,9 +142,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             dq_dx = tf.where(
                 tf.logical_and(
                     tf.greater_equal(x, self.thresholds[0]),
-                    tf.less_equal(
-                        x, self.thresholds[-1]
-                    ),  # should it be alpha?
+                    tf.less_equal(x, self.thresholds[-1]),  # should it be alpha?
                 ),
                 upstream,
                 tf.zeros_like(x),
@@ -165,9 +163,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             # x = [0.1, 0.3, 0.7, 1.5, 2.5] size = 5
             # q(x) = [0, 0.4, 1, 1, 3] size = 5
             # bin_indices = [0, 1, 2, 2, 3] size = 5
-            bin_indices = tf.searchsorted(
-                qlevels, tf.reshape(q, (-1,)), side="left"
-            )
+            bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side="left")
 
             # Then we one-hot encode the bin indices
             # q_one_hot =
@@ -206,9 +202,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                     tf.zeros_like(x),
                 )
 
-                update_value = (
-                    delta_y / delta_x * tf.reduce_sum(masked_upstream)
-                )
+                update_value = delta_y / delta_x * tf.reduce_sum(masked_upstream)
 
                 dq_dthresholds = tf.tensor_scatter_nd_update(
                     dq_dthresholds, indices=[[i]], updates=[update_value]

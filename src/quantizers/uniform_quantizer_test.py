@@ -5,6 +5,7 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+
 from quantizers.uniform_quantizer import UniformQuantizer
 
 
@@ -14,12 +15,8 @@ def plot_histogram(ax, tensor, label, min, max):
     ax.set_title(f"Histogram of {label}")
     ax.set_xlabel("Value")
     ax.set_ylabel("Frequency")
-    ax.axvline(
-        min, color="r", linestyle="dashed", linewidth=2, label="Min clip"
-    )
-    ax.axvline(
-        max, color="g", linestyle="dashed", linewidth=2, label="Max clip"
-    )
+    ax.axvline(min, color="r", linestyle="dashed", linewidth=2, label="Min clip")
+    ax.axvline(max, color="g", linestyle="dashed", linewidth=2, label="Max clip")
     ax.legend()
 
 
@@ -79,9 +76,7 @@ class TestUniformQuantizer(unittest.TestCase):
         plot_histogram(axs[0], self.input_tensor, "Input values", min, max)
         plot_histogram(axs[1], output, "Output values", min, max)
         plt.tight_layout()
-        plt.savefig(
-            f'input_output_values_{"signed" if signed else "unsigned"}.png'
-        )
+        plt.savefig(f'input_output_values_{"signed" if signed else "unsigned"}.png')
 
         # Assert all output values are within the range.
         self.assertLessEqual(
