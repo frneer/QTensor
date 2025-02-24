@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-
 """This module implements a uniform quantizer for quantizing weights and
 activations."""
-
 
 import numpy as np
 import tensorflow as tf

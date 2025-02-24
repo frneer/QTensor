@@ -2,14 +2,15 @@
 
 import unittest
 
-from generate_config import (
+from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
+    Quantizer,
+)
+
+from configs.generate_config import (
     GenerateConfig,
     flatten_nested_dict,
     get_nested_attribute,
     set_nested_attribute,
-)
-from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
-    Quantizer,
 )
 
 

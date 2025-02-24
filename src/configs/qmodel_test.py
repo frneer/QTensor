@@ -2,16 +2,16 @@
 
 import unittest
 
-from qmodel import (
+from tensorflow.keras import Input, Model
+from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.models import Model, Sequential
+
+from configs.qmodel import (
     apply_quantization,
     clone_layer,
     quantize_layer,
     quantize_model,
 )
-from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import LSTM, Dense
-from tensorflow.keras.models import Model, Sequential
-
 from quantizers.uniform_quantizer import UniformQuantizer
 
 

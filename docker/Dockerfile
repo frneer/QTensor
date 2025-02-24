@@ -12,10 +12,7 @@ ENV TF_USE_LEGACY_KERAS=1
 
 # Install linting tools
 RUN pip3 install \
-    autoflake \
-    black \
-    docformatter \
-    isort
+    pre-commit
 
 # User setup
 ARG USERID

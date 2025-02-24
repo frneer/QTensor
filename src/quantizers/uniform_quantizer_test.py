@@ -5,7 +5,8 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from uniform_quantizer import UniformQuantizer
+
+from quantizers.uniform_quantizer import UniformQuantizer
 
 
 def plot_histogram(ax, tensor, label, min, max):
