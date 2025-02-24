@@ -3,7 +3,7 @@
 import unittest
 
 import tensorflow as tf
-from constraints import (
+from quantizers.constraints.constraints import (
     LevelConstraint,
     PositiveConstraint,
     ThresholdConstraint,
@@ -99,7 +99,7 @@ class TestLevelConstraint(unittest.TestCase):
 class TestThresholdConstraint(unittest.TestCase):
     def test_clipping(self):
         alpha = 1.0
-        tc = ThresholdConstraint(alpha)
+        tc = ThresholdConstraint(alpha, signed=True)
 
         assertListAlmostEqual(
             self,
@@ -111,7 +111,7 @@ class TestThresholdConstraint(unittest.TestCase):
 
     def test_ordering(self):
         alpha = 100.0
-        tc = ThresholdConstraint(alpha)
+        tc = ThresholdConstraint(alpha, signed=True)
 
         assertListAlmostEqual(
             self,
@@ -123,7 +123,7 @@ class TestThresholdConstraint(unittest.TestCase):
 
     def test_update_alpha(self):
         alpha = tf.Variable(1.0)
-        tc = ThresholdConstraint(alpha)
+        tc = ThresholdConstraint(alpha, signed=True)
 
         assertListAlmostEqual(
             self,

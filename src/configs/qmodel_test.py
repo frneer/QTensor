@@ -2,7 +2,7 @@
 
 import unittest
 
-from qmodel import (
+from configs.qmodel import (
     apply_quantization,
     clone_layer,
     quantize_layer,

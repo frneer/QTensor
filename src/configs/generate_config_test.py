@@ -2,7 +2,7 @@
 
 import unittest
 
-from generate_config import (
+from configs.generate_config import (
     GenerateConfig,
     flatten_nested_dict,
     get_nested_attribute,
