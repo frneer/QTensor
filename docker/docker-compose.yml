@@ -24,8 +24,6 @@ services:
       - QT_X11_NO_MITSHM=1
       - XAUTHORITY=/tmp/.docker.xauth
 
-    network_mode: host
-
     volumes:
       - ../:/home/$USER/qtensor
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -42,8 +40,6 @@ services:
     restart: on-failure
     stdin_open: true
     tty: true
-
-    network_mode: host
 
     volumes:
       - ../docs:/workspace
