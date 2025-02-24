@@ -15,7 +15,8 @@ def plot_histogram(ax, tensor, label, min, max):
     ax.set_title(f"Histogram of {label}")
     ax.set_xlabel("Value")
     ax.set_ylabel("Frequency")
-    ax.axvline(min, color="r", linestyle="dashed", linewidth=2, label="Min clip")
+    ax.axvline(min, color="r",
+    linestyle="dashed", linewidth=2, label="Min clip")
     ax.axvline(max, color="g", linestyle="dashed", linewidth=2, label="Max clip")
     ax.legend()
 
