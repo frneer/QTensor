@@ -1,0 +1,160 @@
+\documentclass[a4paper,11pt, oneside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage[margin=2cm]{geometry}
+
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{sectsty}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{dirtytalk}
+
+\usepackage[backend=biber, style=ieee]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{float}
+\usepackage{multirow}
+
+% \sectionfont{\fontsize{18}{16}\selectfont}
+% No indent
+\setlength\parindent{0pt}
+
+\title{PLAN DE TRABAJO}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\textbf{Modalidad elegida:} Tesis de Ingeniería Electrónica \\
+
+\textbf{Tesista:} Sr. Francisco Rossi (tel: +54 911 4048 2888; e-mail: frrossi@fi.uba.ar) \\
+
+\textbf{Director:} Ing. Federico Zacchigna (tel: +54 911 6457 3028; e-mail: fzacchigna@fi.uba.ar) \\
+
+\textbf{Lugar de trbajo:}  Grupo de Ingeniería en Inteligencia Artificial (IngenIA) y Laboratorio de Sistemas Embebidos (LSE), Facultad de Ingeniería, Universidad de Buenos Aires. \\
+
+\textbf{Título:} Cuantización flexible de redes neuronales para compresión de modelos con \say{Quantization-Aware Training} \\
+
+\section*{Objetivo general y objetivos particulares del Trabajo Final}
+
+    {
+        \color{gray}
+        \scriptsize
+        En esta sección se debe presentar un resumen con el objetivo del Trabajo Final a desarrollar, indicando explícitamente los aportes creativos y/o novedosos del trabajo. También, señalar el o las áreas en que se encuadra el tema y desarrollo del Trabajo dentro de los alcances del título de Ingeniero/a Electrónico/a de la UBA.\\
+    }
+
+El objetivo principal de esta tesis es el estudio e implementación de algoritmos de cuantización para redes neuronales, asegurando su compatibilidad con APIs de referencia como \texttt{Keras}\cite{keras}, \texttt{TensorFlow} \cite{tensorflow} y \texttt{PyTorch} \cite{pytorch}. \\
+
+En particular, se estudiarán enfoques de cuantización: \\
+
+\subsection*{Tipos de cuantización}
+\begin{itemize}
+    \item \textbf{Cuantización uniforme}: ampliamente utilizada en la literatura y fundamental para la compresión de modelos. \cite{SAYOOD2018257}
+    \item \textbf{Cuantización no uniforme}: un enfoque en el que los niveles no siguen una distribución equidistante, permitiendo una mayor adaptabilidad a la distribución de los datos. \cite{SAYOOD2018257}
+    \item \textbf{Cuantización flexible}: una propuesta innovadora que introduce mejoras en el proceso de cuantización, con el potencial de optimizar la relación entre precisión y eficiencia computacional. \cite{electronics13101923}
+\end{itemize}
+
+Posteriormente se implementarán los enfoques de cuantización uniforme y flexible, que son lo de interés, ya que es posible utilizarlos durante la implementación de de CNN en hardware que utilice punto fijo. Este tipo de hardware es bien conocido por hacer uso eficiente de los recursos, ya sea eficiencia energética, tamaño del hardware y rendimiento en términos de número de operaciones por segundo y otros. \\
+
+Además del desarrollo de estos algoritmos, se diseñará una interfaz de software que facilite su integración en proyectos futuros. Se priorizará la ergonomía de la librería, de modo que cualquier usuario con conocimientos en redes neuronales pueda utilizarla, extenderla y adaptarla a nuevas investigaciones o aplicaciones. Para que este funcione bien dentro de estas librerías, se utilizará lo que se llama fake-quantization \cite{electronics13101923}. \\
+
+Este trabajo integra conceptos fundamentales de la carrera de Ingeniería Electrónica, combinando redes neuronales, procesamiento de señales y la implementación de algoritmos computacionalmente eficientes. Así, busca no solo aplicar los conocimientos adquiridos, sino también contribuir al avance en el campo de la cuantización de modelos de aprendizaje profundo. \\
+
+\section*{Estado actual del conocimiento y relevancia sobre el tema}
+
+    {
+        \color{gray}
+        \scriptsize
+        En esta sección se debe presentar una breve introducción al tema y al estado del arte. También, se debe dar una descripción de la necesidad que da origen al proyecto y una descripción de las soluciones existentes. La extensión no debe superar las 2000 palabras. Se pueden introducir referencias bibliográficas (detalladas en la sección correspondiente).\\
+    }
+
+Las redes neuronales han experimentado un crecimiento exponencial en los últimos años, siendo utilizadas en una amplia variedad de aplicaciones, desde el procesamiento de imágenes y el reconocimiento de voz hasta la toma de decisiones en vehículos autónomos. Por ejemplo, en visión por computadora, modelos como \texttt{ResNet} o \texttt{YOLO} han permitido avances significativos en detección de objetos y clasificación de imágenes \cite{8833671}. En el campo del procesamiento de lenguaje natural, arquitecturas como \texttt{GPT} y \texttt{BERT} han revolucionado tareas como la traducción automática y el análisis de sentimientos \cite{kheiri2023sentimentgptexploitinggptadvanced}. \\
+
+A medida que estas arquitecturas han evolucionado, también ha aumentado su tamaño y complejidad, lo que conlleva una mayor demanda de capacidad computacional y memoria. Modelos de última generación contienen miles de millones de parámetros, lo que no solo implica la necesidad de entrenarlos en hardware especializado (como GPUs o TPUs), sino también el desafío de realizar la inferencia de manera eficiente en entornos con recursos limitados, como dispositivos embebidos o teléfonos móviles \cite{9474372} \cite{Wu_2016_CVPR}. \\
+
+Para ampliar el rango de aplicación de estas redes neuronales y permitir su uso en hardware con menor capacidad de cómputo, es fundamental reducir el tamaño de los modelos y optimizar su ejecución. La reducción del tamaño de los modelos (o complejidad espacial), así como la reducción de la cantidad de cómputo (o complejidad temporal), caen dentro de lo que se conoce como compresión de NN. Una de las estrategias más utilizadas para la compresión de NN es la cuantización, que permite representar los pesos y activaciones con menos bits, reduciendo así el espacio requerido para almacenar el modelo y el ancho de banda necesario para realizar operaciones de inferencia \cite{mishra2020surveydeepneuralnetwork}. \\
+
+Existen dos enfoques principales para la cuantización de redes neuronales: la cuantización uniforme y la cuantización no uniforme. La cuantización uniforme divide el rango de valores en intervalos equidistantes, lo que facilita su implementación en hardware. En cambio, la cuantización no uniforme asigna los niveles de cuantización de manera no equidistante, lo que permite representar ciertos valores con mayor precisión y mejorar el rendimiento en algunos casos. Dentro de este último grupo existen diversas estrategias, cada una con ventajas y limitaciones según la aplicación. La cuatización flexible intenta combinar las ventajas de las cuantizaciones uniformes y no uniformes \cite{SAYOOD2018257} \cite{electronics13101923}. \\
+
+Además, hay dos formas principales de aplicar la cuantización a las redes neuronales:
+
+\begin{itemize}
+    \item \textbf{Cuantización post-entrenamiento (PTQ, Post-Training Quantization)}: Se aplica luego del entrenamiento del modelo, sin modificar el proceso de optimización. Es eficiente en términos computacionales, pero puede generar una pérdida significativa de precisión si no se ajusta adecuadamente \cite{tensorflow-ptq}
+
+    \item \textbf{Cuantización durante el entrenamiento (QAT, Quantization-Aware Training)}: Simula la cuantización dentro del proceso de entrenamiento, permitiendo que el modelo se adapte a la reducción de precisión. Aunque este enfoque mejora el rendimiento y minimiza la pérdida de precisión, requiere un mayor costo computacional \cite{tensorflow-qat}
+
+\end{itemize}
+
+
+A pesar de los avances en cuantización, todavía existen desafíos abiertos, especialmente en la cuantización adaptable y en el desarrollo de herramientas que faciliten su integración en librerías populares como \texttt{TensorFlow} y \texttt{PyTorch}. Actualmente, frameworks como \texttt{TensorFlow Model Optimization} \cite{tensorflow-model-optimization} y \texttt{Torch Quantization} \cite{pytorch-quantization} ofrecen soporte para técnicas básicas de cuantización, pero presentan limitaciones en cuanto a configurabilidad y flexibilidad. \\
+
+El desarrollo de nuevos cuantizadores que permitan una mejor representación de los datos con menor pérdida de precisión es un área activa de investigación. Además, la creación de herramientas con una interfaz más ergonómica y extensible facilitaría su implementación, acelerando la adopción de modelos cuantizados en dispositivos con recursos limitados. \\
+
+En este contexto, esta tesis busca contribuir explorando nuevas técnicas de cuantización y desarrollando herramientas que permitan su integración en entornos reales, optimizando el balance entre eficiencia y precisión. \\
+
+\section*{Tipo de diseño de trabajo y métodos a utilizar}
+
+    {
+        \color{gray}
+        \scriptsize
+        Descripción del alcance del proyecto y planteo de los mecanismos que se utilizarán para verificar la calidad de los resultados obtenidos. Claramente se deben indicar los límites de desarrollo de los temas y especificar los resultados a obtener, en forma cualitativa y, dentro de lo posible, en forma cuantitativa. Describir las etapas del proyecto necesarias para asegurar que el mismo incluya todas las tareas requeridas y solamente las tareas requeridas para completar exitosamente el Trabajo. Se deben describir los mecanismos que se utilizarán para verificar que el resultado obtenido cumpla con la calidad especificada, por ejemplo mediciones, simulaciones, etc. La extensión no debe superar las 1000 palabras.\\
+    }
+
+\subsection*{Aclance del proyecto}
+
+Este trabajo se centrará en la extensión de librerías existentes para crear un entorno ergonómico que facilite la investigación y el desarrollo de nuevas técnicas de cuantización. Además, se implementaran un cuantizador uniforme y un cuantizador flexible, ambos con parámetros entrenables, permitiendo no solo la cuantización durante el entrenamiento para mejorar la adaptación de los pesos del modelo, sino también el entrenamiento de los propios parámetros de cuantización. \\
+
+En el caso del cuantizador uniforme, el rango de cuantización será un parámetro entrenable. Para el cuantizador flexible, lo seran tanto los niveles, como sus umbrales. El cuantizador flexible implementará una técnica novedosa en la que se combinaran las virtudes de un cuantizador uniforme y un cuantizador no uniforme, buscando optimizar la relación de compromiso entre precisión y eficiencia computacional. \\
+
+La librería permitirá aplicar los esquemas tanto al momento de definir los modelos como a cualquier modelo ya definido. Además, permitirá generar esquemas de cuantización mixtos, donde cada capa podrá tener un cuantizador diferente con su propia configuración, y también vincular la cuantización de una capa con la de otra. De esta manera, la herramienta facilitará la exploración y experimentación con diferentes esquemas de cuantización. \\
+
+Este trabajo no abordará la implementación en hardware especializado ni la optimización a nivel de compiladores o aceleradores específicos. Asimismo, no se realizará el ajuste de hiperparámetros de los modelos. \\
+
+
+\subsection*{Metodología general}
+El desarrollo de este trabajo se dividirá en varias etapas:
+\begin{enumerate}
+    \item \textbf{Investigación del estado del arte}
+    \begin{enumerate}
+        \item Revisión de literatura sobre técnicas de cuantización existentes incluyendo cuantización uniforme y no uniforme, así como métodos de cuantización durante el entrenamiento (QAT) y post-entrenamiento (PTQ).
+        \item Análisis de herramientas y bibliotecas disponibles, como \texttt{Tensorflow Model Optimization} y \texttt{Torch Quantization}, para identificar limitaciones en términos de flexibilidad y configurabilidad.
+    \end{enumerate}
+    \item \textbf{Diseño e implementación}
+    \begin{enumerate}
+        \item Desarrollo de las utilidades necesarias para incorporar cuantizadores nuevos a las librerías existentes
+        \item Desarrollo de los métodos de cuantización adaptada a la librería elegida, compatible con quantization aware training.
+        \item Desarrollo de herramientas para la evaluación del correcto funcionamiento, test unitarios, herramientas gráficas.
+    \end{enumerate}
+    \item \textbf{Evaluación y comparación de resultados}
+    \begin{enumerate}
+        \item {Métricas clave}
+        \begin{enumerate}
+            \item Tamaño del modelo.
+            \item Precisión del modelo entrenado.
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+
+\section*{Cronograma de actividades}
+
+{
+    \color{gray}
+    \scriptsize
+    En esta sección se debe presentar un plan de actividades tentativo, estimando los plazos de ejecución de cada parte. \\
+}
+
+\input{plan/cronograma.tex}
+
+\section*{Carga horaria asignada a tareas en el campo de desempeño}
+La carga horaria es la reglamentaria para la realización de la tesis. \\
+
+\section*{Fecha estimada de inicio y finalización}
+Inicio el primer cuatrimestre de 2024 y finalización el primer cuatrimestre de 2025. \\
+
+\section*{Bibliografía}
+\printbibliography
+
+\end{document}

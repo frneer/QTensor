@@ -1,12 +1,13 @@
-\documentclass[]{article}
+\documentclass[11pt]{article}
 
 % Page layout
-\usepackage[a4paper, lmargin=10mm, rmargin=10mm, tmargin=17mm, bmargin=30mm]{geometry}
+\usepackage[a4paper]{geometry}
 
 % Writing definitions
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}  % Set language to Spanish
 \usepackage[]{biblatex}
+\usepackage{csquotes}
 \addbibresource{/workspace/references.bib}
 
 % Extras
@@ -34,6 +35,15 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
+\usepackage{bbm}
+
+% Tikz
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows, positioning, quotes}
+\usetikzlibrary{arrows.meta, positioning, decorations.markings}
+
+% Allow saying
+\usepackage{dirtytalk}
 
 % Custom commands
 \input{commands}
@@ -47,21 +57,50 @@
 \newpage
 
 \section{Objetivos}
-
+\label{sec:objetivos}
+\input{sections/objetivos}
 \section{Introducción}
-\subsection{Redes Neuronales y Backpropagation}
-\subsection{Compresión (en general)}
-\subsubsection{Quantización}
+\subsection{Modelado de sistemas}
+\label{sec:modelado_de_sistemas}
+\input{sections/linear_regression}
+\subsection{Redes Neuronales} % backpropagation
+\label{sec:redes_neuronales}
+\input{sections/redes_neuronales}
+\subsection{Compresión} % en general
+\label{sec:compresion}
+\input{sections/compresion}
+Reducir la complejidad de los parametros, complejidad espacial.
+Reducir la cantidad de operaciones matematicos. (cambiar tmb en el plan)
+\subsection{Compresión de redes neuronales}
+\label{sec:compresion_de_redes}
+\input{sections/compresion_de_redes}
+\subsubsection{Cuantización}
+
+
 \subsubsection{Quantization Aware Training}
-\subsubsection{Codificación de Huffman}
-\subsection{Compresión de redes}
 \section{Desarrollo}
 \subsection{Quantizadores}
 \subsubsection{Quantizador uniforme}
 \label{sec:uniform}
 \input{sections/uniform}
 \subsubsection{Quantizador flexible}
+\subsubsection{Codificación de Huffman (cita o explicarla en un apendice)}
+% Solo reduce la cantidad de datos es si usas huffman para la codificacion de estos parametros
+% Si utilizo una codificacion binaria de los datos no logras compresion
+\label{sec:flex}
+\input{sections/flex}
 \section{Resultados}
+% Resultado de la MLP, LENTE, otras redes
+% MobileNet va peola
+% VGG16 tmb se va anotar mucho algo
+% Cuadro comparativo de perf
+% https://www.tensorflow.org/model_optimization/guide/clustering#image_classification
+% Base FP32
+% Cuantizacion wheigh clustering? Sigue siendo punto fijo
+% Uniforme y para todas las capas misma config (no mixed-precision). Achica pero pierde mucha accuracy
+% Uniforme mixed-precision Buen balance entre compresion y accuracy
+% Flexible mixed-precision - Mejora ambas, con misma perdida de accuracy redes mas chicas. (o mens tamano mejor accuracy)
+% buscar PARETO front https://en.wikipedia.org/wiki/Pareto_front
 \section{Conclusiones}
 \section{Trabajos Futuros}
 \section{Agradecimientos}

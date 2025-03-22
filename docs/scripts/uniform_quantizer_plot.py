@@ -5,7 +5,7 @@ import numpy as np
 
 
 def main():
-    plot_ste = True
+    plot_ste = False
     name = "q_ste" if plot_ste else "q"
     bits = 3
     alpha = 1
@@ -28,10 +28,10 @@ def main():
 
     plt.figure()
     # Generate the box of lenght alpha)
-    plt.axvline(x=-alpha, color="red", linestyle="--", alpha=step)
-    plt.axhline(y=-alpha, color="red", linestyle="--", alpha=step)
-    plt.axvline(x=alpha, color="red", linestyle="--", alpha=step)
-    plt.axhline(y=alpha, color="red", linestyle="--", alpha=step)
+    plt.axvline(x=-alpha, color="red", linestyle="--", alpha=0.5)
+    plt.axhline(y=-alpha, color="red", linestyle="--", alpha=0.5)
+    plt.axvline(x=alpha, color="red", linestyle="--", alpha=0.5)
+    plt.axhline(y=alpha, color="red", linestyle="--", alpha=0.5)
 
     # Generate the quantization funcion q(x; alpha)
     plt.step(
@@ -90,8 +90,8 @@ def main():
     ax = plt.gca()
     ax.set_xticks(np.arange(-0.75, 0.75 + step, step), minor=True)
     ax.set_yticks(np.arange(-0.75, 0.75 + step, step), minor=True)
-    plt.grid(which="both")
-    plt.legend(loc="upper left", fontsize=10)
+    plt.grid(which="both", alpha=0.3, linestyle=":")
+    # plt.legend(loc="upper left", fontsize=10)
 
     plt.savefig(f"../pics/quantizers/uniform/{name}.png")
 

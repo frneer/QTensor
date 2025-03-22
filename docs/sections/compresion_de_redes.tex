@@ -1,0 +1,11 @@
+La compresión de redes neuronales es también un proceso que consiste en reducir el tamaño de los datos, preservando lo mejor posible su performance. La misma, es usada tanto para reducir el espacio de almacenamiento necesario como el tiempo de inferencia. \\
+
+Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son: \\
+
+\begin{itemize}
+    \item \textbf{Compartición de pesos (Weight Sharing):} Se agrupan los pesos de la red en un conjunto reducido de valores, permitiendo una representación más compacta sin afectar demasiado la capacidad de generalización.
+    \item \textbf{Poda (Weight Pruning):} Se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, reduciendo la cantidad de parámetros sin afectar significativamente la precisión del modelo.
+    \item \textbf{Cuantización (Quantization):} Se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia.
+    \item \textbf{Descomposición tensorial (Tensor Decomposition):} Se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de operaciones necesarias durante la inferencia.
+    \item \textbf{Destilación de conocimiento (Knowledge Distillation):} Se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), transfiriendo la información esencial en una forma más compacta.
+\end{itemize}

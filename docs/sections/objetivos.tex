@@ -1,0 +1,20 @@
+La comprensión de redes neuronales es un campo de estudio que ha tomado relevancia en los últimos años, en un contexto donde las arquitecturas de redes son cada vez más complejas y con un claro incremento en su cantidad de parametros surge la necesidad de reducir el tamaño de las mismas para su implementación en dispositivos con recursos limitados (principalmente dispositivos mobiles) y tambien simplemente en la busqueda que utilizen menos recursos de dispositivos mas complejos. Principalmente, se busca una reducción en la memoria y en la cantidad de operaciones de punto flotante (FLOPs) necesarias para realizar la inferencia, sin sacrificar la precisión de la red. \\
+
+Existen diversas tecnicas de compresion que seran explicadas en la seccion \ref{sec:compresion_de_redes}. Este trabajo se enfoca en la \textbf{cuantización} de redes neuronales. Que consiste en reducir la cantidad de bits utilizados para representar los parámetros de la red. \\
+
+La cuantización provee mejoras reduciendo tanto el tamaño como la latencia, ya que al representar los tensores en una precisión reducida, disminuye el tamaño de la red, y permitiendo el uso de operaciones vectoriales altamente eficientes en determinados dispositivos. Sin embargo, la comprensión puede afectar la precisión de la red, por ende se debe elegir cuidadosamente el esquema y los parametros adecuados para mantener la precisión de la red. \\
+
+Existen diversos esquemas de cuantización, entre los que se encuentran la cuantización uniforme, no uniforme, entre otras. En este trabajo se propone e implementa una cuantización flexible, que se adapta a la distribución de los parametros de la red. \\
+
+Existen dos formas de aplicacion de la cuantización a una red, la \textbf{cuantización post-entrenamiento} (\texttt{PTQ} por sus siglas en inglés) y la \textbf{cuantización durante el entrenamiento} (\texttt{QAT}). \texttt{PTQ} consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizar los parámetros de la red a un número menor de bits. \texttt{QAT} consiste en entrenar la red neuronal emulando la cuantización en la inferencia, pero manteniendo la resolución de los parámetros en punto flotante para realizar backpropagation, esto permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. \\
+
+El objetivo principal de esta tesis es el diseño, implementación y evaluación de una librería de python compatible con Keras que permita el entrenamiento de redes neuronales con cuantización durante el entrenamiento, inyectar diversos esquemas de cuantización y que sea facilmente aplicable a cualquier red previamente definida. Para lograr este objetivo, se plantean los siguientes objetivos específicos:
+
+\begin{itemize}
+    \item Diseñar e implementar una librería que permita entrenar redes neuronales con cuantización durante el entrenamiento basada en TensorFlow y Keras.
+    \item Implementar un esquema de cuantización uniforme.
+    \item Implementar un esquema de cuantización flexible.
+    \item Desarrollar ejemplos con arquitecturas de redes neuronales del estado del arte y evaluar el rendimiento de la librería.
+\end{itemize}
+
+% Los requerimientos funcionales y no funcionales de la libreria son:...
