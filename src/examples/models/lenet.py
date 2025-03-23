@@ -49,6 +49,30 @@ simple_qconfig = {
         },
     }
 
+simple_qconfig_uniform = {
+        "conv2d": {
+            "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+            "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+        },
+        "conv2d_1": {
+            "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+            "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+        },
+        "dense": {
+            "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+            "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+        },
+        "dense_1": {
+            "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+            "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+        },
+        "dense_2": {
+            "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+            "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+        },
+    }
+
 qconfigs = {
-    "qconfig": simple_qconfig
+    "qconfig": simple_qconfig,
+    "uniform": simple_qconfig_uniform
 }

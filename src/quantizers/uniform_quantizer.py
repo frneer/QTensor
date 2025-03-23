@@ -87,6 +87,10 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
     def levels(self):
         """Compute the quantization levels."""
         start = -self.alpha if self.signed else 0
+        #tf.debugging.assert_all_finite(self.alpha, "Alpha contains NaNs or Infs!")
+        #tf.debugging.assert_greater(self.m_levels, 0, message="m_levels must be > 0")
+
+        tf.keras.backend.eval(f"start={start}, range={self.range()}, delta={self.delta()}")
         return tf.range(start, start + self.range(), self.delta())
 
     @tf.custom_gradient
