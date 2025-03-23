@@ -28,15 +28,16 @@ def main(args):
 
     dataset_module_name = f"datasets.{args.dataset}"
     dataset_module = importlib.import_module(dataset_module_name)
-    (x_train, y_train), (x_test, y_test) = dataset_module.generate_dataset()
+    train_dataset, val_dataset, test_dataset = dataset_module.generate_dataset(args.batch_size)
 
    # Pretrain the model to get a baseline
+    train_dataset.batch(args.pre_training_batch_size)
+    val_dataset.batch(args.pre_training_batch_size)
     model.fit(
-        x_train,
-        y_train,
+        train_dataset,
         epochs=args.pre_training_epochs,
         batch_size=args.pre_training_batch_size,
-        validation_data=(x_test, y_test),
+        validation_data=val_dataset
     )
 
     # Apply quantization
@@ -46,27 +47,35 @@ def main(args):
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
+    print(qmodel.summary())
+    print(f"qweights: {[w.name for w in qmodel.layers[1].weights]}")
+    # print(f"qactivations: {[w.name for w in qmodel.layers[1].weights]}")
 
     callback_tuples = [(CaptureWeightCallback(qlayer), qconfig[layer.name]) for layer, qlayer in zip(model.layers, qmodel.layers) if layer.name in qconfig]
 
-    qmodel.fit(
-        x_train,
-        y_train,
+    train_dataset.batch(args.batch_size)
+    val_dataset.batch(args.batch_size)
+    hist = qmodel.fit(
+        train_dataset,
         epochs=args.epochs,
         batch_size=args.batch_size,
-        validation_data=(x_test, y_test),
+        validation_data=val_dataset,
         callbacks=[callback for callback, _ in callback_tuples],
     )
 
     output_dict = {}
+    output_dict["global"] = hist.history
     for callback, qconfig in callback_tuples:
         output_dict[callback.layer.name] = {}
         output_dict[callback.layer.name]["history"] = callback.get_history()
         output_dict[callback.layer.name]["qconfig"] = qconfig
-    with open(args.output_path / "output_dict.pkl", "wb") as f:
+    output_path = Path(args.output_path)
+    output_path.mkdir(parents=True, exist_ok=True)
+    with open(args.output_path / f"{args.model}_{args.qconfig}.pkl", "wb") as f:
         pickle.dump(output_dict, f)
 
-    qmodel.evaluate(x_test, y_test)
+    test_dataset.batch(args.batch_size)
+    qmodel.evaluate(test_dataset)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

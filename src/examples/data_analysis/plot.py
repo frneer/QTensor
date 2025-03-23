@@ -1,19 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-def plot_flex_snapshot(history, accuracy_history, output_path):
+from quantizers.common import min_value, max_value, quantize
+
+def plot_flex_snapshot(layer_name, layer_history, quantizer, accuracy_history, output_path):
     """
     :param accuracy_history: history of the accuracy
     :param history: history of a single layer weights
     """
-    alpha_hist = history["alpha"]
-    level_hist = history["level"]
-    threshold_hist = history["threshold"]
-    accuracy_hist = history["accuracy"]
+    # NOTE(Fran): Big assumption here that the keys are always the same
+    # TODO(Fran): Also it seems activations aren't being stored as model weights
+    # ...
+    alpha_history = layer_history[f"{layer_name}/alpha:0"]
+    level_history = layer_history[f"{layer_name}/levels:0"]
+    threshold_history = layer_history[f"{layer_name}/thresholds:0"]
+    bits = quantizer.bits
+    signed = quantizer.signed
 
     m_levels = 2 ** bits
     for epoch, (alpha, level, threshold, acc) in enumerate(
-        zip(alpha_hist, level_hist, threshold_hist, accuracy_hist)
+        zip(alpha_history, level_history, threshold_history, accuracy_history)
     ):
         plt.figure()
         # Actual levels
@@ -53,11 +60,25 @@ def plot_flex_snapshot(history, accuracy_history, output_path):
         )
         plt.text(
             0.05,
-            0.90,
+            0.85,
             f"Accuracy: {acc:.3f}",
             transform=plt.gca().transAxes,
             fontsize=12,
         )
+        plt.legend(loc="lower right")
 
+        # Ticks and grid configuration
+        plt.yticks(
+            np.linspace(
+                level[0], max_value(alpha, m_levels, signed), m_levels
+            ),
+            labels=[f"" for _ in range(m_levels)],
+        )
+        ax = plt.gca()
+        ax.yaxis.set_tick_params(width=0)
+        plt.grid(which="both", alpha=0.3, linestyle=":")
+
+        output_path = Path(output_path)
+        output_path.mkdir(parents=True, exist_ok=True)
         plt.savefig(output_path / f"epoch_{epoch}.png")
         plt.close()
