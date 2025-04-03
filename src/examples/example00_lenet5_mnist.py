@@ -45,39 +45,43 @@ qconfig = qconfig_flex
 output_path = Path("snapshots")
 
 # Pre-training parameters
-pre_training_learning_rate = 0.001
 pre_training_epochs = 10
-pre_training_batch_size = 32
+pre_training_batch_size = 128
+pre_training_learning_rate = 0.001 * (pre_training_batch_size/256)
 
 # QAT parameters
-learning_rate = 0.0001
-epochs = 10
+epochs = 20
 batch_size = 32
+learning_rate = 0.0001 * (batch_size/256)
 
 if __name__ == "__main__":
 
-
+    # Load Mnist dataset
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    input_shape = (None,) + x_train.shape[1:] + (1,)
+    image_shape = input_shape[1:]
+    categories = 10
 
-    x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
-    x_test = x_test.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+    x_train = x_train.reshape(-1, *image_shape).astype("float32") / 255.0
+    x_test = x_test.reshape(-1, *image_shape).astype("float32") / 255.0
 
-    y_train = to_categorical(y_train, 10)
-    y_test = to_categorical(y_test, 10)
-
-    input_shape = x_train.shape[1:]
+    y_train = to_categorical(y_train, categories)
+    y_test = to_categorical(y_test, categories)
 
     model = models.Sequential()
-    model.add(layers.Conv2D(6, kernel_size=5, activation='relu', input_shape=input_shape, padding='same'))
+    model.add(layers.Conv2D(6, kernel_size=5, activation='relu', padding='same'))
     model.add(layers.AveragePooling2D())
     model.add(layers.Conv2D(16, kernel_size=5, activation='relu'))
     model.add(layers.AveragePooling2D())
     model.add(layers.Flatten())
     model.add(layers.Dense(120, activation='relu'))
     model.add(layers.Dense(84, activation='relu'))
-    model.add(layers.Dense(10, activation='softmax'))
+    model.add(layers.Dense(categories, activation='softmax'))
+
+    model.build(input_shape=input_shape)
 
     print(f"#####################################################")
+    print(f"Summary")
     model.summary(line_length=100)
     print(f"#####################################################\n")
 
