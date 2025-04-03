@@ -31,14 +31,14 @@ qconfig_uniform = {
         "conv2d_1"  : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         "dense"     : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         "dense_1"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
-        #"dense_2"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+        "dense_2"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         }
 qconfig_flex = {
         "conv2d"    : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=2, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         "conv2d_1"  : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=2, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         "dense"     : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=2, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
         "dense_1"   : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=2, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
-        #"dense_2"   : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=2, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+        "dense_2"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, },
         }
 qconfig = qconfig_flex
 
