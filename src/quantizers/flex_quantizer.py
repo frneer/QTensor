@@ -31,6 +31,8 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         bits: int,
         n_levels: int,
         signed: bool = True,
+        name_suffix: str = "",
+        # TODO(Colo): The regularizer and initializer are missing. There should be one for each tf.Variable: thresholds, levels, alpha.
     ):
         """Constructor.
 
@@ -47,6 +49,9 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
 
         self.bits = bits
         self.signed = signed
+        self.name_suffix = name_suffix
+        #self.initializer = initializer #TODO(Colo): Implementation missing
+        #self.regularizer = regularizer #TODO(Colo): Implementation missing
 
         self.n_levels = n_levels
         self.m_levels = 2**self.bits
@@ -58,7 +63,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
 
         alpha = layer.add_weight(
-            "alpha",
+            name=f"{name}{self.name_suffix}_alpha",
             initializer=tf.keras.initializers.Constant(0.1),
             trainable=True,
             dtype=tf.float32,
@@ -68,7 +73,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.alpha = alpha
 
         levels = layer.add_weight(
-            "levels",
+            name=f"{name}{self.name_suffix}_levels",
             initializer=tf.keras.initializers.Constant(
                 np.linspace(
                     min_value(self.alpha, self.signed),
@@ -84,7 +89,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.levels = levels
 
         thresholds = layer.add_weight(
-            "thresholds",
+            name=f"{name}{self.name_suffix}_thresholds",
             initializer=tf.keras.initializers.Constant(
                 np.linspace(
                     min_value(self.alpha, self.signed),
