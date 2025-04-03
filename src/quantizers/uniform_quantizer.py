@@ -65,7 +65,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                 return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
         alpha = layer.add_weight(
-            name.join("_alpha"),
+            name=f"{name}{self.name_suffix}_alpha",
             initializer=self.initializer,
             trainable=True,
             dtype=tf.float32,
