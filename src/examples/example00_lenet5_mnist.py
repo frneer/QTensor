@@ -50,9 +50,9 @@ pre_training_batch_size = 128
 pre_training_learning_rate = 0.001 * (pre_training_batch_size/256)
 
 # QAT parameters
-epochs = 20
-batch_size = 32
-learning_rate = 0.0001 * (batch_size/256)
+qat_epochs = 20
+qat_batch_size = 32
+qat_learning_rate = 0.0001 * (qat_batch_size/256)
 
 if __name__ == "__main__":
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     qmodel = apply_quantization(fmodel, qconfig)
     qmodel.build(input_shape=input_shape)
     qmodel.compile(
-        optimizer=Adam(learning_rate=learning_rate),
+        optimizer=Adam(learning_rate=qat_learning_rate),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
@@ -162,12 +162,12 @@ if __name__ == "__main__":
 
     print(f"#####################################################")
     print(f"QAT")
-    if epochs > 0:
+    if qat_epochs > 0:
         hist = qmodel.fit(
             x_train,
             y_train,
-            epochs=epochs,
-            batch_size=batch_size,
+            epochs=qat_epochs,
+            batch_size=qat_batch_size,
             validation_split=0.1,
             callbacks=[callback for callback, _ in callback_tuples],
         )

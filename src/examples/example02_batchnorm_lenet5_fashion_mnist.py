@@ -12,8 +12,8 @@ from tensorflow.keras.optimizers import Adam
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.datasets import fashion_mnist
-
 from tensorflow.keras.utils import to_categorical
+
 
 import numpy as np
 from pathlib import Path
@@ -21,7 +21,7 @@ from pathlib import Path
 from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
 
-from functions import apply_bn_folding, compute_alpha_dict, apply_alpha_dict
+from functions import apply_bn_folding, compute_alpha_dict, apply_alpha_dict, print_model_weighs
 
 qconfig_uniform = {
         "conv2d"    : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
@@ -42,14 +42,20 @@ qconfig = qconfig_flex
 output_path = Path("snapshots")
 
 # Pre-training parameters
-pre_training_epochs = 30
+pre_training_epochs = 10
 pre_training_batch_size = 128
 pre_training_learning_rate = 0.001 * (pre_training_batch_size/256)
 
+# BN parameters
+post_bnf_epochs = 1
+post_bnf_batch_size = 128
+post_bnf_learning_rate = 0.0005 * (post_bnf_batch_size/256)
+
 # QAT parameters
-epochs = 30
-batch_size = 128
-learning_rate = 0.0001 * (batch_size/256)
+qat_epochs = 200
+qat_batch_size = 32
+qat_learning_rate = 0.0001 * (qat_batch_size/256)
+
 
 if __name__ == "__main__":
 
@@ -86,7 +92,7 @@ if __name__ == "__main__":
     model.build(input_shape=input_shape)
 
     print(f"#####################################################")
-    print(f"Summary")
+    print(f"Model summary")
     model.summary(line_length=100)
     print(f"#####################################################\n")
 
@@ -111,13 +117,27 @@ if __name__ == "__main__":
     loss, accuracy = model.evaluate(x=x_test, y=y_test)
     print(f"#####################################################\n")
 
-    fmodel = apply_bn_folding(model, False)
+    fmodel = apply_bn_folding(model, merge_activation=True)
     fmodel.build(input_shape=input_shape)
     fmodel.compile(
-        optimizer=Adam(learning_rate=pre_training_learning_rate),
+        optimizer=Adam(learning_rate=post_bnf_learning_rate),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
+    print(f"#####################################################")
+    print(f"Post-BNF-Training")
+    if post_bnf_epochs > 0:
+        fmodel.fit(x_train, y_train,
+                   batch_size=post_bnf_batch_size,
+                   epochs=post_bnf_epochs,
+                   validation_split=0.1
+                   )
+    print(f"#####################################################\n")
+
+    print(f"#####################################################")
+    print(f"Folded model summary")
+    fmodel.summary(line_length=100)
+    print(f"#####################################################\n")
 
     print(f"#####################################################")
     print(f"POST BN FOLDING Evaluation")
@@ -133,17 +153,13 @@ if __name__ == "__main__":
     qmodel = apply_quantization(fmodel, qconfig)
     qmodel.build(input_shape=input_shape)
     qmodel.compile(
-        optimizer=Adam(learning_rate=learning_rate),
+        optimizer=Adam(learning_rate=qat_learning_rate),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
 
-
+    # Initialize alpha values
     alpha_dict = compute_alpha_dict(fmodel, x_train)
-
-
-    # ----------------------------
-    # Print the complete alpha_dict with weights and activation alpha values.
     print("#####################################################")
     print("Alpha Dictionary (Weights and Activations)")
     for i, (layer_name, weights_dict) in enumerate(alpha_dict.items()):
@@ -151,28 +167,32 @@ if __name__ == "__main__":
         for key, alpha_value in weights_dict.items():
             print(f"    {key}: {alpha_value}")
     print("#####################################################\n")
-    
-
     qmodel = apply_alpha_dict(qmodel, alpha_dict)
-    
 
+    #print("#####################################################")
+    #print("DEBUG: Model weights")
+    #print_model_weighs(model)
+    #print("--------------------------------")
+    #print_model_weighs(fmodel)
+    #print("--------------------------------")
+    #print_model_weighs(qmodel)
+    #print("#####################################################\n")
 
     print(f"#####################################################")
     print(f"POST QUANTIZATION Evaluation")
     loss, accuracy = qmodel.evaluate(x=x_test, y=y_test)
     print(f"#####################################################\n")
 
-
     callback_tuples = [(CaptureWeightCallback(qlayer), qconfig[layer.name]) for layer, qlayer in zip(model.layers, qmodel.layers) if layer.name in qconfig]
 
     print(f"#####################################################")
     print(f"QAT")
-    if epochs > 0:
+    if qat_epochs > 0:
         hist = qmodel.fit(
             x_train,
             y_train,
-            epochs=epochs,
-            batch_size=batch_size,
+            epochs=qat_epochs,
+            batch_size=qat_batch_size,
             validation_split=0.1,
             callbacks=[callback for callback, _ in callback_tuples],
         )

@@ -15,7 +15,6 @@ from tensorflow.keras.datasets import fashion_mnist
 from tensorflow.keras.utils import to_categorical
 
 
-import tensorflow as tf
 import numpy as np
 from pathlib import Path
 
@@ -23,8 +22,6 @@ from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
 
 from functions import apply_bn_folding, compute_alpha_dict, apply_alpha_dict
-
-
 
 qconfig_uniform = {
         "conv2d"    : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
@@ -54,6 +51,7 @@ epochs = 30
 batch_size = 64
 learning_rate = 0.0001 * (batch_size/256)
 
+
 if __name__ == "__main__":
 
     # Load Fashion Mnist dataset
@@ -81,7 +79,7 @@ if __name__ == "__main__":
     model.build(input_shape=input_shape)
 
     print(f"#####################################################")
-    print(f"Summary")
+    print(f"Model summary")
     model.summary(line_length=100)
     print(f"#####################################################\n")
 
@@ -106,7 +104,7 @@ if __name__ == "__main__":
     loss, accuracy = model.evaluate(x=x_test, y=y_test)
     print(f"#####################################################\n")
 
-    fmodel = apply_bn_folding(model, False)
+    fmodel = apply_bn_folding(model, merge_activation=False)
     fmodel.build(input_shape=input_shape)
     fmodel.compile(
         optimizer=Adam(learning_rate=pre_training_learning_rate),
@@ -133,12 +131,8 @@ if __name__ == "__main__":
         metrics=["accuracy"],
     )
 
-
+    # Initialize alpha values
     alpha_dict = compute_alpha_dict(fmodel, x_train)
-
-
-    # ----------------------------
-    # Print the complete alpha_dict with weights and activation alpha values.
     print("#####################################################")
     print("Alpha Dictionary (Weights and Activations)")
     for i, (layer_name, weights_dict) in enumerate(alpha_dict.items()):
@@ -146,8 +140,6 @@ if __name__ == "__main__":
         for key, alpha_value in weights_dict.items():
             print(f"    {key}: {alpha_value}")
     print("#####################################################\n")
-    
-
     qmodel = apply_alpha_dict(qmodel, alpha_dict)
     
 
@@ -156,7 +148,6 @@ if __name__ == "__main__":
     print(f"POST QUANTIZATION Evaluation")
     loss, accuracy = qmodel.evaluate(x=x_test, y=y_test)
     print(f"#####################################################\n")
-
 
     callback_tuples = [(CaptureWeightCallback(qlayer), qconfig[layer.name]) for layer, qlayer in zip(model.layers, qmodel.layers) if layer.name in qconfig]
 
