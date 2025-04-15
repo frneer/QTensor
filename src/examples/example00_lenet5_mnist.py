@@ -25,6 +25,57 @@ from quantizers.uniform_quantizer import UniformQuantizer
 from functions import apply_bn_folding, compute_alpha_dict, apply_alpha_dict
 
 
+layers = [
+        "conv2d",
+        "conv2d_1",
+        "dense",
+        "dense_1",
+        "dense_2",
+        ]
+
+def gen_uniform_arithmetic_config(kernel=None, bias=None, activation=None):
+    weights_cfg = dict()
+    if kernel:
+        if kernel[0] == 'uq':
+            kbits = kernel[1]
+            weights_cfg['kernel'] = UniformQuantizer(bits=kbits, signed=True) 
+        if kernel[0] == 'fq':
+            kbits = kernel[1]
+            klevels = kernel[2]
+            weights_cfg['kernel'] = FlexQuantizer(bits=kbits, levels=klevels, signed=True) 
+
+    if bias:
+        if bias[0] == 'uq':
+            bbits = bias[1]
+            weights_cfg['bias'] = UniformQuantizer(bits=bbits, signed=True) 
+        if bias[0] == 'fq':
+            bbits = bias[1]
+            blevels = bias[2]
+            weights_cfg['bias'] = FlexQuantizer(bits=bbits, levels=blevels, signed=True) 
+
+    activation_cfg = dict()
+    if activation:
+        if activation[0] == 'uq':
+            abits = activation[1]
+            activation_cfg['activation'] = UniformQuantizer(bits=abits, signed=True) 
+        if activation[0] == 'fq':
+            abits = activation[1]
+            alevels = activation[2]
+            activation_cfg['activation'] = FlexQuantizer(bits=abits, levels=alevels, signed=True) 
+
+    config = dict()
+    for layer in layers:
+        layer_cfg = dict()
+        if weights_cfg:
+            layer_cfg['weights'] = weights_cfg
+        if activation_cfg:
+            layer_cfg['activation'] = activation_cfg
+        config[layer] = layer_cfg
+
+    return config
+
+
+
 
 qconfig_uniform = {
         "conv2d"    : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
