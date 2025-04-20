@@ -21,6 +21,7 @@
 \documentclass{article}
 \usepackage[spanish]{babel}
 \usepackage{charter} % Use the Charter font
+\usepackage{graphicx}  % add this in your preamble
 
 \usepackage{dirtytalk}
 
@@ -95,7 +96,7 @@
 %	LETTER CONTENT
 %----------------------------------------------------------------------------------------
 
-En la Ciudad de Buenos Aires, en el día la fecha, por la  presente acta, el estudiante Francisco Rossi, padrón 99540, de la carrera de Ingeniería Electrónica, y el docente Federico Zacchigna, acuerdan sobre los siguientes puntos:
+En la Ciudad de Buenos Aires, en el día la fecha, por la  presente acta, el estudiante Francisco Rossi, padrón 99540, de la carrera de Ingeniería Electrónica, y los docentes Federico Zacchigna y Celeste Corominas acuerdan sobre los siguientes puntos:
 
 \begin{enumerate}
     \item El plan de estudios correspondientes al ciclo superior de la carrera de los estudiantes.
@@ -106,12 +107,28 @@ Firman en conformidad los arriba mencionados,
 
 \vspace{60pt} % Vertical whitespace
 
----------------------------------------
-\hfill
----------------------------------------
-\\
-Francisco Rossi
-\hfill
-Ing. Federico Zacchigna
+\noindent
+\begin{minipage}[t]{0.3\linewidth}
+    \centering
+	\vspace{0.6cm}
+    \rule{5cm}{0.4pt} \\[0.5cm]
+    Francisco Rossi
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}[t]{0.3\linewidth}
+    \centering
+	\includegraphics[height=3cm]{formalidades/firma_colo.png} \\[0.2cm]
+    \rule{5cm}{0.4pt} \\[0.5cm]
+    Ing. Federico Zacchigna
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}[t]{0.3\linewidth}
+    \centering
+	\includegraphics[height=2cm]{formalidades/firma_celeste.jpg} \\[0.2cm]
+    \rule{5cm}{0.4pt} \\[0.5cm]
+	Ing. María Celeste Corominas
+\end{minipage}
+
+
 
 \end{document}

@@ -21,6 +21,7 @@
 \documentclass{article}
 \usepackage[spanish]{babel}
 \usepackage{charter} % Use the Charter font
+\usepackage{graphicx}  % add this in your preamble
 
 \usepackage[
 	a4paper, % Paper size
@@ -89,7 +90,7 @@
 
 \bigskip
 
-De mi mayor consideración,
+De nuestra mayor consideración,
 
 \bigskip
 
@@ -97,18 +98,33 @@ De mi mayor consideración,
 %	LETTER CONTENT
 %----------------------------------------------------------------------------------------
 
-Tengo el agrado de dirigirme a usted con el fin de presentar conforme al inciso 7 del artículo 1 del anexo a la resolución Nº 1511/90 el acta de acuerdo de Tesis de Ingeniería Electrónica y plan de estudios personales del alumno Francisco Rossi, padrón 99540.
-Manifiesto estar de acuerdo con el plan de estudios y el tema propuesto.
+Tenemos el agrado de dirigirnos a usted con el fin de presentar conforme al inciso 7 del artículo 1 del anexo a la resolución Nº 1511/90 el acta de acuerdo de Tesis de Ingeniería Electrónica y plan de estudios personales del alumno Francisco Rossi, padrón 99540.
+Manifiestamos estar de acuerdo con el plan de estudios y el tema propuesto.
 
 
 \bigskip % Vertical whitespace
 
-Sin otro particular, lo saluda atentamente
+Sin otro particular, lo saludan atentamente
 
 \vspace{100pt} % Vertical whitespace
 
----------------------------------------
-\\
-Ing. Federico Zacchigna
+% Inside your document:
+\noindent
+
+
+\begin{minipage}[t]{0.4\linewidth}
+    \centering
+    \includegraphics[height=3cm]{formalidades/firma_colo.png} \\[0.2cm]
+    \rule{6cm}{0.4pt} \\[0.3cm]
+    Ing. Federico Zacchigna
+\end{minipage}
+\hspace{2cm}
+\begin{minipage}[t]{0.4\linewidth}
+    \centering
+    \includegraphics[height=2cm]{formalidades/firma_celeste.jpg} \\[0.2cm]
+    \rule{6cm}{0.4pt} \\[0.3cm]
+	Ing. María Celeste Corominas
+\end{minipage}
+
 
 \end{document}
