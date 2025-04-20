@@ -29,6 +29,9 @@ cd qtensor
   ```
 > Note: Run `./run.py --help` for extra options
 
+## Contributing
+
+
 ## Working on the thesis article
 
 To run and develop the document with latex, you can compile the file by running `compile.sh`.
@@ -72,8 +75,10 @@ If you use visual studio code as your IDE you can customize it so `ctrl+enter` c
 
 ## How to contribute
 
-Please before pushing, do a linter pass:
+Please before pushing, install pre-commits and run them
 
 ```bash
-./src/linter.sh
+pip install pre-commit==2.20.0
+pre-commit install
+pre-commit run --all-files --verbose --show-diff-on-failure
 ```
