@@ -6,11 +6,28 @@
 
 To get started with QTensor, clone the repository and run:
 
+1. Clone the repo
 ```bash
 git clone https://github.com/username/qtensor.git
 cd qtensor
-docker compose run ./docker/run.sh
 ```
+
+2. Run the docker container
+
+```bash
+./docker/run.sh
+```
+
+3. Run examples
+
+  - Select a model under the [models](./src/examples/models) module, fo example `mlp`.
+  - Select one of the qconfigs associated with the selected model (the available ones are the keys of the `qconfigs` dictionary e.g. for [mlp](./src/examples/models/mlp.py#L20)).
+  - Select a dataset to use to evaluate the model from the [available datasets](./src/examples/datasets/).
+  ```
+  cd src/examples
+  ./run.py --model mlp --qconfig qconfig --dataset mnist`
+  ```
+> Note: Run `./run.py --help` for extra options
 
 ## Working on the thesis article
 
