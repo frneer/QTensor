@@ -1,10 +1,14 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
 
-from quantizers.common import min_value, max_value, quantize
+import matplotlib.pyplot as plt
+import numpy as np
 
-def plot_flex_snapshot(layer_name, layer_history, quantizer, accuracy_history, output_path):
+from quantizers.common import max_value, min_value, quantize
+
+
+def plot_flex_snapshot(
+    layer_name, layer_history, quantizer, accuracy_history, output_path
+):
     """
     :param accuracy_history: history of the accuracy
     :param history: history of a single layer weights
@@ -18,7 +22,7 @@ def plot_flex_snapshot(layer_name, layer_history, quantizer, accuracy_history, o
     bits = quantizer.bits
     signed = quantizer.signed
 
-    m_levels = 2 ** bits
+    m_levels = 2**bits
     for epoch, (alpha, level, threshold, acc) in enumerate(
         zip(alpha_history, level_history, threshold_history, accuracy_history)
     ):

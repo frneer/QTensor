@@ -1,5 +1,7 @@
-from tensorflow.keras.callbacks import Callback
 from typing import Optional
+
+from tensorflow.keras.callbacks import Callback
+
 
 class CaptureWeightCallback(Callback):
     def __init__(self, layer, exclude: Optional[list[str]] = None):

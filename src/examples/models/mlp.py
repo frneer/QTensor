@@ -12,11 +12,9 @@ from quantizers.uniform_quantizer import UniformQuantizer
 
 simple_qconfig = {
     "hidden": {
-        "weights": {"kernel": FlexQuantizer(bits=4, n_levels=10 , signed=True)},
+        "weights": {"kernel": FlexQuantizer(bits=4, n_levels=10, signed=True)},
         "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
     }
 }
 
-qconfigs = {
-    "qconfig": simple_qconfig
-}
+qconfigs = {"qconfig": simple_qconfig}
