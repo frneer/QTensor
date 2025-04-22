@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 import numpy as np
+from tqdm import tqdm
 
 #def apply_bn_folding(model: tf.keras.Model, merge_activation: bool = False) -> tf.keras.Model:
 #    """
@@ -306,81 +307,257 @@ def print_model_weighs(model):
         for v in layer.weights:
             print(f"    weight={v.name}")
 
-def compute_alpha_dict(fmodel, x_train, batch_size=128):
+#def compute_alpha_dict(fmodel, x_train, batch_size=128):
+#
+#    # Assume fmodel and x_train are already defined.
+#    # ----------------------------
+#    # 1. Compute weight alpha values (as before)
+#    alpha_dict = {}
+#    for layer in fmodel.layers:
+#        for v in layer.weights:
+#            # Expected format: "layer_name/weight_type:0"
+#            name_parts = v.name.split("/")
+#            if len(name_parts) == 1 or len(name_parts) == 2:
+#                layer_key = layer.name
+#                # Remove the trailing ":0" from the weight type.
+#                weight_type = name_parts[0].split(":")[0]
+#            if len(name_parts) == 2:
+#                layer_key = name_parts[0]
+#                # Remove the trailing ":0" from the weight type.
+#                weight_type = name_parts[1].split(":")[0]
+#            if len(name_parts) == 0 or len(name_parts) > 2:
+#                assert(False, "Unexpected format: {v.name} -> len(parts)={len(name_parts)}")
+#    
+#            # Compute alpha_value as the maximum of the absolute min and max values.
+#            v_array = v.numpy() if hasattr(v, "numpy") else v
+#            alpha_value = np.max(np.abs([np.max(v_array), np.min(v_array)]))
+#    
+#            # Create the nested dictionary if necessary.
+#            if layer_key not in alpha_dict:
+#                alpha_dict[layer_key] = {}
+#            alpha_dict[layer_key][weight_type] = alpha_value
+#    
+#    # ----------------------------
+#    # 2. Compute activation alpha values using batches
+#    num_samples = x_train.shape[0]
+#    num_batches = int(np.ceil(num_samples / batch_size))
+#    
+#    # Initialize the activation entry for each layer in fmodel.
+#    for layer in fmodel.layers:
+#        layer_key = layer.name
+#        if layer_key not in alpha_dict:
+#            alpha_dict[layer_key] = {}
+#        # Set an initial value of 0 to later update the maximum.
+#        alpha_dict[layer_key]["activation"] = 0
+#
+#        #def has_activation(layer):
+#        #    act = getattr(layer, "activation", None)
+#        #    return act is not None and act != tf.keras.activations.linear
+#        #alpha_dict[layer_key]["has_activation"] = has_activation(layer)
+#    
+#    # Iterate over batches of x_train.
+#    for i in range(num_batches):
+#        # Get a batch of inputs
+#        batch_input = x_train[i * batch_size : (i + 1) * batch_size]
+#        current_activation = batch_input
+#        # Propagate the batch through each layer of the model.
+#        for layer in fmodel.layers:
+#            current_activation = layer(current_activation)
+#            # Compute the maximum absolute activation in the current batch.
+#            current_max = np.max(np.abs(current_activation))
+#            layer_key = layer.name
+#            # Update if this batch has a larger value.
+#            if current_max > alpha_dict[layer_key]["activation"]:
+#                alpha_dict[layer_key]["activation"] = current_max
+#    
+#
+#    return alpha_dict
 
-    # Assume fmodel and x_train are already defined.
+
+#def compute_alpha_dict(fmodel, x_train, batch_size=128):
+#    """
+#    Computes a nested dictionary of alpha values for weights and activations for each layer
+#    of the given model.
+#
+#    The dictionary has the following structure:
+#      {
+#         'layer_name': {
+#              'kernel': <alpha_value from weight>,
+#              'bias': <alpha_value from bias>,
+#              'activation': <alpha_value from activations>
+#         },
+#         ...
+#      }
+#
+#    For activations, the alpha value is computed as the maximum of the absolute values
+#    over the training set. The training data (x_train) can be either a NumPy array or a
+#    tf.data.Dataset.
+#
+#    Parameters:
+#      fmodel: A Keras model whose layers will be used to compute alpha values.
+#      x_train: The training inputs. It can be a NumPy array or a tf.data.Dataset.
+#      batch_size: Batch size to use if x_train is a NumPy array.
+#
+#    Returns:
+#      alpha_dict: The nested dictionary containing computed alpha values.
+#    """
+#    # ----------------------------
+#    # 1. Compute weight alpha values
+#    alpha_dict = {}
+#    for layer in tqdm(fmodel.layers, desc="Computing weight alpha values"):
+#        for v in layer.weights:
+#            # Expected format: "layer_name/weight_type:0" or just "weight_type:0"
+#            name_parts = v.name.split("/")
+#            if len(name_parts) == 1:
+#                layer_key = layer.name
+#                weight_type = name_parts[0].split(":")[0]
+#            elif len(name_parts) == 2:
+#                layer_key = name_parts[0]
+#                weight_type = name_parts[1].split(":")[0]
+#            else:
+#                raise ValueError(f"Unexpected format: {v.name} -> len(parts)={len(name_parts)}")
+#
+#            # Compute alpha_value as the maximum of the absolute minimum and maximum values.
+#            v_array = v.numpy() if hasattr(v, "numpy") else v
+#            alpha_value = np.max(np.abs([np.max(v_array), np.min(v_array)]))
+#
+#            # Create the nested dictionary if necessary.
+#            if layer_key not in alpha_dict:
+#                alpha_dict[layer_key] = {}
+#            alpha_dict[layer_key][weight_type] = alpha_value
+#    
+#    del v_array
+#
+#    # ----------------------------
+#    # 2. Initialize activation entries
+#    for layer in fmodel.layers:
+#        layer_key = layer.name
+#        if layer_key not in alpha_dict:
+#            alpha_dict[layer_key] = {}
+#        # Set an initial value of 0 to later update the maximum.
+#        alpha_dict[layer_key]["activation"] = 0
+#
+#    # Define a helper function to process a batch.
+#    def process_batch(batch_input):
+#        # If the dataset yields a tuple (inputs, labels), take the inputs.
+#        if isinstance(batch_input, (tuple, list)):
+#            batch_input = batch_input[0]
+#        current_activation = batch_input
+#        for layer in fmodel.layers:
+#            current_activation = layer(current_activation)
+#            current_max = np.max(np.abs(current_activation))
+#            layer_key = layer.name
+#            if current_max > alpha_dict[layer_key]["activation"]:
+#                alpha_dict[layer_key]["activation"] = current_max
+#
+#    # ----------------------------
+#    # 3. Compute activation alpha values with progress bar
+#    if isinstance(x_train, tf.data.Dataset):
+#        for batch in tqdm(x_train, desc="Processing activations"):
+#            process_batch(batch)
+#    else:
+#        # Assume x_train is a NumPy array.
+#        num_samples = x_train.shape[0]
+#        num_batches = int(math.ceil(num_samples / batch_size))
+#        for i in tqdm(range(num_batches), desc="Processing activations"):
+#            batch_input = x_train[i * batch_size : (i + 1) * batch_size]
+#            process_batch(batch_input)
+#
+#    return alpha_dict
+import tensorflow as tf
+import numpy as np
+import math
+from tqdm import tqdm
+
+def compute_alpha_dict(fmodel, x_train, batch_size=128):
+    """
+    Computes a nested dictionary of alpha values for weights and activations for each layer
+    of the given model. Alpha values for weights are computed using TensorFlow ops to avoid
+    unnecessary tensor-to-numpy conversions. Activations are computed in a batched and
+    memory-efficient manner via a compiled tf.function.
+    """
     # ----------------------------
-    # 1. Compute weight alpha values (as before)
+    # 1. Compute weight alpha values using TensorFlow operations
     alpha_dict = {}
-    for layer in fmodel.layers:
+    for layer in tqdm(fmodel.layers, desc="Computing weight alpha values"):
         for v in layer.weights:
-            # Expected format: "layer_name/weight_type:0"
+            # Expected format: "layer_name/weight_type:0" or just "weight_type:0"
             name_parts = v.name.split("/")
-            if len(name_parts) == 1 or len(name_parts) == 2:
+            if len(name_parts) == 1:
                 layer_key = layer.name
-                # Remove the trailing ":0" from the weight type.
                 weight_type = name_parts[0].split(":")[0]
-            if len(name_parts) == 2:
+            elif len(name_parts) == 2:
                 layer_key = name_parts[0]
-                # Remove the trailing ":0" from the weight type.
                 weight_type = name_parts[1].split(":")[0]
-            if len(name_parts) == 0 or len(name_parts) > 2:
-                assert(False, "Unexpected format: {v.name} -> len(parts)={len(name_parts)}")
-    
-            # Compute alpha_value as the maximum of the absolute min and max values.
-            v_array = v.numpy() if hasattr(v, "numpy") else v
-            alpha_value = np.max(np.abs([np.max(v_array), np.min(v_array)]))
-    
-            # Create the nested dictionary if necessary.
+            else:
+                raise ValueError(f"Unexpected format: {v.name} -> len(parts)={len(name_parts)}")
+
+            # Compute alpha_value using TF operations: maximum of the absolute maximum and minimum.
+            abs_v = tf.abs(v)
+            max_val = tf.reduce_max(abs_v)
+            # Compute absolute of the minimum
+            min_val = tf.abs(tf.reduce_min(v))
+            alpha_value = max(max_val.numpy(), min_val.numpy())
+
             if layer_key not in alpha_dict:
                 alpha_dict[layer_key] = {}
             alpha_dict[layer_key][weight_type] = alpha_value
-    
+
     # ----------------------------
-    # 2. Compute activation alpha values using batches
-    num_samples = x_train.shape[0]
-    num_batches = int(np.ceil(num_samples / batch_size))
-    
-    # Initialize the activation entry for each layer in fmodel.
+    # 2. Initialize activation entries for each layer.
     for layer in fmodel.layers:
         layer_key = layer.name
         if layer_key not in alpha_dict:
             alpha_dict[layer_key] = {}
-        # Set an initial value of 0 to later update the maximum.
+        # Set an initial activation value of 0.
         alpha_dict[layer_key]["activation"] = 0
 
-        #def has_activation(layer):
-        #    act = getattr(layer, "activation", None)
-        #    return act is not None and act != tf.keras.activations.linear
-        #alpha_dict[layer_key]["has_activation"] = has_activation(layer)
-    
-    # Iterate over batches of x_train.
-    for i in range(num_batches):
-        # Get a batch of inputs
-        batch_input = x_train[i * batch_size : (i + 1) * batch_size]
+    # ----------------------------
+    # 3. Compute activation alpha values using a compiled function for efficiency.
+    @tf.function
+    def get_batch_maxes(batch_input):
         current_activation = batch_input
-        # Propagate the batch through each layer of the model.
+        batch_maxes = []
         for layer in fmodel.layers:
             current_activation = layer(current_activation)
-            # Compute the maximum absolute activation in the current batch.
-            current_max = np.max(np.abs(current_activation))
-            layer_key = layer.name
-            # Update if this batch has a larger value.
-            if current_max > alpha_dict[layer_key]["activation"]:
-                alpha_dict[layer_key]["activation"] = current_max
-    
+            # Compute maximum absolute value for this layer.
+            batch_max = tf.reduce_max(tf.abs(current_activation))
+            batch_maxes.append(batch_max)
+        return batch_maxes
+
+    # Process activations: If x_train is a tf.data.Dataset, iterate over it; otherwise, treat it as a NumPy array.
+    if isinstance(x_train, tf.data.Dataset):
+        for batch in tqdm(x_train, desc="Processing activations"):
+            # If the dataset yields a tuple (inputs, labels), select the inputs.
+            batch_input = batch[0] if isinstance(batch, (tuple, list)) else batch
+            batch_maxes = get_batch_maxes(batch_input)
+            for i, layer in enumerate(fmodel.layers):
+                layer_key = layer.name
+                current_max = batch_maxes[i].numpy()
+                if current_max > alpha_dict[layer_key]["activation"]:
+                    alpha_dict[layer_key]["activation"] = current_max
+    else:
+        num_samples = x_train.shape[0]
+        num_batches = int(math.ceil(num_samples / batch_size))
+        for i in tqdm(range(num_batches), desc="Processing activations"):
+            batch_input = x_train[i * batch_size : (i + 1) * batch_size]
+            batch_maxes = get_batch_maxes(batch_input)
+            for j, layer in enumerate(fmodel.layers):
+                layer_key = layer.name
+                current_max = batch_maxes[j].numpy()
+                if current_max > alpha_dict[layer_key]["activation"]:
+                    alpha_dict[layer_key]["activation"] = current_max
 
     return alpha_dict
 
 
 
 
+
+
+
 def apply_alpha_dict(qmodel, alpha_dict):
-    print("#####################################################")
-    print("Apply alpha values")
-
     for layer in qmodel.layers:
-
         print(f"  Layer: {layer.name}")
         for w in layer.weights:
             print(f"    Weight name: {w.name}")
@@ -401,10 +578,30 @@ def apply_alpha_dict(qmodel, alpha_dict):
                             v.assign(new_alpha)
                             print(f"Updated {v.name} (activation) with new alpha value {new_alpha}")
 
-    print("#####################################################\n")
-
     return qmodel
 
 
+#TODO(Colo): COMPLETE this
 def apply_initial_values(qmodel, initial_values_dict):
     assert(False, "TODO(Colo): Implementation missing -> Some fuctions the heuristically define good initial values for levels and thresholds.")
+
+
+
+
+
+
+
+
+import tensorflow as tf
+
+def report_memory_usage():
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        gpu_name = gpus[0].name.split("/")[-1]  # ✅ get 'GPU:0' from '/physical_device:GPU:0'
+        memory_info = tf.config.experimental.get_memory_info("GPU:0")
+        print(f"  DEBUG: Current GPU memory usage: {memory_info['current'] / (1024 ** 2):.2f} MB")
+        print(f"  DEBUG: Peak GPU memory usage: {memory_info['peak'] / (1024 ** 2):.2f} MB")
+    else:
+        print(f"  DEBUG: No GPU available.")
+
+
