@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """This module implements a uniform quantizer for quantizing weights and
 activations."""
