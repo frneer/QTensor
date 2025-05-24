@@ -9,6 +9,7 @@ from data_collection.callbacks import CaptureWeightCallback
 from tensorflow.keras.optimizers import Adam
 
 from configs.qmodel import apply_quantization
+from utils.metrics import compute_space_complexity_model
 
 
 def main(args):
@@ -49,9 +50,6 @@ def main(args):
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
-    print(qmodel.summary())
-    print(f"qweights: {[w.name for w in qmodel.layers[1].weights]}")
-    # print(f"qactivations: {[w.name for w in qmodel.layers[1].weights]}")
 
     callback_tuples = [
         (CaptureWeightCallback(qlayer), qconfig[layer.name])
@@ -67,6 +65,14 @@ def main(args):
         batch_size=args.batch_size,
         validation_data=val_dataset,
         callbacks=[callback for callback, _ in callback_tuples],
+    )
+
+    qmodel(next(iter(test_dataset))[0])
+    space_complexity = compute_space_complexity_model(qmodel)
+    print(f"Space complexity: {space_complexity / 8 * 1/1024} kB")
+    original_space_complexity = compute_space_complexity_model(model)
+    print(
+        f"Original space complexity: {original_space_complexity / 8 * 1/1024} kB"
     )
 
     output_dict = {}
