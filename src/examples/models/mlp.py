@@ -17,4 +17,14 @@ simple_qconfig = {
     }
 }
 
-qconfigs = {"qconfig": simple_qconfig}
+uniform_qconfig = {
+    "hidden": {
+        "weights": {"kernel": UniformQuantizer(bits=4, signed=True)},
+        "activations": {"activation": UniformQuantizer(bits=4, signed=False)},
+    }
+}
+
+qconfigs = {
+    "simple": simple_qconfig,
+    "uniform": uniform_qconfig,
+}
