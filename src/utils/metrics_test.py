@@ -3,13 +3,13 @@
 import unittest
 
 import tensorflow as tf
-from metrics import (
-    compute_space_complexity_model,
-    compute_space_complexity_quantize,
-)
 
 from configs.qmodel import apply_quantization
 from quantizers.uniform_quantizer import UniformQuantizer
+from utils.metrics import (
+    compute_space_complexity_model,
+    compute_space_complexity_quantize,
+)
 
 
 # From tensorflow internal code
