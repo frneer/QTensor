@@ -4,15 +4,18 @@ FROM tensorflow/tensorflow:2.17.0-gpu AS base
 RUN pip3 install \
     matplotlib \
     scikit-learn \
-    tensorflow-model-optimization
+    tensorflow-model-optimization \
+    kagglehub
 
 # Set backward compatibility for tfmot
 RUN pip3 install tf_keras --no-deps
 ENV TF_USE_LEGACY_KERAS=1
 
 # Install linting tools
+RUN apt-get update && apt-get install -y \
+    git
 RUN pip3 install \
-    pre-commit
+    pre-commit==2.20.0
 
 # User setup
 ARG USERID

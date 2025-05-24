@@ -79,6 +79,7 @@ class GenerateConfig(QuantizeConfig):
             activations_and_quantizers.append(
                 (get_nested_attribute(layer, activation_attribute), quantizer)
             )
+        print(f"AQ: {activations_and_quantizers}")
         return activations_and_quantizers
 
     def set_quantize_activations(
@@ -87,6 +88,7 @@ class GenerateConfig(QuantizeConfig):
         for attribute, quantized_activation in zip(
             self.activations.keys(), quantize_activations
         ):
+            print(f"SA: {attribute} {quantized_activation}")
             set_nested_attribute(layer, attribute, quantized_activation)
 
     def get_output_quantizers(self, layer):

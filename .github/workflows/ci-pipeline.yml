@@ -32,6 +32,8 @@ jobs:
         with:
           cache: pip
 
+      # Install newer version of pre-commit once docformatter is updated to 1.7.6
+      # https://github.com/PyCQA/docformatter/issues/302
       - name: Install python packages
         run: pip install pre-commit==2.20.0
 
