@@ -625,6 +625,51 @@ def report_memory_usage():
 
 
 
+
+
+
+
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
+
+def load_data(dataset):
+
+    if dataset == "mnist":
+        # Load dataset
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+        input_shape = (None,) + x_train.shape[1:] + (1,)
+        image_shape = input_shape[1:]
+        categories = 10
+
+        x_train = x_train.reshape(-1, *image_shape).astype("float32") / 255.0
+        x_test = x_test.reshape(-1, *image_shape).astype("float32") / 255.0
+
+        y_train = to_categorical(y_train, categories)
+        y_test = to_categorical(y_test, categories)
+
+        data = {
+                'x_train' : x_train,
+                'y_train' : y_train,
+                'x_test'  : x_test,
+                'y_test'  : y_test,
+                # TODO(Colo): How to handle data generators
+                # TODO(Colo): How to handle validation data for all cases
+                }
+
+        return data
+
+    else:
+        raise ValueError(f"Unknown dataset: {dataset!r}")
+
+
+
+
+
+
+
+
+
+
 from tensorflow.keras import layers, models
 
 def model_create(params):
@@ -657,13 +702,15 @@ def model_create(params):
         raise ValueError(f"Unknown model_name: {model_name!r}")
 
 
-def model_train(model, params, data):
-    x_train          = data['x_train']
-    y_train          = data['y_train']
+def model_train(model, params):
     learning_rate    = params['learning_rate']
     epochs           = params['epochs']
     batch_size       = params['batch_size']
     validation_split = params['validation_split']
+    dataset          = params['dataset']
+    data             = load_data(dataset)
+    x_train          = data['x_train']
+    y_train          = data['y_train']
     model.compile(
         optimizer=Adam(learning_rate=learning_rate),
         loss='categorical_crossentropy',
@@ -773,9 +820,11 @@ def model_quantize(model, params):
     return model
 
 
-def model_initialize_parameters(model, params, data, ref_model):
+def model_initialize_parameters(model, params, ref_model):
 
     if params['type'] == "alpha":
+        dataset          = params['dataset']
+        data             = load_data(dataset)
         x_train          = data['x_train']
 
         alpha_dict = compute_alpha_dict(ref_model, x_train)
@@ -795,8 +844,9 @@ def model_initialize_parameters(model, params, data, ref_model):
 
 from tensorflow.keras.optimizers import Adam
 
-def run_stage(model, params, other, data=None, ref_model=None):
+def run_stage(model, params, other, ref_model=None):
     stage_type = params['stage_type']
+
 
     if stage_type == 'model_creation':
         func_name   = params['stage_function']
@@ -812,7 +862,7 @@ def run_stage(model, params, other, data=None, ref_model=None):
         func = globals().get(func_name)
         if func is None:
             raise NameError(f"Function '{func_name}' is not defined")
-        return func(model, func_params, data)
+        return func(model, func_params)
 
     elif stage_type == 'model_transformation':
         func_name   = params['stage_function']
@@ -831,7 +881,7 @@ def run_stage(model, params, other, data=None, ref_model=None):
         func = globals().get(func_name)
         if func is None:
             raise NameError(f"Function '{func_name}' is not defined")
-        model = func(model, func_params, data, ref_model)
+        model = func(model, func_params, ref_model)
         return model
 
     else:
@@ -883,4 +933,5 @@ def get_layers_size(model):
             activation_sizes.append(0)
 
     return kernel_sizes, bias_sizes, activation_sizes
+
 

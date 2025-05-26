@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import tensorflow as tf
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import clone_model
 
 
@@ -12,7 +10,7 @@ import hashlib
 import time
 import pickle
 
-from functions import run_stage
+from functions import run_stage, load_data
 
 
 output_path = Path("snapshots")
@@ -32,9 +30,10 @@ stage0_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_create",
             "stage_parameters" : {
+                "dataset"     : "mnist",
+                "input_shape" : [None, 28, 28, 1],
+                "categories"  : 10,
                 "model_name"  : "lenet5_custom",
-                "input_shape" : None, # Needs to be defined
-                "categories"  : None, # Needs to be defined
                 },
             "previous_hash"   : None, # Does not need to be defined as is the first stage
             },
@@ -53,6 +52,9 @@ stage1_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_train",
             "stage_parameters" : {
+                "dataset"          : "mnist",
+                "input_shape"      : [None, 28, 28, 1],
+                "categories"       : 10,
                 "epochs"           : 2,
                 "batch_size"       : 1024,
                 "learning_rate"    : 0.001, #Another option is learning_rate = 0.0001 * (batch_size/256),
@@ -94,6 +96,9 @@ stage3_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_train",
             "stage_parameters" : {
+                "dataset"          : "mnist",
+                "input_shape"      : [None, 28, 28, 1],
+                "categories"       : 10,
                 "epochs"           : 1,
                 "batch_size"       : 32,
                 "learning_rate"    : 0.0005, #Another option is learning_rate = 0.0001 * (batch_size/256),
@@ -116,7 +121,7 @@ stage4_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_quantize",
             "stage_parameters" : {
-                "input_shape" : None, # Needs to be defined
+                "input_shape" : [None, 28, 28, 1],
                 'kernel'      : None, # Needs to be defined
                 'bias'        : [
                     {'type': None},
@@ -150,7 +155,10 @@ stage5_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_initialize_parameters",
             "stage_parameters" : {
-                "type": "alpha",
+                "dataset"     : "mnist",
+                "input_shape" : [None, 28, 28, 1],
+                "categories"  : 10,
+                "type"        : "alpha",
                 },
             "previous_hash"   : None, # Needs to be defined
             },
@@ -169,6 +177,9 @@ stage6_hyperparams = {
             "stage_seed"       : 12345,
             "stage_function"   : "model_train",
             "stage_parameters" : {
+                "dataset"          : "mnist",
+                "input_shape"      : [None, 28, 28, 1],
+                "categories"       : 10,
                 "epochs"           : 2,
                 "batch_size"       : 32,
                 "learning_rate"    : 0.0001, #Another option is learning_rate = 0.0001 * (batch_size/256),
@@ -179,7 +190,7 @@ stage6_hyperparams = {
         "other"      : {
             'print_summary'  : True,
             'model_evaluate' : True,
-            'model_save'     : True, #TODO(Colo): This is set to false, as loading quantize models using tf.keras.models.load_model(...) fails!
+            'model_save'     : True,
             },
         }
 
@@ -198,29 +209,6 @@ stages_hyperparams = [
 
 
 if __name__ == "__main__":
-
-    # Load dataset
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    input_shape = (None,) + x_train.shape[1:] + (1,)
-    image_shape = input_shape[1:]
-    categories = 10
-
-    x_train = x_train.reshape(-1, *image_shape).astype("float32") / 255.0
-    x_test = x_test.reshape(-1, *image_shape).astype("float32") / 255.0
-
-    y_train = to_categorical(y_train, categories)
-    y_test = to_categorical(y_test, categories)
-
-    data = {
-            'x_train' : x_train,
-            'y_train' : y_train,
-            'x_test'  : x_test,
-            'y_test'  : y_test,
-            }
-
-    # Complete the hyperparameters
-    stages_hyperparams[0]['hyperparams']['stage_parameters']['input_shape'] = input_shape
-    stages_hyperparams[0]['hyperparams']['stage_parameters']['categories'] = categories
 
     for bits in range(1,11):
         print(f"Uniform, uniform arithmetic, bits={bits}\n")
@@ -266,7 +254,7 @@ if __name__ == "__main__":
             else:
                 print(f'Checkpoint NOT FOUND (hash={stage_hash}).')
                 save_flag = True
-                model = run_stage(model, hyperparams, other, data, ref_model)
+                model = run_stage(model, hyperparams, other, ref_model)
 
             # If this is not a quantization stage, then save this model as reference model
             if hyperparams['stage_type'] != 'model_quantize':
@@ -281,8 +269,10 @@ if __name__ == "__main__":
 
             # Model evaluation
             if other.get('model_evaluate', False):
+                dataset = hyperparams['stage_parameters']['dataset']
+                data = load_data(dataset)
                 print(f"Stage {i}({hyperparams['stage_name']}): Evaluation")
-                loss, accuracy = model.evaluate(x=x_test, y=y_test)
+                loss, accuracy = model.evaluate(x=data['x_test'], y=data['y_test'])
                 print(f"  → loss={loss:.4f}, acc={accuracy:.4f}")
 
             # Model save
@@ -350,7 +340,7 @@ if __name__ == "__main__":
                 else:
                     print(f'Checkpoint NOT FOUND (hash={stage_hash}).')
                     save_flag = True
-                    model = run_stage(model, hyperparams, other, data, ref_model)
+                    model = run_stage(model, hyperparams, other, ref_model)
 
                 # If this is not a quantization stage, then save this model as reference model
                 if hyperparams['stage_type'] != 'model_quantize':
@@ -365,8 +355,10 @@ if __name__ == "__main__":
 
                 # Model evaluation
                 if other.get('model_evaluate', False):
+                    dataset = hyperparams['stage_parameters']['dataset']
+                    data = load_data(dataset)
                     print(f"Stage {i}({hyperparams['stage_name']}): Evaluation")
-                    loss, accuracy = model.evaluate(x=x_test, y=y_test)
+                    loss, accuracy = model.evaluate(x=data['x_test'], y=data['y_test'])
                     print(f"  → loss={loss:.4f}, acc={accuracy:.4f}")
 
                 # Model save
@@ -436,7 +428,7 @@ if __name__ == "__main__":
             else:
                 print(f'Checkpoint NOT FOUND (hash={stage_hash}).')
                 save_flag = True
-                model = run_stage(model, hyperparams, other, data, ref_model)
+                model = run_stage(model, hyperparams, other, ref_model)
 
             # If this is not a quantization stage, then save this model as reference model
             if hyperparams['stage_type'] != 'model_quantize':
@@ -451,8 +443,10 @@ if __name__ == "__main__":
 
             # Model evaluation
             if other.get('model_evaluate', False):
+                dataset = hyperparams['stage_parameters']['dataset']
+                data = load_data(dataset)
                 print(f"Stage {i}({hyperparams['stage_name']}): Evaluation")
-                loss, accuracy = model.evaluate(x=x_test, y=y_test)
+                loss, accuracy = model.evaluate(x=data['x_test'], y=data['y_test'])
                 print(f"  → loss={loss:.4f}, acc={accuracy:.4f}")
 
             # Model save
@@ -520,7 +514,7 @@ if __name__ == "__main__":
                 else:
                     print(f'Checkpoint NOT FOUND (hash={stage_hash}).')
                     save_flag = True
-                    model = run_stage(model, hyperparams, other, data, ref_model)
+                    model = run_stage(model, hyperparams, other, ref_model)
 
                 # If this is not a quantization stage, then save this model as reference model
                 if hyperparams['stage_type'] != 'model_quantize':
@@ -535,8 +529,10 @@ if __name__ == "__main__":
 
                 # Model evaluation
                 if other.get('model_evaluate', False):
+                    dataset = hyperparams['stage_parameters']['dataset']
+                    data = load_data(dataset)
                     print(f"Stage {i}({hyperparams['stage_name']}): Evaluation")
-                    loss, accuracy = model.evaluate(x=x_test, y=y_test)
+                    loss, accuracy = model.evaluate(x=data['x_test'], y=data['y_test'])
                     print(f"  → loss={loss:.4f}, acc={accuracy:.4f}")
 
                 # Model save
