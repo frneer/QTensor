@@ -225,6 +225,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             "bits": self.bits,
             "signed": self.signed,
             "name_suffix": self.name_suffix,
-            "initializer": self.initializer,
-            "regularizer": self.regularizer,
+            #"initializer": self.initializer, #TODO (Colo): This has to be uncommented when initializer is implemented.
+            #"regularizer": self.regularizer, #TODO (Colo): This has to be uncommented when regularizer is implemented.
         }
+
