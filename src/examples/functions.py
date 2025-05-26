@@ -840,4 +840,47 @@ def run_stage(model, params, other, data=None, ref_model=None):
 
 
 
+import numpy as np
+
+def get_layers_size(model):
+    """
+    For each layer in `model` returns three parallel lists:
+      - kernel_sizes:   # of elements in layer.kernel (or first weight array)
+      - bias_sizes:     # of elements in layer.bias   (or second weight array)
+      - activation_sizes: product of layer.output_shape[1:]
+    
+    Layers without a kernel/bias get size 0 in the corresponding list.
+    Layers with dynamic output shapes (None in dims) also yield 0 activation size.
+    """
+    kernel_sizes = []
+    bias_sizes = []
+    activation_sizes = []
+
+    for layer in model.layers:
+        # inspect weights
+        weights = layer.get_weights()  # list of numpy arrays
+        if len(weights) >= 1:
+            kernel_sizes.append(int(np.prod(weights[0].shape)))
+        else:
+            kernel_sizes.append(0)
+
+        if len(weights) >= 2:
+            bias_sizes.append(int(np.prod(weights[1].shape)))
+        else:
+            bias_sizes.append(0)
+
+        # inspect output shape (may be tuple or list)
+        out_shape = layer.output_shape
+        # out_shape[0] is batch dim; skip it
+        if hasattr(out_shape, "__iter__") and len(out_shape) > 1:
+            dims = out_shape[1:]
+            # only count if all dims are fixed integers
+            if all(isinstance(d, int) for d in dims):
+                activation_sizes.append(int(np.prod(dims)))
+            else:
+                activation_sizes.append(0)
+        else:
+            activation_sizes.append(0)
+
+    return kernel_sizes, bias_sizes, activation_sizes
 
