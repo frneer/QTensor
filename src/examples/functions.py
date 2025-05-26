@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 import numpy as np
+import sys
 from tqdm import tqdm
 
 #def apply_bn_folding(model: tf.keras.Model, merge_activation: bool = False) -> tf.keras.Model:
@@ -479,7 +480,7 @@ def compute_alpha_dict(fmodel, x_train, batch_size=128):
     # ----------------------------
     # 1. Compute weight alpha values using TensorFlow operations
     alpha_dict = {}
-    for layer in tqdm(fmodel.layers, desc="Computing weight alpha values"):
+    for layer in tqdm(fmodel.layers, desc="Computing weight alpha values", file=sys.stdout):
         for v in layer.weights:
             # Expected format: "layer_name/weight_type:0" or just "weight_type:0"
             name_parts = v.name.split("/")
@@ -527,7 +528,7 @@ def compute_alpha_dict(fmodel, x_train, batch_size=128):
 
     # Process activations: If x_train is a tf.data.Dataset, iterate over it; otherwise, treat it as a NumPy array.
     if isinstance(x_train, tf.data.Dataset):
-        for batch in tqdm(x_train, desc="Processing activations"):
+        for batch in tqdm(x_train, desc="Processing activations", file=sys.stdout):
             # If the dataset yields a tuple (inputs, labels), select the inputs.
             batch_input = batch[0] if isinstance(batch, (tuple, list)) else batch
             batch_maxes = get_batch_maxes(batch_input)
@@ -539,7 +540,7 @@ def compute_alpha_dict(fmodel, x_train, batch_size=128):
     else:
         num_samples = x_train.shape[0]
         num_batches = int(math.ceil(num_samples / batch_size))
-        for i in tqdm(range(num_batches), desc="Processing activations"):
+        for i in tqdm(range(num_batches), desc="Processing activations", file=sys.stdout):
             batch_input = x_train[i * batch_size : (i + 1) * batch_size]
             batch_maxes = get_batch_maxes(batch_input)
             for j, layer in enumerate(fmodel.layers):
@@ -558,9 +559,9 @@ def compute_alpha_dict(fmodel, x_train, batch_size=128):
 
 def apply_alpha_dict(qmodel, alpha_dict):
     for layer in qmodel.layers:
-        print(f"  Layer: {layer.name}")
-        for w in layer.weights:
-            print(f"    Weight name: {w.name}")
+        #print(f"  Layer: {layer.name}")
+        #for w in layer.weights:
+        #    print(f"    Weight name: {w.name}")
 
         orig_layer_name = layer.name
         if orig_layer_name.startswith("quant_"):
@@ -573,17 +574,25 @@ def apply_alpha_dict(qmodel, alpha_dict):
                     for v in layer.weights:
                         if "alpha" in v.name and alpha_type in v.name:
                             v.assign(new_alpha)
-                            print(f"Updated {v.name} ({alpha_type}) with new alpha value {new_alpha}")
+                            #print(f"Updated {v.name} ({alpha_type}) with new alpha value {new_alpha}")
                         elif alpha_type == "activation" and "post_activation" in v.name and "alpha" in v.name:
                             v.assign(new_alpha)
-                            print(f"Updated {v.name} (activation) with new alpha value {new_alpha}")
+                            #print(f"Updated {v.name} (activation) with new alpha value {new_alpha}")
 
     return qmodel
 
 
-#TODO(Colo): COMPLETE this
+# TODO(Colo): COMPLETE this
 def apply_initial_values(qmodel, initial_values_dict):
-    assert(False, "TODO(Colo): Implementation missing -> Some fuctions the heuristically define good initial values for levels and thresholds.")
+    """
+    TODO(Colo): Implementation missing.
+    Some functions heuristically define good initial values for levels and thresholds.
+    """
+    raise NotImplementedError(
+        "apply_initial_values is not yet implemented: "
+        "Some functions heuristically define good initial values for levels and thresholds."
+    )
+
 
 
 
@@ -603,5 +612,232 @@ def report_memory_usage():
         print(f"  DEBUG: Peak GPU memory usage: {memory_info['peak'] / (1024 ** 2):.2f} MB")
     else:
         print(f"  DEBUG: No GPU available.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+from tensorflow.keras import layers, models
+
+def model_create(params):
+
+    input_shape = params['input_shape']
+    categories = params['categories']
+    model_name = params['model_name']
+
+    if model_name == "lenet5_custom":
+        model = models.Sequential()
+        model.add(layers.Conv2D(6, kernel_size=5, activation='relu', padding='same'))
+        model.add(layers.AveragePooling2D())
+        model.add(layers.Conv2D(16, kernel_size=5, activation='relu'))
+        model.add(layers.AveragePooling2D())
+        model.add(layers.Flatten())
+        model.add(layers.Dense(120, activation='relu'))
+        model.add(layers.Dense(84, activation='relu'))
+        model.add(layers.Dense(categories, activation='softmax'))
+
+        model.build(input_shape=input_shape)
+
+        model.compile(
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+
+        return model
+
+    else:
+        raise ValueError(f"Unknown model_name: {model_name!r}")
+
+
+def model_train(model, params, data):
+    x_train          = data['x_train']
+    y_train          = data['y_train']
+    learning_rate    = params['learning_rate']
+    epochs           = params['epochs']
+    batch_size       = params['batch_size']
+    validation_split = params['validation_split']
+    model.compile(
+        optimizer=Adam(learning_rate=learning_rate),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    if epochs > 0:
+        model.fit(
+            x_train, y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            validation_split=validation_split
+            # callbacks=[callback for callback, _ in callback_tuples],
+        )
+    return model
+
+
+def model_transform_bnf(model, params):
+    merge_activation = params['merge_activation']
+    model = apply_bn_folding(model, merge_activation=merge_activation)
+    model.compile(
+        loss="categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+    return model
+
+
+from quantizers.flex_quantizer import FlexQuantizer
+from quantizers.uniform_quantizer import UniformQuantizer
+from configs.qmodel import apply_quantization
+
+def model_quantize(model, params):
+
+    kernel      = params['kernel']
+    bias        = params['bias']
+    activations = params['activations']
+
+    # Layers initialization
+    layers = list()
+    supported = ("conv2d", "dense")
+    for layer in model.layers:
+        if any(kw in layer.name for kw in supported):
+            layers.append(layer.name)
+
+    # QConfig initialization
+    qconfig = dict()
+    for layer in layers:
+        qconfig[layer] = dict()
+    for layer in layers:
+        for k in ('weights', 'activations'):
+            qconfig[layer][k] = dict()
+
+    for layer, k, b, a in zip(layers, kernel, bias, activations):
+        # Kernel
+        if k['type'] == "uniform":
+            qconfig[layer]['weights']['kernel'] = UniformQuantizer(bits=k['bits'], signed=True)
+        elif k['type'] == "flexible":
+            qconfig[layer]['weights']['kernel'] = FlexQuantizer(bits=k['bits'], n_levels=k['n_levels'], signed=True)
+        else:
+            pass
+        # Bias
+        if b['type'] == "uniform":
+            qconfig[layer]['weights']['bias'] = UniformQuantizer(bits=b['bits'], signed=True)
+        elif b['type'] == "flexible":
+            qconfig[layer]['weights']['bias'] = FlexQuantizer(bits=b['bits'], n_levels=b['n_levels'], signed=True)
+        else:
+            pass
+        # Arctivations
+        if a['type'] == "uniform":
+            qconfig[layer]['activations']['activation'] = UniformQuantizer(bits=a['bits'], signed=False)
+        elif a['type'] == "flexible":
+            qconfig[layer]['activations']['activation'] = FlexQuantizer(bits=a['bits'], n_levels=a['n_levels'], signed=False)
+        else:
+            pass
+
+    ## For debugging
+    ##for k in qconfig:
+    ##    print(f'DEBUG: {k} -> {qconfig[k]}')
+
+    #qconfig_uniform = {
+    #        "conv2d"    : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "conv2d_1"  : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense"     : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense_1"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense_2"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        }
+    #qconfig_flex = {
+    #        "conv2d"    : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=4, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "conv2d_1"  : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=4, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense"     : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=4, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense_1"   : { "weights": {"kernel": FlexQuantizer(bits=8, n_levels=4, signed=True)}, "activations": {"activation": UniformQuantizer(bits=8 , signed=False)}, },
+    #        "dense_2"   : { "weights": {"kernel": UniformQuantizer(bits=8, signed=True)}, },
+    #        }
+    #qconfig = qconfig_flex
+
+    ## For debugging
+    #print(f"DEBUG: QConfig")
+    #for i, qc in enumerate(qconfig.values()):
+    #    print(f"DEBUG: {i:04d}: {qc}")
+    #print(f"DEBUG: ------------------")
+    model = apply_quantization(model, qconfig)
+    input_shape = params['input_shape']
+    model.build(input_shape=input_shape)
+    model.compile(
+        loss="categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+    return model
+
+
+def model_initialize_parameters(model, params, data, ref_model):
+
+    if params['type'] == "alpha":
+        x_train          = data['x_train']
+
+        alpha_dict = compute_alpha_dict(ref_model, x_train)
+        ## For debugging
+        #print(f"DEBUG: QConfig")
+        #for i, (layer_name, weights_dict) in enumerate(alpha_dict.items()):
+        #    print(f"{i:04d}: {layer_name}")
+        #    for key, alpha_value in weights_dict.items():
+        #        print(f"    {key}: {alpha_value}")
+        model = apply_alpha_dict(model, alpha_dict)
+
+        return model
+
+    else:
+        raise ValueError(f"Unknown type: {type!r}")
+
+
+from tensorflow.keras.optimizers import Adam
+
+def run_stage(model, params, other, data=None, ref_model=None):
+    stage_type = params['stage_type']
+
+    if stage_type == 'model_creation':
+        func_name   = params['stage_function']
+        func_params = params['stage_parameters']
+        func = globals().get(func_name)
+        if func is None:
+            raise NameError(f"Function '{func_name}' is not defined")
+        return func(func_params)
+
+    elif stage_type == 'training':
+        func_name   = params['stage_function']
+        func_params = params['stage_parameters']
+        func = globals().get(func_name)
+        if func is None:
+            raise NameError(f"Function '{func_name}' is not defined")
+        return func(model, func_params, data)
+
+    elif stage_type == 'model_transformation':
+        func_name   = params['stage_function']
+        func_params = params['stage_parameters']
+        func = globals().get(func_name)
+        if func is None:
+            raise NameError(f"Function '{func_name}' is not defined")
+        model = func(model, func_params)
+        return model
+
+    elif stage_type == 'parameter_initialization':
+        if ref_model is None:
+            raise ValueError(f"A reference model (ref_model parameter) must be provided")
+        func_name   = params['stage_function']
+        func_params = params['stage_parameters']
+        func = globals().get(func_name)
+        if func is None:
+            raise NameError(f"Function '{func_name}' is not defined")
+        model = func(model, func_params, data, ref_model)
+        return model
+
+    else:
+        raise ValueError(f"Unknown stage_type: {stage_type!r}")
+
+
+
 
 
