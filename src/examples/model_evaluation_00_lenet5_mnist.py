@@ -36,7 +36,7 @@ stage0_hyperparams = {
                 "input_shape" : None, # Needs to be defined
                 "categories"  : None, # Needs to be defined
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Does not need to be defined as is the first stage
             },
         "other"      : {
             'print_summary'  : False,
@@ -58,7 +58,7 @@ stage1_hyperparams = {
                 "learning_rate"    : 0.001, #Another option is learning_rate = 0.0001 * (batch_size/256),
                 "validation_split" : 0.1,
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
             },
         "other"      : {
             'print_summary'  : False,
@@ -77,7 +77,7 @@ stage2_hyperparams = {
             "stage_parameters" : {
                 "merge_activation" : True,
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
             },
         "other"      : {
             'print_summary'  : False,
@@ -99,7 +99,7 @@ stage3_hyperparams = {
                 "learning_rate"    : 0.0005, #Another option is learning_rate = 0.0001 * (batch_size/256),
                 "validation_split" : 0.1,
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
             },
         "other"      : {
             'print_summary'  : False,
@@ -140,7 +140,7 @@ stage4_hyperparams = {
                     ],
                 },
             },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
         "other"      : {
             'print_summary'  : False,
             'model_evaluate' : False,
@@ -158,7 +158,7 @@ stage5_hyperparams = {
             "stage_parameters" : {
                 "type": "alpha",
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
             },
         "other"      : {
             'print_summary'  : False,
@@ -180,7 +180,7 @@ stage6_hyperparams = {
                 "learning_rate"    : 0.0001, #Another option is learning_rate = 0.0001 * (batch_size/256),
                 "validation_split" : 0.1,
                 },
-            "previous_hash"   : None,
+            "previous_hash"   : None, # Needs to be defined
             },
         "other"      : {
             'print_summary'  : True,
@@ -237,7 +237,6 @@ if __name__ == "__main__":
         other       = v['other']
 
         # Opening message
-        #print(f"#####################################################")
         print(f"Stage {i}({hyperparams['stage_name']}): Start")
 
         # Set previous hash
@@ -291,7 +290,6 @@ if __name__ == "__main__":
 
         # Closing message
         print(f"Stage {i}({hyperparams['stage_name']}): elapsed time = {time.time() - start_time:.2f} seconds")
-        #print(f"#####################################################\n")
         print(f"\n")
 
 
