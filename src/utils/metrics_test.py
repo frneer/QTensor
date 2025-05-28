@@ -297,22 +297,32 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
             vec = np.ones(n)
             return vec / vec.sum()
 
+        def increasing_probability_vector(n, epsilon=1e-8):
+            vec = np.arange(1, n + 1)
+            return vec / vec.sum()
+
         layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
         kernel_bits = [7, 6, 5, 4, 3]
         bias_bits = [3, 4, 5, 6, 7]
-        kernel_n_levels = [25, 12, 13, 5, 2]
-        bias_n_levels = [3, 7, 15, 7, 14]
-        # kernel_n_levels = [2]*5 # TEST: for levels = 2
-        # bias_n_levels   = [2]*5 # TEST: for levels = 2
+        # kernel_n_levels = [25, 12, 13, 5, 2]
+        # bias_n_levels = [3, 7, 15, 7, 14]
+        kernel_n_levels = [2] * 5  # TEST: for levels = 2
+        bias_n_levels = [2] * 5  # TEST: for levels = 2
         kernel_alphas = [1.0] * 5
         bias_alphas = [1.0] * 5
         kernel_probabilities = []
         bias_probabilities = []
         for kl, bl in zip(kernel_n_levels, bias_n_levels):
-            kernel_probabilities.append(random_probability_vector(kl))
-            bias_probabilities.append(random_probability_vector(bl))
-            # kernel_probabilities.append(equal_probability_vector(kl)) # TEST: for levels = 2**bits and equiprobabilities
-            # bias_probabilities.append(equal_probability_vector(bl)) # TEST: for levels = 2**bits and equiprobabilities
+            # kernel_probabilities.append(random_probability_vector(kl))
+            # bias_probabilities.append(random_probability_vector(bl))
+            # kernel_probabilities.append(equal_probability_vector(kl)) # TEST: equiprobabilities
+            # bias_probabilities.append(equal_probability_vector(bl)) # TEST: equiprobabilities
+            kernel_probabilities.append(
+                increasing_probability_vector(kl)
+            )  # TEST: increasing probabilities
+            bias_probabilities.append(
+                increasing_probability_vector(bl)
+            )  # TEST: increasing probabilities
 
         # 1) build a qconfig where every layer's kernel & bias uses a FlexQuantizer
         qconfig = {}
@@ -374,8 +384,10 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 valid_values = np.linspace(-alpha, alpha, num=2**bits + 1)[:-1]
 
                 # 2) pick exactly `n_levels` of them, then sample your weight‐vector
-                values = np.random.choice(
-                    valid_values, size=n_levels, replace=False
+                values = np.sort(
+                    np.random.choice(
+                        valid_values, size=n_levels, replace=False
+                    )
                 )
                 vector = np.random.choice(
                     values, size=size, replace=True, p=probs
@@ -387,13 +399,15 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
 
                 # 3) recompute empirical probabilities from the sampled weights
                 counter = Counter(weight.flatten())
-                total = sum(counter.values())
-                emp_probs = np.array([cnt / total for cnt in counter.values()])
+                sorted_items = sorted(counter.items())
+                counter_keys, counter_values = zip(*sorted_items)
+                emp_probs = np.array(counter_values) / sum(counter_values)
+                print(f"probs={probs}, emp_probs={emp_probs}")
 
                 # 4) entropy and Huffman bits
                 entropy = -np.sum(emp_probs * np.log2(emp_probs))
                 expected_bits += size * entropy
-                # expected_bits += n_levels * bits
+                expected_bits += n_levels * bits
 
                 # 5) sanity checks
                 #    a) all entries are in the valid set
