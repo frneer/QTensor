@@ -23,7 +23,7 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
     if not isinstance(qlayer, QuantizeWrapperV2):
         raise ValueError("Layer is not a QuantizeWrapperV2")
 
-    total_layer_size = 0
+    total_layer_size = 0.0
     qconfig = qlayer.quantize_config
 
     # Assumption: order is the same for layer.weights and get_weights_and_quantizers
@@ -36,13 +36,15 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
             weight_size = weight.shape.num_elements() * quantizer.bits
         elif isinstance(quantizer, FlexQuantizer):
             qweight = quantizer.quantize_op(weight)
-            counter = Counter(qweight.numpy().flatten())
-            total = sum(counter.values())
-            probabilities = np.array(
-                [freq / total for freq in counter.values()]
-            )
-            entropy = -np.sum(probabilities * np.log2(probabilities))
-            weight_size = weight.shape.num_elements() * entropy
+            # counter = Counter(qweight.numpy().flatten())
+            # total = sum(counter.values())
+            # probabilities = np.array(
+            #    [freq / total for freq in counter.values()]
+            # )
+            # entropy = -np.sum(probabilities * np.log2(probabilities))
+            # weight_size = weight.shape.num_elements() * entropy
+            weight_size = compute_huffman_nominal_complexity(qweight)
+            weight_size += quantizer.n_levels * quantizer.bits
         else:
             raise ValueError(f"Unknown quantizer type: {type(quantizer)}")
         total_layer_size += weight_size
@@ -77,7 +79,7 @@ def compute_space_complexity_model(model: tf.keras.Model) -> float:
     """Compute the uniform space complexity of a model based on its
     quantization configuration."""
     total_space_complexity = 0
-    print(model.summary())
+    # print(model.summary())
 
     for layer in model.layers:
         if isinstance(layer, QuantizeWrapperV2):

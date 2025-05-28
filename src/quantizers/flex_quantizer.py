@@ -118,6 +118,15 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
     def quantize_op(self, x):
         # Quantize levels (uniform quantization)
         qlevels = self.delta() * tf.math.floor(self.levels / self.delta())
+        # TODO(Colo): I think we can replace
+        #   `qlevels = self.delta() * tf.math.floor(self.levels / self.delta())`
+        # with
+        #   `qlevels = self.qlevels`
+        # and compute
+        #   `self.qlevels = self.delta() * tf.math.floor(self.levels / self.delta())`
+        # before
+        #   `q = self.quantize_op(x)`
+        # in the `quantize` function.
 
         # Quantize input
         q = tf.zeros_like(x)
