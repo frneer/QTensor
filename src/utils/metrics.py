@@ -77,7 +77,7 @@ def compute_space_complexity_model(model: tf.keras.Model) -> float:
     """Compute the uniform space complexity of a model based on its
     quantization configuration."""
     total_space_complexity = 0
-    print(model.summary())
+    #print(model.summary())
 
     for layer in model.layers:
         if isinstance(layer, QuantizeWrapperV2):
