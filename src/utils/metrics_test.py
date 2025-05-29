@@ -5,16 +5,16 @@ from collections import Counter
 
 import numpy as np
 import tensorflow as tf
-from metrics import (
-    compute_huffman_nominal_complexity,
-    compute_space_complexity_model,
-    compute_space_complexity_quantize,
-)
 from tensorflow.keras import layers, models
 
 from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
+from utils.metrics import (
+    compute_huffman_nominal_complexity,
+    compute_space_complexity_model,
+    compute_space_complexity_quantize,
+)
 
 
 # From tensorflow internal code
