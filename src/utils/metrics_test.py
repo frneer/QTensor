@@ -160,6 +160,46 @@ class TestComputeHuffmanNominalComplexity(unittest.TestCase):
         )
 
 
+def apply_flex_dict(qmodel, alpha_dict, levels_dict, thresholds_dict):
+    """TODO(Colo): This function will is implemented in branch
+    colo/model_evalution in QTensor/src/examples/functions.py.
+
+    When merged, import that functions insted of redefining it here.
+    """
+    for layer in qmodel.layers:
+        orig_layer_name = layer.name
+        if orig_layer_name.startswith("quant_"):
+            orig_layer_name = orig_layer_name[len("quant_") :]
+
+        if orig_layer_name in alpha_dict:
+            for alpha_type in ["kernel", "bias", "activation"]:
+                new_alpha = alpha_dict[orig_layer_name].get(alpha_type, None)
+                new_levels = levels_dict[orig_layer_name].get(alpha_type, None)
+                new_thresholds = thresholds_dict[orig_layer_name].get(
+                    alpha_type, None
+                )
+                if new_alpha is not None:
+                    for v in layer.weights:
+                        if "alpha" in v.name and alpha_type in v.name:
+                            v.assign(new_alpha)
+                            # print(f"Updated {v.name} ({alpha_type}) with new alpha value {new_alpha}")
+                        elif (
+                            alpha_type == "activation"
+                            and "post_activation" in v.name
+                            and "alpha" in v.name
+                        ):
+                            v.assign(new_alpha)
+                            # print(f"Updated {v.name} (activation) with new alpha value {new_alpha}")
+                        if "levels" in v.name and alpha_type in v.name:
+                            v.assign(new_levels)
+                            # print(f"Updated {v.name} ({alpha_type}) with new levels value {new_levels}")
+                        if "thresholds" in v.name and alpha_type in v.name:
+                            v.assign(new_thresholds)
+                            # print(f"Updated {v.name} ({alpha_type}) with new thresholds value {new_thresholds}")
+
+    return qmodel
+
+
 def apply_alpha_dict(qmodel, alpha_dict):
     """TODO(Colo): This function will is implemented in branch
     colo/model_evalution in QTensor/src/examples/functions.py.
@@ -195,7 +235,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
         # build a small LeNet-5 for, say, 10 classes over 28×28×1 inputs
         categories = 10
         input_shape = (None, 28, 28, 1)
-        self.model = models.Sequential(
+        self.model_lenet = models.Sequential(
             [
                 layers.Conv2D(
                     6,
@@ -215,12 +255,39 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 layers.Dense(categories, activation="softmax", name="dense_2"),
             ]
         )
-        self.model.build(input_shape)
+        self.model_lenet.build(input_shape)
+
+        input_shape = (None, 28, 28, 1)
+        self.model_single_conv2d = models.Sequential(
+            [
+                layers.Conv2D(
+                    32,
+                    kernel_size=5,
+                    activation="relu",
+                    padding="same",
+                    name="conv2d",
+                ),
+            ]
+        )
+        self.model_single_conv2d.build(input_shape)
+
+        input_shape = (None, 10)
+        self.model_single_dense = models.Sequential(
+            [
+                layers.Dense(20, activation="relu", name="dense"),
+            ]
+        )
+        self.model_single_dense.build(input_shape)
+
+    def setup_model(self, model):
+        self.model = model
         self.model.compile(
             loss="categorical_crossentropy", metrics=["accuracy"]
         )
         # run one dummy inference so any lazy weights are created
-        self.model(tf.random.normal((1, 28, 28, 1)))
+        input_shape = self.model.input_shape
+        input_shape = (1,) + input_shape[1:]
+        self.model(tf.random.normal(input_shape))
         self.kernel_shape = list()
         self.bias_shape = list()
         self.kernel_size = list()
@@ -234,28 +301,79 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 shape = layer.bias.shape
                 self.bias_shape.append(shape)
                 self.bias_size.append(shape.num_elements())
+        # self.model.summary()
 
-    def test_uniform_quantizer_space_complexity(self):
-        """All weights quantized using uniform quantizer."""
-        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
-        kernel_bits = [7, 6, 5, 4, 3]
-        bias_bits = [3, 4, 5, 6, 7]
-        kernel_alphas = [1.0] * 5
-        bias_alphas = [1.0] * 5
-
-        # 1) define an 8‐bit uniform quantizer on every kernel
+    def gen_qconfig(
+        self,
+        qtype,
+        layer_names,
+        kernel_bits,
+        bias_bits,
+        kernel_n_levels=None,
+        bias_n_levels=None,
+    ):
         qconfig = {}
         for i, layer in enumerate(layer_names):
             qconfig[layer] = dict()
             qconfig[layer]["weights"] = dict()
-            qconfig[layer]["weights"]["kernel"] = UniformQuantizer(
-                bits=kernel_bits[i], signed=True
-            )
-            qconfig[layer]["weights"]["bias"] = UniformQuantizer(
-                bits=bias_bits[i], signed=True
-            )
+        if qtype == "uniform":
+            # 1) define an 8‐bit uniform quantizer on every kernel
+            for i, layer in enumerate(layer_names):
+                qconfig[layer]["weights"]["kernel"] = UniformQuantizer(
+                    bits=kernel_bits[i], signed=True
+                )
+                qconfig[layer]["weights"]["bias"] = UniformQuantizer(
+                    bits=bias_bits[i], signed=True
+                )
+
+        elif qtype == "flexible":
+            # 1) build a qconfig where every layer's kernel & bias uses a FlexQuantizer
+            for i, layer in enumerate(layer_names):
+                qconfig[layer]["weights"]["kernel"] = FlexQuantizer(
+                    bits=kernel_bits[i],
+                    n_levels=kernel_n_levels[i],
+                    signed=True,
+                )
+                qconfig[layer]["weights"]["bias"] = FlexQuantizer(
+                    bits=bias_bits[i], n_levels=bias_n_levels[i], signed=True
+                )
+
+        else:
+            raise ValueError(f"Invalid qtype ({qtype})")
+
+        # DEBUG: Print qconfig
         # for key in qconfig:
         #    print(f'{key}: {qconfig[key]}')
+        return qconfig
+
+    def random_probability_vector(self, n, epsilon=1e-8):
+        vec = np.random.rand(n) + epsilon
+        return vec / vec.sum()
+
+    def equal_probability_vector(self, n):
+        vec = np.ones(n)
+        return vec / vec.sum()
+
+    def increasing_probability_vector(self, n):
+        vec = np.arange(1, n + 1)
+        return vec / vec.sum()
+
+    def base_uniform_quantizer_space_complexity(
+        self,
+        model,
+        layer_names,
+        kernel_bits,
+        bias_bits,
+        kernel_alphas,
+        bias_alphas,
+    ):
+        """All weights quantized using uniform quantizer."""
+
+        self.setup_model(model)
+
+        qconfig = self.gen_qconfig(
+            "uniform", layer_names, kernel_bits, bias_bits
+        )
 
         # 4) compute expected size
         expected_bits = 0
@@ -265,9 +383,11 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
             expected_bits += kb * ks + bb * bs
 
         # 2) apply quantization and build
+        input_shape = self.model.input_shape
         qmodel = apply_quantization(self.model, qconfig)
-        qmodel.build(self.model.input_shape)
-        qmodel(tf.random.normal((1, 28, 28, 1)))
+        qmodel.build(input_shape)
+        input_shape = (1,) + input_shape[1:]
+        qmodel(tf.random.normal(input_shape))
 
         # 3) set alphas
         alpha_dict = {
@@ -280,68 +400,42 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
 
         # 5) Check result
         computed_bits = compute_space_complexity_model(qmodel)
-        print(f"expected_bits={expected_bits}")
-        print(f"computed_bits={computed_bits}")
+        # print(f"DEBUG: expected_bits={expected_bits}")
+        # print(f"DEBUG: computed_bits={computed_bits}")
         self.assertEqual(computed_bits, expected_bits)
 
-    def test_flex_quantizer_space_complexity(self):
+    def base_flex_quantizer_space_complexity(
+        self,
+        model,
+        layer_names,
+        kernel_bits,
+        bias_bits,
+        kernel_n_levels,
+        bias_n_levels,
+        kernel_probabilities,
+        bias_probabilities,
+        kernel_alphas,
+        bias_alphas,
+    ):
         """All weights quantized using flexible quantizer."""
 
-        def random_probability_vector(n, epsilon=1e-8):
-            vec = (
-                np.random.rand(n) + epsilon
-            )  # ensure all elements are strictly > 0
-            return vec / vec.sum()
+        self.setup_model(model)
 
-        def equal_probability_vector(n, epsilon=1e-8):
-            vec = np.ones(n)
-            return vec / vec.sum()
-
-        def increasing_probability_vector(n, epsilon=1e-8):
-            vec = np.arange(1, n + 1)
-            return vec / vec.sum()
-
-        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
-        kernel_bits = [7, 6, 5, 4, 3]
-        bias_bits = [3, 4, 5, 6, 7]
-        # kernel_n_levels = [25, 12, 13, 5, 2]
-        # bias_n_levels = [3, 7, 15, 7, 14]
-        kernel_n_levels = [2] * 5  # TEST: for levels = 2
-        bias_n_levels = [2] * 5  # TEST: for levels = 2
-        kernel_alphas = [1.0] * 5
-        bias_alphas = [1.0] * 5
-        kernel_probabilities = []
-        bias_probabilities = []
-        for kl, bl in zip(kernel_n_levels, bias_n_levels):
-            # kernel_probabilities.append(random_probability_vector(kl))
-            # bias_probabilities.append(random_probability_vector(bl))
-            # kernel_probabilities.append(equal_probability_vector(kl)) # TEST: equiprobabilities
-            # bias_probabilities.append(equal_probability_vector(bl)) # TEST: equiprobabilities
-            kernel_probabilities.append(
-                increasing_probability_vector(kl)
-            )  # TEST: increasing probabilities
-            bias_probabilities.append(
-                increasing_probability_vector(bl)
-            )  # TEST: increasing probabilities
-
-        # 1) build a qconfig where every layer's kernel & bias uses a FlexQuantizer
-        qconfig = {}
-        for i, layer in enumerate(layer_names):
-            qconfig[layer] = dict()
-            qconfig[layer]["weights"] = dict()
-            qconfig[layer]["weights"]["kernel"] = FlexQuantizer(
-                bits=kernel_bits[i], n_levels=kernel_n_levels[i], signed=True
-            )
-            qconfig[layer]["weights"]["bias"] = FlexQuantizer(
-                bits=bias_bits[i], n_levels=bias_n_levels[i], signed=True
-            )
-        # for key in qconfig:
-        #    print(f'{key}: {qconfig[key]}')
+        qconfig = self.gen_qconfig(
+            "flexible",
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+        )
 
         # 2) compute expected total bits
         expected_bits = 0.0
         kernels = []
         biases = []
+        kvvalues = []
+        bvvalues = []
         # pack both “kernel” and “bias” data into a single list of groups
         groups = [
             (
@@ -352,6 +446,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 kernel_alphas,
                 kernel_probabilities,
                 kernels,
+                kvvalues,
             ),
             (
                 self.bias_shape,
@@ -361,6 +456,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 bias_alphas,
                 bias_probabilities,
                 biases,
+                bvvalues,
             ),
         ]
         for (
@@ -371,6 +467,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
             alphas_list,
             probs_list,
             container,
+            vvalues,
         ) in groups:
             for shape, size, bits, n_levels, alpha, probs in zip(
                 shape_list,
@@ -389,6 +486,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                         valid_values, size=n_levels, replace=False
                     )
                 )
+                vvalues.append(values)
                 vector = np.random.choice(
                     values, size=size, replace=True, p=probs
                 )
@@ -402,7 +500,9 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 sorted_items = sorted(counter.items())
                 counter_keys, counter_values = zip(*sorted_items)
                 emp_probs = np.array(counter_values) / sum(counter_values)
-                print(f"probs={probs}, emp_probs={emp_probs}")
+
+                # DEBUG
+                # print(f"DEBUG: probs={probs}, emp_probs={emp_probs}")
 
                 # 4) entropy and Huffman bits
                 entropy = -np.sum(emp_probs * np.log2(emp_probs))
@@ -430,25 +530,513 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
         self.model.set_weights(weights)
 
         # 4) apply quantization & init everything
+        input_shape = self.model.input_shape
         qmodel = apply_quantization(self.model, qconfig)
-        qmodel.build(self.model.input_shape)
-        qmodel(tf.random.normal((1, 28, 28, 1)))
+        qmodel.build(input_shape)
+        input_shape = (1,) + input_shape[1:]
+        qmodel(tf.random.normal(input_shape))
 
         # 5) set alphats
-        alpha_dict = {
-            layer_name: {"kernel": kalpha, "bias": balpha}
-            for layer_name, kalpha, balpha in zip(
-                qconfig, kernel_alphas, bias_alphas
-            )
-        }
-        apply_alpha_dict(qmodel, alpha_dict)
+        # alpha_dict = {
+        #    layer_name: {"kernel": kalpha, "bias": balpha}
+        #    for layer_name, kalpha, balpha in zip(
+        #        qconfig, kernel_alphas, bias_alphas
+        #    )
+        # }
+        alpha_dict = {}
+        levels_dict = {}
+        thresholds_dict = {}
+        for layer_name, kalpha, balpha, k, b in zip(
+            qconfig, kernel_alphas, bias_alphas, kvvalues, bvvalues
+        ):
+            klevels = k
+            blevels = b
+            kthresholds = [-kalpha] + list((k[1:] + k[:-1]) / 2) + [kalpha]
+            bthresholds = [-balpha] + list((b[1:] + b[:-1]) / 2) + [balpha]
+            # print(f'DEBUG: k={k}')
+            # print(f'DEBUG: b={b}')
+            # print(f'DEBUG: k={klevels}')
+            # print(f'DEBUG: b={blevels}')
+            # print(f'DEBUG: k={kthresholds}')
+            # print(f'DEBUG: b={bthresholds}')
+            alpha_dict[layer_name] = {"kernel": kalpha, "bias": balpha}
+            levels_dict[layer_name] = {"kernel": klevels, "bias": blevels}
+            thresholds_dict[layer_name] = {
+                "kernel": kthresholds,
+                "bias": bthresholds,
+            }
+        # for k in alpha_dict:
+        #    print(f'DEBUG: {k}(alpha)     : {alpha_dict[k]}')
+        #    print(f'DEBUG: {k}(levels)    : {levels_dict[k]}')
+        #    print(f'DEBUG: {k}(thresholds): {thresholds_dict[k]}')
+        apply_flex_dict(qmodel, alpha_dict, levels_dict, thresholds_dict)
 
         # 6) compare to your implementation
         computed_bits = compute_space_complexity_model(qmodel)
-        print(f"expected_bits={expected_bits}")
-        print(f"computed_bits={computed_bits}")
+        # print(f"DEBUG: expected_bits={expected_bits}")
+        # print(f"DEBUG: computed_bits={computed_bits}")
         # self.assertEqual(computed_bits, expected_bits)
         self.assertAlmostEqual(computed_bits, expected_bits, places=6)
+
+    def test_uniform_quantizer_space_complexity_single_dense(self):
+        model = self.model_single_dense
+        layer_names = [
+            "dense",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        self.base_uniform_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_uniform_quantizer_space_complexity_single_conv2d(self):
+        model = self.model_single_conv2d
+        layer_names = [
+            "conv2d",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        self.base_uniform_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_uniform_quantizer_space_complexity_lenet(self):
+        model = self.model_lenet
+        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
+        kernel_bits = [7, 6, 5, 4, 3]
+        bias_bits = [3, 4, 5, 6, 7]
+        kernel_alphas = [1.0] * 5
+        bias_alphas = [1.0] * 5
+        self.base_uniform_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_dense_1(self):
+        model = self.model_single_dense
+        layer_names = [
+            "dense",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [2] * 1  # TEST: for levels = 2
+        bias_n_levels = [2] * 1  # TEST: for levels = 2
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_dense_2(self):
+        model = self.model_single_dense
+        layer_names = [
+            "dense",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_dense_3(self):
+        model = self.model_single_dense
+        layer_names = [
+            "dense",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(self.increasing_probability_vector(kl))
+            bias_probabilities.append(self.increasing_probability_vector(bl))
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_dense_4(self):
+        model = self.model_single_dense
+        layer_names = [
+            "dense",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(self.random_probability_vector(kl))
+            bias_probabilities.append(self.random_probability_vector(bl))
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_conv2d_1(self):
+        model = self.model_single_conv2d
+        layer_names = [
+            "conv2d",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [2] * 1  # TEST: for levels = 2
+        bias_n_levels = [2] * 1  # TEST: for levels = 2
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_conv2d_2(self):
+        model = self.model_single_conv2d
+        layer_names = [
+            "conv2d",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_conv2d_3(self):
+        model = self.model_single_conv2d
+        layer_names = [
+            "conv2d",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(self.increasing_probability_vector(kl))
+            bias_probabilities.append(self.increasing_probability_vector(bl))
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_single_conv2d_4(self):
+        model = self.model_single_conv2d
+        layer_names = [
+            "conv2d",
+        ]
+        kernel_bits = [
+            6,
+        ]
+        bias_bits = [
+            4,
+        ]
+        kernel_n_levels = [13] * 1
+        bias_n_levels = [8] * 1
+        kernel_alphas = [1.0] * 1
+        bias_alphas = [1.0] * 1
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(self.random_probability_vector(kl))
+            bias_probabilities.append(self.random_probability_vector(bl))
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_lenet_1(self):
+        model = self.model_lenet
+        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
+        kernel_bits = [7, 6, 5, 4, 3]
+        bias_bits = [3, 4, 5, 6, 7]
+        kernel_n_levels = [2] * 5  # TEST: for levels = 2
+        bias_n_levels = [2] * 5  # TEST: for levels = 2
+        kernel_alphas = [1.0] * 5
+        bias_alphas = [1.0] * 5
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_lenet_2(self):
+        model = self.model_lenet
+        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
+        kernel_bits = [7, 6, 5, 4, 3]
+        bias_bits = [3, 4, 5, 6, 7]
+        kernel_n_levels = [25, 12, 13, 5, 2]
+        bias_n_levels = [3, 7, 15, 7, 14]
+        kernel_alphas = [1.0] * 5
+        bias_alphas = [1.0] * 5
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.equal_probability_vector(kl)
+            )  # TEST: equiprobabilities
+            bias_probabilities.append(
+                self.equal_probability_vector(bl)
+            )  # TEST: equiprobabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_lenet_3(self):
+        model = self.model_lenet
+        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
+        kernel_bits = [7, 6, 5, 4, 3]
+        bias_bits = [3, 4, 5, 6, 7]
+        kernel_n_levels = [25, 12, 13, 5, 2]
+        bias_n_levels = [3, 7, 15, 7, 14]
+        kernel_alphas = [1.0] * 5
+        bias_alphas = [1.0] * 5
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(
+                self.increasing_probability_vector(kl)
+            )  # TEST: increasing probabilities
+            bias_probabilities.append(
+                self.increasing_probability_vector(bl)
+            )  # TEST: increasing probabilities
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
+
+    def test_flex_quantizer_space_complexity_lenet_4(self):
+        model = self.model_lenet
+        layer_names = ["conv2d", "conv2d_1", "dense", "dense_1", "dense_2"]
+        kernel_bits = [7, 6, 5, 4, 3]
+        bias_bits = [3, 4, 5, 6, 7]
+        kernel_n_levels = [25, 12, 13, 5, 2]
+        bias_n_levels = [3, 7, 15, 7, 14]
+        kernel_alphas = [1.0] * 5
+        bias_alphas = [1.0] * 5
+        kernel_probabilities = []
+        bias_probabilities = []
+        for kl, bl in zip(kernel_n_levels, bias_n_levels):
+            kernel_probabilities.append(self.random_probability_vector(kl))
+            bias_probabilities.append(self.random_probability_vector(bl))
+        self.base_flex_quantizer_space_complexity(
+            model,
+            layer_names,
+            kernel_bits,
+            bias_bits,
+            kernel_n_levels,
+            bias_n_levels,
+            kernel_probabilities,
+            bias_probabilities,
+            kernel_alphas,
+            bias_alphas,
+        )
 
 
 if __name__ == "__main__":
