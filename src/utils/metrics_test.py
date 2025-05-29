@@ -400,8 +400,6 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
 
         # 5) Check result
         computed_bits = compute_space_complexity_model(qmodel)
-        # print(f"DEBUG: expected_bits={expected_bits}")
-        # print(f"DEBUG: computed_bits={computed_bits}")
         self.assertEqual(computed_bits, expected_bits)
 
     def base_flex_quantizer_space_complexity(
@@ -501,9 +499,6 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 counter_keys, counter_values = zip(*sorted_items)
                 emp_probs = np.array(counter_values) / sum(counter_values)
 
-                # DEBUG
-                # print(f"DEBUG: probs={probs}, emp_probs={emp_probs}")
-
                 # 4) entropy and Huffman bits
                 entropy = -np.sum(emp_probs * np.log2(emp_probs))
                 expected_bits += size * entropy
@@ -553,29 +548,16 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
             blevels = b
             kthresholds = [-kalpha] + list((k[1:] + k[:-1]) / 2) + [kalpha]
             bthresholds = [-balpha] + list((b[1:] + b[:-1]) / 2) + [balpha]
-            # print(f'DEBUG: k={k}')
-            # print(f'DEBUG: b={b}')
-            # print(f'DEBUG: k={klevels}')
-            # print(f'DEBUG: b={blevels}')
-            # print(f'DEBUG: k={kthresholds}')
-            # print(f'DEBUG: b={bthresholds}')
             alpha_dict[layer_name] = {"kernel": kalpha, "bias": balpha}
             levels_dict[layer_name] = {"kernel": klevels, "bias": blevels}
             thresholds_dict[layer_name] = {
                 "kernel": kthresholds,
                 "bias": bthresholds,
             }
-        # for k in alpha_dict:
-        #    print(f'DEBUG: {k}(alpha)     : {alpha_dict[k]}')
-        #    print(f'DEBUG: {k}(levels)    : {levels_dict[k]}')
-        #    print(f'DEBUG: {k}(thresholds): {thresholds_dict[k]}')
         apply_flex_dict(qmodel, alpha_dict, levels_dict, thresholds_dict)
 
         # 6) compare to your implementation
         computed_bits = compute_space_complexity_model(qmodel)
-        # print(f"DEBUG: expected_bits={expected_bits}")
-        # print(f"DEBUG: computed_bits={computed_bits}")
-        # self.assertEqual(computed_bits, expected_bits)
         self.assertAlmostEqual(computed_bits, expected_bits, places=6)
 
     def test_uniform_quantizer_space_complexity_single_dense(self):
