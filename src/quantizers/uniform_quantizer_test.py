@@ -52,7 +52,9 @@ class TestUniformQuantizer(unittest.TestCase):
             name_suffix="_test",
         )
         weights = quantizer.build(self.input_shape, "test", self.mock_layer)
-        self.assertDictEqual(weights, {"alpha": weights["alpha"]})
+        self.assertDictEqual(
+            weights, {"alpha": weights["alpha"], "levels": weights["levels"]}
+        )
 
     # TODO(Fran): Consider using a fixture here?
     def assert_weights_within_limits(self, bits, signed):
@@ -71,7 +73,7 @@ class TestUniformQuantizer(unittest.TestCase):
         output = quantizer(self.input_tensor, training=True, weights=weights)
 
         # Check that all output values are within the range determined by alpha
-        quantizer_levels = quantizer.levels()
+        quantizer_levels = quantizer.compute_levels()
         min = quantizer_levels[0]
         max = quantizer_levels[-1]
 
@@ -142,9 +144,9 @@ class TestUniformQuantizer(unittest.TestCase):
 
         quantizer.build(self.input_shape, "test", self.mock_layer)
 
-        levels = quantizer.levels()
+        levels = quantizer.compute_levels()
         expected_n_levels = 2**3
-        self.assertEqual(len(levels), expected_n_levels)
+        self.assertEqual(levels.shape.num_elements(), expected_n_levels)
 
         expected_levels = [-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75]
         self.assertListEqual(list(levels), expected_levels)
@@ -161,7 +163,7 @@ class TestUniformQuantizer(unittest.TestCase):
 
         quantizer.build(self.input_shape, "test", self.mock_layer)
 
-        levels = quantizer.levels()
+        levels = quantizer.compute_levels()
         self.assertEqual(levels[0], -1.0)
         self.assertEqual(levels[2], -0.5)
         self.assertEqual(levels[7], 0.75)
@@ -192,7 +194,7 @@ class TestUniformQuantizer(unittest.TestCase):
         # Call the quantizer
         output = quantizer(self.input_tensor, training=True, weights=weights)
         output_set = sorted(set(output.numpy().flatten()))
-        expected_set = list(quantizer.levels())
+        expected_set = list(quantizer.compute_levels())
 
         self.assertListEqual(output_set, expected_set)
 
@@ -221,7 +223,7 @@ class TestUniformQuantizer(unittest.TestCase):
         # Call the quantizer
         output = quantizer(self.input_tensor, training=True, weights=weights)
         output_set = sorted(set(output.numpy().flatten()))
-        expected_set = list(quantizer.levels())
+        expected_set = list(quantizer.compute_levels())
 
         self.assertListEqual(output_set, expected_set)
 

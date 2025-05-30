@@ -31,6 +31,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         bits: int,
         n_levels: int,
         signed: bool = True,
+        name_suffix: str = "",
     ):
         """Constructor.
 
@@ -55,10 +56,12 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.levels = None  # possible output values
         self.thresholds = None  # boundaries between levels
 
+        self.name_suffix = name_suffix
+
     def build(self, tensor_shape, name: str, layer: tf.keras.layers.Layer):
 
         alpha = layer.add_weight(
-            "alpha",
+            name=f"{name}{self.name_suffix}_alpha",
             initializer=tf.keras.initializers.Constant(0.1),
             trainable=True,
             dtype=tf.float32,
@@ -68,7 +71,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.alpha = alpha
 
         levels = layer.add_weight(
-            "levels",
+            name=f"{name}{self.name_suffix}_levels",
             initializer=tf.keras.initializers.Constant(
                 np.linspace(
                     min_value(self.alpha, self.signed),
@@ -84,7 +87,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         self.levels = levels
 
         thresholds = layer.add_weight(
-            "thresholds",
+            name=f"{name}{self.name_suffix}_thresholds",
             initializer=tf.keras.initializers.Constant(
                 np.linspace(
                     min_value(self.alpha, self.signed),
@@ -112,15 +115,18 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
     def delta(self):
         return self.range() / self.m_levels
 
-    @tf.custom_gradient
-    def quantize(self, x, alpha, levels, thresholds):
-        # Capture the values of the parameters
-        self.alpha = alpha
-        self.levels = levels
-        self.thresholds = thresholds
-
+    def quantize_op(self, x):
         # Quantize levels (uniform quantization)
         qlevels = self.delta() * tf.math.floor(self.levels / self.delta())
+        # TODO(Colo): I think we can replace
+        #   `qlevels = self.delta() * tf.math.floor(self.levels / self.delta())`
+        # with
+        #   `qlevels = self.qlevels`
+        # and compute
+        #   `self.qlevels = self.delta() * tf.math.floor(self.levels / self.delta())`
+        # before
+        #   `q = self.quantize_op(x)`
+        # in the `quantize` function.
 
         # Quantize input
         q = tf.zeros_like(x)
@@ -133,6 +139,19 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                 qlevels[i],
                 q,
             )
+
+        return q
+
+    @tf.custom_gradient
+    def quantize(self, x, alpha, levels, thresholds):
+        # Capture the values of the parameters
+        self.alpha = alpha
+        self.levels = levels
+        self.thresholds = thresholds
+
+        q = self.quantize_op(x)
+
+        qlevels = self.delta() * tf.math.floor(self.levels / self.delta())
 
         def grad(upstream):
             ##### dq_dx uses STE #####

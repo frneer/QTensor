@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """This module implements a uniform quantizer for quantizing weights and
 activations."""
@@ -11,6 +11,8 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantizers imp
     Quantizer,
     _QuantizeHelper,
 )
+
+from quantizers.common import delta, max_value, min_value, span
 
 
 class UniformQuantizer(_QuantizeHelper, Quantizer):
@@ -65,29 +67,44 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                 return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
         alpha = layer.add_weight(
-            name.join("_alpha"),
+            name=f"{name}{self.name_suffix}_alpha",
             initializer=self.initializer,
             trainable=True,
             dtype=tf.float32,
             regularizer=self.regularizer,
             constraint=PositiveConstraint(),
         )
+        levels = layer.add_weight(
+            name=f"{name}{self.name_suffix}_levels",
+            trainable=False,
+            shape=(self.m_levels,),
+            dtype=tf.float32,
+        )
         self.alpha = alpha
-        return {"alpha": alpha}
+        self.levels = levels
+
+        return {"alpha": alpha, "levels": levels}
 
     def __call__(self, inputs, training, weights, **kwargs):
         return self.quantize(inputs, weights["alpha"])
 
     def range(self):
-        return 2 * self.alpha if self.signed else self.alpha
+        return span(self.alpha, self.signed)
 
     def delta(self):
-        return self.range() / self.m_levels
+        return delta(self.alpha, self.m_levels, self.signed)
 
-    def levels(self):
+    def compute_levels(self):
         """Compute the quantization levels."""
-        start = -self.alpha if self.signed else 0
+        start = min_value(self.alpha, self.signed)
         return tf.range(start, start + self.range(), self.delta())
+
+    def quantize_op(self, x):
+        clipped_x = tf.clip_by_value(x, self.levels[0], self.levels[-1])
+        delta_v = (
+            2 * self.alpha if self.signed else self.alpha
+        ) / self.m_levels
+        return delta_v * tf.math.floor(clipped_x / delta_v)
 
     @tf.custom_gradient
     def quantize(self, x, alpha):
@@ -97,25 +114,22 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         :param alpha: alpha parameter
         :returns: quantized input tensor
         """
-        # Capture alpha
+        # Store alpha for other methods to use
         self.alpha = alpha
 
-        # Compute quantization levels
-        levels = self.levels()
+        self.levels = self.compute_levels()
 
-        # Clip input values between min and max levels (function is zero outside the range)
-        clipped_x = tf.clip_by_value(x, levels[0], levels[-1])
-
-        # Quantize input values
-        q = self.delta() * tf.math.floor(clipped_x / self.delta())
+        # Use direct parameter passing to avoid graph scope issues
+        q = self.quantize_op(x)
 
         def grad(upstream):
             # Gradient only flows through if the input is within range
-            ## Use STE to estimate the gradient
             dq_dx = tf.where(
                 tf.logical_and(
-                    tf.greater_equal(x, levels[0]),
-                    tf.less_equal(x, levels[-1]),
+                    tf.greater_equal(x, min_value(alpha, self.signed)),
+                    tf.less_equal(
+                        x, max_value(alpha, self.m_levels, self.signed)
+                    ),
                 ),
                 upstream,
                 tf.zeros_like(x),
