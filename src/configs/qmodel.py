@@ -107,11 +107,14 @@ def apply_quantization(model: Model, quantizers: LayerQuantizerDict):
             )
     # TODO(Fran): get below dict objects from the quantizers passed in add method (Constant comes from UniformQuantizer)
     # So maybe if there are custom objects to register each class should have a method to return them
-    custom_objects = {}
-    custom_objects["GenerateConfig"] = GenerateConfig
-    custom_objects["UniformQuantizer"] = UniformQuantizer
-    custom_objects["FlexQuantizer"] = FlexQuantizer
-    custom_objects["Constant"] = Constant
 
     with quantize_scope(custom_objects):
         return quantize_apply(quantize_model(model, quantizers))
+
+
+custom_objects = {
+    "GenerateConfig": GenerateConfig,
+    "UniformQuantizer": UniformQuantizer,
+    "FlexQuantizer": FlexQuantizer,
+    "Constant": Constant,
+}

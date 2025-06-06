@@ -1,9 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 import unittest
 
 from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
     Quantizer,
+)
+from tensorflow_model_optimization.python.core.quantization.keras.utils import (
+    serialize_keras_object,
 )
 
 from configs.generate_config import (
@@ -19,6 +22,13 @@ class GenerateConfigTest(unittest.TestCase):
 
     def setUp(self):
         self.quantizer = unittest.mock.Mock(spec=Quantizer)
+        self.quantizer.get_config.return_value = {
+            "bits": 8,
+            "signed": True,
+            "name_suffix": "_asdasd",
+            "initializer": "Constant",
+            "regularizer": None,
+        }
         self.layer = unittest.mock.Mock()
 
     def test_can_instantiate_generate_config(self):
@@ -103,13 +113,15 @@ class GenerateConfigTest(unittest.TestCase):
             weights={"kernel": self.quantizer},
             activations={"activation": self.quantizer},
         )
-        self.assertDictEqual(
-            config.get_config(),
-            {
-                "weights": {"kernel": self.quantizer},
-                "activations": {"activation": self.quantizer},
+
+        expected_config = {
+            "weights": {"kernel": serialize_keras_object(self.quantizer)},
+            "activations": {
+                "activation": serialize_keras_object(self.quantizer)
             },
-        )
+        }
+
+        self.assertDictEqual(config.get_config(), expected_config)
 
     def test_can_get_config_with_dict(self):
         """Test that verifies that the GenerateConfig can get the
@@ -121,16 +133,19 @@ class GenerateConfigTest(unittest.TestCase):
                 "other": self.quantizer,
             },
         )
-        self.assertDictEqual(
-            config.get_config(),
-            {
-                "weights": {"kernel": self.quantizer, "bias": self.quantizer},
-                "activations": {
-                    "activation": self.quantizer,
-                    "other": self.quantizer,
-                },
+
+        expected_config = {
+            "weights": {
+                "kernel": serialize_keras_object(self.quantizer),
+                "bias": serialize_keras_object(self.quantizer),
             },
-        )
+            "activations": {
+                "activation": serialize_keras_object(self.quantizer),
+                "other": serialize_keras_object(self.quantizer),
+            },
+        }
+
+        self.assertDictEqual(config.get_config(), expected_config)
 
     def test_nested_weight_config(self):
         """Test that verifies that the GenerateConfig can be instantiated with

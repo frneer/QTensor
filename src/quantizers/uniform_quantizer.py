@@ -69,6 +69,7 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         alpha = layer.add_weight(
             name=f"{name}{self.name_suffix}_alpha",
             initializer=self.initializer,
+            # shape=(1,),
             trainable=True,
             dtype=tf.float32,
             regularizer=self.regularizer,
@@ -150,3 +151,17 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
             "initializer": tf.keras.initializers.serialize(self.initializer),
             "regularizer": tf.keras.regularizers.serialize(self.regularizer),
         }
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(
+            bits=config["bits"],
+            signed=config["signed"],
+            name_suffix=config["name_suffix"],
+            initializer=tf.keras.initializers.deserialize(
+                config["initializer"]
+            ),
+            regularizer=tf.keras.regularizers.deserialize(
+                config["regularizer"]
+            ),
+        )
