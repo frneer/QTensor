@@ -15,7 +15,7 @@ import tensorflow as tf
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
 
-from configs.serialization_module.serialization import load_qmodel, save_qmodel
+from configs.serialization.serialization import load_qmodel, save_qmodel
 from utils.metrics import compute_space_complexity_model
 
 

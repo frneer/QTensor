@@ -1,5 +1,7 @@
 # main.py
 
+from functools import partial
+
 import tensorflow as tf
 from functions import FUNCTION_MAP
 
@@ -159,9 +161,19 @@ if __name__ == "__main__":
 
         # The loop's responsibility is to pass the state (model & hash) between stages
         for stage in pipeline:
+            # We need to set the ref model
+            if stage.initial_config["name"] == "alpha_initialization":
+                assert (
+                    ref_model is not None
+                ), "Reference model for alpha initialization is not set."
+                stage.function = partial(stage.function, ref_model=ref_model)
             model, previous_hash = stage.run(
                 input_model=model, previous_hash=previous_hash
             )
+
+            # Save the ref model after the last stage we dont quantize
+            if stage.initial_config["name"] == "pbnf_training":
+                ref_model = tf.keras.models.clone_model(model)
 
             stage.evaluate(model)
             stage.compute_complexity(model)
