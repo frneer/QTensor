@@ -335,12 +335,16 @@ def apply_alpha_dict(q_model, alpha_dict):
     return q_model
 
 
-def model_initialize_parameters(model, **params) -> tf.keras.Model:
+def model_initialize_parameters(model, ref_model, **params) -> tf.keras.Model:
     """Initializes quantization parameters (alphas) using a reference model."""
     print("Function: model_initialize_parameters called")
+    if ref_model is None:
+        raise ValueError(
+            "model_initialize_parameters requires a ref_model, but none was provided."
+        )
     if params["type"] == "alpha":
         data = load_data(params["dataset"])
-        alpha_dict = compute_alpha_dict(model, data["x_train"])
+        alpha_dict = compute_alpha_dict(ref_model, data["x_train"])
         model = apply_alpha_dict(model, alpha_dict)
         return model
     raise ValueError(
