@@ -1,6 +1,3 @@
-from collections import Counter
-
-import numpy as np
 import tensorflow as tf
 from tensorflow_model_optimization.python.core.quantization.keras.quantize_layer import (
     QuantizeLayer,
@@ -11,6 +8,7 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapp
 
 from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
+from utils.huffman import compute_huffman_nominal_complexity
 
 
 def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
@@ -36,13 +34,6 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
             weight_size = weight.shape.num_elements() * quantizer.bits
         elif isinstance(quantizer, FlexQuantizer):
             qweight = quantizer.quantize_op(weight)
-            # counter = Counter(qweight.numpy().flatten())
-            # total = sum(counter.values())
-            # probabilities = np.array(
-            #    [freq / total for freq in counter.values()]
-            # )
-            # entropy = -np.sum(probabilities * np.log2(probabilities))
-            # weight_size = weight.shape.num_elements() * entropy
             weight_size = compute_huffman_nominal_complexity(qweight)
             weight_size += quantizer.n_levels * quantizer.bits
         else:
@@ -50,17 +41,6 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
         total_layer_size += weight_size
 
     return total_layer_size
-
-
-def compute_huffman_nominal_complexity(qweights):
-    """Compute the nominal complexity of a huffman codification of the
-    quantized weights."""
-    N = qweights.shape.num_elements()
-    counter = Counter(qweights.numpy().flatten())
-    total = sum(counter.values())
-    probabilities = np.array([freq / total for freq in counter.values()])
-    entropy = -np.sum(probabilities * np.log2(probabilities))
-    return N * entropy
 
 
 def compute_space_complexity(layer):
@@ -79,7 +59,6 @@ def compute_space_complexity_model(model: tf.keras.Model) -> float:
     """Compute the uniform space complexity of a model based on its
     quantization configuration."""
     total_space_complexity = 0
-    # print(model.summary())
 
     for layer in model.layers:
         if isinstance(layer, QuantizeWrapperV2):

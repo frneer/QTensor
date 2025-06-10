@@ -12,7 +12,7 @@ from tensorflow.keras.utils import to_categorical
 from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
-from utils.utils import VariableHistoryCallback, plot_snapshot
+from utils.plot import VariableHistoryCallback, plot_snapshot
 
 
 def generate_dataset():
