@@ -11,6 +11,10 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantize_confi
 from tensorflow_model_optimization.python.core.quantization.keras.quantizers import (
     Quantizer,
 )
+from tensorflow_model_optimization.python.core.quantization.keras.utils import (
+    deserialize_keras_object,
+    serialize_keras_object,
+)
 
 AttributeQuantizerDict = dict[str, Quantizer | dict[str, Quantizer]]
 
@@ -47,11 +51,29 @@ class GenerateConfig(QuantizeConfig):
 
     def __init__(
         self,
-        weights: AttributeQuantizerDict = {},
-        activations: AttributeQuantizerDict = {},
+        weights: AttributeQuantizerDict = None,
+        activations: AttributeQuantizerDict = None,
     ):
-        self.weights = flatten_nested_dict(weights)
-        self.activations = flatten_nested_dict(activations)
+        self._raw_weights = weights or {}
+        self._raw_activations = activations or {}
+        self.weights = flatten_nested_dict(self._raw_weights)
+        self.activations = flatten_nested_dict(self._raw_activations)
+
+    def _serialize_recursively(self, nested_obj):
+        """Recursively traverses a nested dict and serializes any Keras object
+        (like a Quantizer) it finds."""
+        if isinstance(nested_obj, dict):
+            # If it's a dict, recurse on its values
+            return {
+                key: self._serialize_recursively(value)
+                for key, value in nested_obj.items()
+            }
+        elif hasattr(nested_obj, "get_config"):
+            # Base case: If it's a serializable object (a Quantizer), serialize it.
+            return serialize_keras_object(nested_obj)
+        else:
+            # It's some other primitive type, return it as is.
+            return nested_obj
 
     def get_weights_and_quantizers(
         self, layer: Layer
@@ -93,8 +115,45 @@ class GenerateConfig(QuantizeConfig):
         return []
 
     def get_config(self):
-        return {"weights": self.weights, "activations": self.activations}
+        """Correctly serialize by recursively traversing the nested
+        dictionaries."""
+        return {
+            "weights": self._serialize_recursively(self._raw_weights),
+            "activations": self._serialize_recursively(self._raw_activations),
+        }
 
     @classmethod
     def from_config(cls, config):
-        return cls(**config)
+        """
+        FIX: Use a recursive helper function to deserialize the nested structure
+        before passing it to the constructor.
+        """
+
+        def _deserialize_recursively(nested_config):
+            # Base Case: If the dict is a serialized Keras object, deserialize it.
+            if (
+                isinstance(nested_config, dict)
+                and "class_name" in nested_config
+            ):
+                return deserialize_keras_object(nested_config)
+
+            # Recursive Step: If it's a dict container, recurse on its values.
+            if isinstance(nested_config, dict):
+                return {
+                    key: _deserialize_recursively(value)
+                    for key, value in nested_config.items()
+                }
+
+            # Handle lists of items
+            if isinstance(nested_config, list):
+                return [
+                    _deserialize_recursively(item) for item in nested_config
+                ]
+
+            # It's a primitive type, return as is.
+            return nested_config
+
+        return cls(
+            weights=_deserialize_recursively(config["weights"]),
+            activations=_deserialize_recursively(config["activations"]),
+        )

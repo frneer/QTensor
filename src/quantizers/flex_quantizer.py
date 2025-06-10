@@ -238,7 +238,6 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
         return {
             "bits": self.bits,
             "signed": self.signed,
+            "n_levels": self.n_levels,
             "name_suffix": self.name_suffix,
-            "initializer": self.initializer,
-            "regularizer": self.regularizer,
         }
