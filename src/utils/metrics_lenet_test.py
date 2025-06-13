@@ -6,6 +6,9 @@ from collections import Counter
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapper import (
+    QuantizeWrapperV2,
+)
 
 from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
@@ -14,43 +17,57 @@ from utils.metrics import compute_space_complexity_model
 
 
 def apply_flex_dict(qmodel, alpha_dict, levels_dict, thresholds_dict):
-    """TODO(Colo): This function will is implemented in branch
-    colo/model_evalution in QTensor/src/examples/functions.py.
-
-    When merged, import that functions insted of redefining it here.
-    """
+    """Sets the internal state (alpha, levels, thresholds) of FlexQuantizers
+    within a quantized model by directly finding and assigning to the live
+    tf.Variable objects."""
     for layer in qmodel.layers:
-        orig_layer_name = layer.name
-        if orig_layer_name.startswith("quant_"):
-            orig_layer_name = orig_layer_name[len("quant_") :]
+        if not isinstance(layer, QuantizeWrapperV2):
+            continue
 
+        orig_layer_name = layer.layer.name
         if orig_layer_name in alpha_dict:
-            for alpha_type in ["kernel", "bias", "activation"]:
-                new_alpha = alpha_dict[orig_layer_name].get(alpha_type, None)
-                new_levels = levels_dict[orig_layer_name].get(alpha_type, None)
-                new_thresholds = thresholds_dict[orig_layer_name].get(
-                    alpha_type, None
-                )
-                if new_alpha is not None:
-                    for v in layer.weights:
-                        if "alpha" in v.name and alpha_type in v.name:
-                            v.assign(new_alpha)
-                            # print(f"Updated {v.name} ({alpha_type}) with new alpha value {new_alpha}")
-                        elif (
-                            alpha_type == "activation"
-                            and "post_activation" in v.name
-                            and "alpha" in v.name
-                        ):
-                            v.assign(new_alpha)
-                            # print(f"Updated {v.name} (activation) with new alpha value {new_alpha}")
-                        if "levels" in v.name and alpha_type in v.name:
-                            v.assign(new_levels)
-                            # print(f"Updated {v.name} ({alpha_type}) with new levels value {new_levels}")
-                        if "thresholds" in v.name and alpha_type in v.name:
-                            v.assign(new_thresholds)
-                            # print(f"Updated {v.name} ({alpha_type}) with new thresholds value {new_thresholds}")
+            # Find all variables in the wrapper layer and create a map by name
+            var_map = {v.name: v for v in layer.weights}
 
-    return qmodel
+            # Iterate through the types ('kernel', 'bias') we might want to change
+            for attr_type in ["kernel", "bias"]:
+                new_alpha = alpha_dict.get(orig_layer_name, {}).get(attr_type)
+                new_levels = levels_dict.get(orig_layer_name, {}).get(
+                    attr_type
+                )
+                new_thresholds = thresholds_dict.get(orig_layer_name, {}).get(
+                    attr_type
+                )
+
+                # Construct the expected variable names and assign if they exist
+                if new_alpha is not None:
+                    # Note: TFMOT might name variables slightly differently.
+                    # This searches for common patterns.
+                    for name_pattern in [
+                        f"/{attr_type}_alpha:0",
+                        f"_{attr_type}_alpha:0",
+                    ]:
+                        var_name = layer.name + name_pattern
+                        if var_name in var_map:
+                            var_map[var_name].assign(new_alpha)
+
+                if new_levels is not None:
+                    for name_pattern in [
+                        f"/{attr_type}_levels:0",
+                        f"_{attr_type}_levels:0",
+                    ]:
+                        var_name = layer.name + name_pattern
+                        if var_name in var_map:
+                            var_map[var_name].assign(new_levels)
+
+                if new_thresholds is not None:
+                    for name_pattern in [
+                        f"/{attr_type}_thresholds:0",
+                        f"_{attr_type}_thresholds:0",
+                    ]:
+                        var_name = layer.name + name_pattern
+                        if var_name in var_map:
+                            var_map[var_name].assign(new_thresholds)
 
 
 def apply_alpha_dict(qmodel, alpha_dict):
@@ -418,6 +435,7 @@ class TestLeNetQuantizedComplexity(unittest.TestCase):
                 "bias": bthresholds,
             }
         apply_flex_dict(qmodel, alpha_dict, levels_dict, thresholds_dict)
+        qmodel(tf.random.normal(input_shape))
 
         # 6) compare to your implementation
         computed_bits = compute_space_complexity_model(qmodel)
