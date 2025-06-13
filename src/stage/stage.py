@@ -1,7 +1,8 @@
-# stage.py
+# stage
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import time
@@ -50,10 +51,17 @@ class StageConfig:
     """
 
     name: str
+    function: str
     seed: int
     parameters: Dict[str, Any]
-    # The crucial link: the hash of the stage that came before this one.
     previous_hash: Optional[str] = None
+
+    def to_hash(self) -> str:
+        """Generates a unique hash for this configuration."""
+        # asdict converts the dataclass to a dictionary.
+        # sort_keys ensures the hash is consistent.
+        config_str = json.dumps(asdict(self), sort_keys=True)
+        return hashlib.md5(config_str.encode()).hexdigest()
 
 
 class Stage:
@@ -64,21 +72,11 @@ class Stage:
     ):
         self.function = function
         self.initial_config = initial_config
-        print(f"initial_config: {self.initial_config}")
-        self.config: Optional[StageConfig] = None  # Will be set at runtime
-        self.hash: Optional[str] = None
-        self.checkpoint_dir = Path(
-            "checkpoints"
-        )  # Use a dedicated checkpoint dir
+        self.config: StageConfig = None  # Will be set at runtime
+        self.hash: str = None
+        self.checkpoint_dir = Path("checkpoints")
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.is_quantized = initial_config.get("is_quantized", False)
-
-    def _generate_hash(self) -> str:
-        """Generates a unique hash from the immutable StageConfig."""
-        # asdict converts the dataclass to a dictionary.
-        # sort_keys ensures the hash is consistent.
-        config_str = json.dumps(asdict(self.config), sort_keys=True)
-        return hashlib.md5(config_str.encode()).hexdigest()
 
     def _save_metadata(self):
         """Saves the current stage configuration to a JSON file.
@@ -101,14 +99,17 @@ class Stage:
         if self.hash is None:
             raise ValueError("Hash is not set. Run the stage first.")
 
-        if self.is_quantized:
-            model_path = self.checkpoint_dir / f"{self.hash}"
-            save_qmodel(model, model_path)
-            print(f"Quantized model saved to '{model_path}'")
-        else:
-            model_path = self.checkpoint_dir / f"{self.hash}.keras"
-            model.save(model_path)
-            print(f"Model saved to '{model_path}'")
+        # if self.is_quantized:
+        #     model_path = self.checkpoint_dir / f"{self.hash}"
+        #     save_qmodel(model, model_path)
+        #     print(f"Quantized model saved to '{model_path}'")
+        # else:
+        #     model_path = self.checkpoint_dir / f"{self.hash}.keras"
+        #     model.save(model_path)
+        #     print(f"Model saved to '{model_path}'")
+        model_path = self.checkpoint_dir / f"{self.hash}"
+        save_qmodel(model, model_path)
+        print(f"Model saved to '{model_path}'")
 
     def save(self, model: tf.keras.Model):
         """Saves the model and its configuration to disk.
@@ -135,46 +136,35 @@ class Stage:
         # 1. Create the final, traceable config for this run
         self.config = StageConfig(
             name=self.initial_config["name"],
-            seed=self.initial_config.get(
-                "seed", int(time.time())
-            ),  # Use a seed or timestamp
+            seed=self.initial_config.get("seed", int(time.time())),
+            function=(
+                self.function.__name__
+                if not isinstance(self.function, functools.partial)
+                else self.function.func.__name__
+            ),
             parameters=self.initial_config["kwargs"],
             previous_hash=previous_hash,
         )
 
         # 2. Generate the unique hash for this specific configuration
-        self.hash = self._generate_hash()
-
-        model_path = self.checkpoint_dir / f"{self.hash}"
-        if not self.is_quantized:
-            model_path = self.checkpoint_dir / f"{self.hash}.keras"
-        self.checkpoint_dir / f"{self.hash}.json"
+        self.hash = self.config.to_hash()
 
         print(f"--- Running Stage({self.config.name}) ---")
         print(f"    Hash: {self.hash}")
         print(f"    Depends on: {self.config.previous_hash}")
 
+        model_path = self.checkpoint_dir / f"{self.hash}"
         # 3. Checkpoint logic: If a model with this exact history exists, load it.
         if model_path.exists():
             print(f"    Checkpoint FOUND. Loading model from '{model_path}'")
-            if self.is_quantized:
-                output_model = load_qmodel(model_path)
-            else:
-                output_model = tf.keras.models.load_model(
-                    model_path, compile=False
-                )
+            output_model = load_qmodel(model_path)
         else:
             print("    Checkpoint NOT FOUND. Executing function...")
             output_model = self.function(
                 model=input_model, **self.config.parameters
             )
 
-            # 4. Save the work using the hash as the filename
-            self._save_model(output_model)
-
-            # --- THIS IS YOUR TRACEABILITY ---
-            # Save the configuration (metadata) that produced this model.
-            self._save_metadata()
+            self.save(output_model)
 
         print(f"--- Stage finished in {time.time() - start_time:.2f}s ---\n")
 

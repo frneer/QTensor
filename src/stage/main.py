@@ -1,4 +1,4 @@
-# main.py
+#!/usr/bin/env python3
 
 from functools import partial
 
@@ -88,7 +88,6 @@ stages_hyperparams = [
                 {"type": "uniform", "bits": 8},
             ],
         },
-        "is_quantized": True,
     },
     # Stage 5: Alpha initialization
     {
@@ -116,7 +115,6 @@ stages_hyperparams = [
             "learning_rate": 0.0001,
             "validation_split": 0.1,
         },
-        "is_quantized": True,
     },
     {
         "name": "final_evaluation",
@@ -127,7 +125,6 @@ stages_hyperparams = [
             "input_shape": [None, 28, 28, 1],
             "categories": 10,
         },
-        "is_quantized": True,
     },
 ]
 
