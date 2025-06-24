@@ -11,36 +11,12 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Tuple
 
 import tensorflow as tf
-
-# This shouldnt be here.
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
+from functions import load_data
 
 from configs.serialization.serialization import load_qmodel, save_qmodel
 from utils.metrics import compute_space_complexity_model
 
-
-def load_data(dataset_name: str) -> dict:
-    """Loads and preprocesses the specified dataset."""
-    if dataset_name == "mnist":
-        (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-        # Reshape and normalize images
-        x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
-        x_test = x_test.reshape(-1, 28, 28, 1).astype("float32") / 255.0
-
-        # One-hot encode labels
-        y_train = to_categorical(y_train, 10)
-        y_test = to_categorical(y_test, 10)
-
-        return {
-            "x_train": x_train,
-            "y_train": y_train,
-            "x_test": x_test,
-            "y_test": y_test,
-        }
-    else:
-        raise ValueError(f"Unknown dataset: {dataset_name!r}")
+# This shouldnt be here.
 
 
 @dataclass(frozen=True)
@@ -69,14 +45,23 @@ class Stage:
         self,
         function: Callable,
         initial_config: Dict[str, Any],  # We'll start with a dict
+        checkpoint_path: Optional[Path] = None,
+        metadata_path: str = "metadata",
     ):
         self.function = function
         self.initial_config = initial_config
         self.config: StageConfig = None  # Will be set at runtime
-        self.hash: str = None
-        self.checkpoint_dir = Path("checkpoints")
-        self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        self.is_quantized = initial_config.get("is_quantized", False)
+        self.hash: str = None  # Will be set at runtime
+        self.loss = None  # The loss after running the stage
+        self.accuracy = None  # The accuracy after running the stage
+        self.complexity = None  # The complexity after running the stage
+        checkpoint_path = checkpoint_path or Path("checkpoints")
+        checkpoint_path.mkdir(parents=True, exist_ok=True)
+        self.artifacts_path = checkpoint_path / "artifacts"
+        self.artifacts_path.mkdir(parents=True, exist_ok=True)
+        self.config_path = checkpoint_path / metadata_path
+        self.config_path.mkdir(parents=True, exist_ok=True)
+        self.model = None  # The model after running the stage
 
     def _save_metadata(self):
         """Saves the current stage configuration to a JSON file.
@@ -86,12 +71,17 @@ class Stage:
         if self.config is None:
             raise ValueError("StageConfig is not set. Run the stage first.")
 
-        metadata_path = self.checkpoint_dir / f"{self.hash}.json"
+        metadata_path = self.config_path / f"{self.config.name}.json"
+        config_dict = asdict(self.config)
+        config_dict["accuracy"] = self.accuracy
+        config_dict["loss"] = self.loss
+        config_dict["complexity"] = self.complexity
+        config_dict["hash"] = self.hash
         with metadata_path.open("w") as f:
-            json.dump(asdict(self.config), f, indent=2)
+            json.dump(config_dict, f, indent=2)
         print(f"Configuration saved to '{metadata_path}'")
 
-    def _save_model(self, model: tf.keras.Model):
+    def _save_model(self):
         """Saves the model to a file using the unique hash as the filename.
 
         This is useful for traceability and caching.
@@ -99,19 +89,11 @@ class Stage:
         if self.hash is None:
             raise ValueError("Hash is not set. Run the stage first.")
 
-        # if self.is_quantized:
-        #     model_path = self.checkpoint_dir / f"{self.hash}"
-        #     save_qmodel(model, model_path)
-        #     print(f"Quantized model saved to '{model_path}'")
-        # else:
-        #     model_path = self.checkpoint_dir / f"{self.hash}.keras"
-        #     model.save(model_path)
-        #     print(f"Model saved to '{model_path}'")
-        model_path = self.checkpoint_dir / f"{self.hash}"
-        save_qmodel(model, model_path)
+        model_path = self.artifacts_path / f"{self.hash}"
+        save_qmodel(self.model, model_path)
         print(f"Model saved to '{model_path}'")
 
-    def save(self, model: tf.keras.Model):
+    def save(self):
         """Saves the model and its configuration to disk.
 
         This is useful for traceability and caching.
@@ -120,7 +102,15 @@ class Stage:
             raise ValueError("StageConfig is not set. Run the stage first.")
 
         self._save_metadata()
-        self._save_model(model)
+        self._save_model()
+
+    def load(self, hash: str):
+        """Loads the model and its configuration from disk."""
+        model_path = self.artifacts_path / hash
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+
+        self.model = load_qmodel(model_path)
 
     def run(
         self,
@@ -153,42 +143,75 @@ class Stage:
         print(f"    Hash: {self.hash}")
         print(f"    Depends on: {self.config.previous_hash}")
 
-        model_path = self.checkpoint_dir / f"{self.hash}"
-        # 3. Checkpoint logic: If a model with this exact history exists, load it.
-        if model_path.exists():
-            print(f"    Checkpoint FOUND. Loading model from '{model_path}'")
-            output_model = load_qmodel(model_path)
-        else:
-            print("    Checkpoint NOT FOUND. Executing function...")
-            output_model = self.function(
+        try:
+            self.load(self.hash)
+        except FileNotFoundError as e:
+            print(f"    Checkpoint NOT FOUND. {e} Executing function...")
+            self.model = self.function(
                 model=input_model, **self.config.parameters
             )
+            self._save_model()
+        # Evaluate the model if a dataset is provided in the parameters
+        dataset = self.config.parameters.get("dataset", None)
+        if dataset is not None:
+            self.loss, self.accuracy = self.evaluate(load_data(dataset))
+        # Compute the complexity of the model
+        self.complexity = self.compute_complexity()
 
-            self.save(output_model)
+        self._save_metadata()
 
         print(f"--- Stage finished in {time.time() - start_time:.2f}s ---\n")
 
         # 5. Return both the model and its hash to the orchestrator
-        return output_model, self.hash
+        return self.model, self.hash
 
-    def evaluate(self, model):
-        if model is None:
-            raise ValueError("No model to evaluate. Run the stage first.")
-        # After loading it is not compiled I think....
-        model.compile(
+    def evaluate(self, data):
+        # After loading it is not compiled I think...
+        self.model.compile(
             optimizer="adam",
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )
-        if "dataset" in self.config.parameters.keys():
-            data = load_data(self.config.parameters["dataset"])
-            loss, accuracy = model.evaluate(
-                data["x_test"], data["y_test"], verbose=0
-            )
-            print("Evaluation results:")
-            print(f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+        loss, accuracy = self.model.evaluate(
+            data["x_test"], data["y_test"], verbose=0
+        )
+        print("Evaluation results:")
+        print(f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+        return loss, accuracy
 
-    def compute_complexity(self, model):
-        complexity = compute_space_complexity_model(model)
+    def compute_complexity(self):
+        complexity = compute_space_complexity_model(self.model)
         print("Space complexity of the model:")
         print(complexity)
+        return complexity
+
+
+class Pipeline:
+    def __init__(self, stages: list[Stage]):
+        self.stages = stages
+
+    def add(self, stage: Stage):
+        """Adds a new stage to the pipeline."""
+        self.stages.append(stage)
+
+    def remove(self, stages_names: list[str] | str):
+        """Removes stages by their names."""
+        if isinstance(stages_names, str):
+            stages_names = [stages_names]
+        self.stages = [
+            stage
+            for stage in self.stages
+            if stage.config.name not in stages_names
+        ]
+
+    def run(self, input_model: Optional[tf.keras.Model] = None):
+        """Runs the entire pipeline, passing the model from one stage to the
+        next."""
+        previous_hash = None
+
+        for stage in self.stages:
+            current_model, previous_hash = stage.run(
+                input_model=input_model, previous_hash=previous_hash
+            )
+
+        return current_model

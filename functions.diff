@@ -1,0 +1,99 @@
+diff --git a/src/stage/functions.py b/src/stage/functions.py
+index 3e06394..919615c 100644
+--- a/src/stage/functions.py
++++ b/src/stage/functions.py
+@@ -277,62 +277,49 @@ def model_quantize(model: tf.keras.Model, **params) -> tf.keras.Model:
+
+ # --- Alpha Initialization for QAT ---
+
+-
+-def compute_alpha_dict(model, x_train, batch_size=128):
+-    """Computes alpha values for weights and activations."""
+-    alpha_dict = {}
+-    # Compute weight alphas
+-    for layer in tqdm(
+-        model.layers,
+-        desc="Computing weight alphas",
+-        file=sys.stdout,
+-        leave=False,
+-    ):
+-        if layer.get_weights():
+-            alpha_dict[layer.name] = {}
+-            # Simplified alpha calculation for weights
+-            weights = layer.get_weights()[0]
+-            alpha_dict[layer.name]["kernel"] = np.max(np.abs(weights))
+-
+-    # Compute activation alphas
++def get_activations_output(model, x_train, batch_size=128):
++    """Gets the activations of the model for the training data."""
+     intermediate_model = models.Model(
+         inputs=model.input, outputs=[layer.output for layer in model.layers]
+     )
+     activations = intermediate_model.predict(
+         x_train, batch_size=batch_size, verbose=0
+     )
++    return activations
++
++def compute_alpha_dict(model, x_train, batch_size=128):
++    """Computes alpha values for weights and activations in a single comprehension."""
++    activations = get_activations_output(model, x_train, batch_size)
+
+-    for layer, activation_data in tqdm(
+-        zip(model.layers, activations),
+-        total=len(model.layers),
+-        desc="Computing activation alphas",
+-        file=sys.stdout,
+-        leave=False,
+-    ):
+-        if layer.name not in alpha_dict:
+-            alpha_dict[layer.name] = {}
+-        alpha_dict[layer.name]["activation"] = np.max(np.abs(activation_data))
++    alpha_dict = {
++        layer.name: {
++            **{weight.name: np.max(np.abs(weight.numpy())) for weight in layer.weights},
++            'activation': np.max(np.abs(activation_data))
++        }
++        for layer, activation_data in zip(model.layers, activations)
++    }
+
+     return alpha_dict
+
+-
+-def apply_alpha_dict(q_model, alpha_dict):
++def apply_alpha_dict(model, alpha_dict):
+     """Applies pre-computed alpha values to a quantized model."""
+-    for layer in q_model.layers:
+-        original_name = layer.name.replace("quant_", "")
+-        if original_name in alpha_dict:
+-            for alpha_type in ["kernel", "activation"]:
+-                if new_alpha := alpha_dict[original_name].get(alpha_type):
+-                    for weight_var in layer.weights:
+-                        if (
+-                            alpha_type in weight_var.name
+-                            and "alpha" in weight_var.name
+-                        ):
+-                            weight_var.assign(new_alpha)
+-                            print(
+-                                f"Updated {weight_var.name} with alpha: {new_alpha:.4f}"
+-                            )
+-    return q_model
++    for layer in model.layers:
++        original_layer_name = layer.name.replace("quant_", "")
++
++        if original_layer_name not in alpha_dict:
++            continue
++
++        for weight in layer.weights:
++            if weight.name not in alpha_dict[original_layer_name]:
++                continue
++
++            # See the quantizers weight naming convention
++            # No name_suffix for now
++            weight.assign(
++                alpha_dict[original_layer_name][weight.name]
++            )
++            print(f"Updated {weight.name} with alpha: {alpha_dict[original_layer_name][weight.name]:.4f}")
++    return model
+
+
+ def model_initialize_parameters(model, ref_model, **params) -> tf.keras.Model:

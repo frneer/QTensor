@@ -1,6 +1,5 @@
 # functions.py
 
-import sys
 
 import numpy as np
 import tensorflow as tf
@@ -8,7 +7,6 @@ from tensorflow.keras import layers, models
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
-from tqdm import tqdm
 
 from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
@@ -36,6 +34,63 @@ def load_data(dataset_name: str) -> dict:
             "x_test": x_test,
             "y_test": y_test,
         }
+    if dataset_name == "fashion_mnist":
+        (x_train, y_train), (x_test, y_test) = (
+            tf.keras.datasets.fashion_mnist.load_data()
+        )
+
+        # Reshape and normalize images
+        x_train = x_train.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+        x_test = x_test.reshape(-1, 28, 28, 1).astype("float32") / 255.0
+
+        # One-hot encode labels
+        y_train = to_categorical(y_train, 10)
+        y_test = to_categorical(y_test, 10)
+
+        return {
+            "x_train": x_train,
+            "y_train": y_train,
+            "x_test": x_test,
+            "y_test": y_test,
+        }
+    if dataset_name == "cifar10":
+        (x_train, y_train), (x_test, y_test) = (
+            tf.keras.datasets.cifar10.load_data()
+        )
+
+        # Normalize images
+        x_train = x_train.astype("float32") / 255.0
+        x_test = x_test.astype("float32") / 255.0
+
+        # One-hot encode labels
+        y_train = to_categorical(y_train, 10)
+        y_test = to_categorical(y_test, 10)
+
+        return {
+            "x_train": x_train,
+            "y_train": y_train,
+            "x_test": x_test,
+            "y_test": y_test,
+        }
+    if dataset_name == "cifar100":
+        (x_train, y_train), (x_test, y_test) = (
+            tf.keras.datasets.cifar100.load_data()
+        )
+
+        # Normalize images
+        x_train = x_train.astype("float32") / 255.0
+        x_test = x_test.astype("float32") / 255.0
+
+        # One-hot encode labels
+        y_train = to_categorical(y_train, 100)
+        y_test = to_categorical(y_test, 100)
+
+        return {
+            "x_train": x_train,
+            "y_train": y_train,
+            "x_test": x_test,
+            "y_test": y_test,
+        }
     else:
         raise ValueError(f"Unknown dataset: {dataset_name!r}")
 
@@ -48,7 +103,6 @@ def model_create(model, **params: dict) -> tf.keras.Model:
     model_name = params["model_name"]
     input_shape = params["input_shape"]
     categories = params["categories"]
-
     if model_name == "lenet5_custom":
         new_model = models.Sequential(
             [
@@ -70,6 +124,49 @@ def model_create(model, **params: dict) -> tf.keras.Model:
             name=model_name,
         )
 
+        new_model.compile(
+            optimizer=Adam(),
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return new_model
+
+    if model_name == "lenet5_custom_v2":
+        new_model = models.Sequential(
+            [
+                layers.Conv2D(
+                    32,
+                    kernel_size=5,
+                    activation="relu",
+                    padding="same",
+                    input_shape=input_shape[1:],
+                ),
+                layers.AveragePooling2D(),
+                layers.Conv2D(64, kernel_size=5, activation="relu"),
+                layers.AveragePooling2D(),
+                layers.Conv2D(64, kernel_size=5, activation="relu"),
+                layers.AveragePooling2D(),
+                layers.Flatten(),
+                layers.Dense(128, activation="relu"),
+                layers.Dense(256, activation="relu"),
+                layers.Dense(categories, activation="softmax"),
+            ],
+            name=model_name,
+        )
+
+        new_model.compile(
+            optimizer=Adam(),
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return new_model
+    if model_name == "vgg16":
+        new_model = tf.keras.applications.VGG16(
+            include_top=True,
+            weights=None,
+            input_shape=input_shape[1:],
+            classes=categories,
+        )
         new_model.compile(
             optimizer=Adam(),
             loss="categorical_crossentropy",
@@ -278,61 +375,61 @@ def model_quantize(model: tf.keras.Model, **params) -> tf.keras.Model:
 # --- Alpha Initialization for QAT ---
 
 
-def compute_alpha_dict(model, x_train, batch_size=128):
-    """Computes alpha values for weights and activations."""
-    alpha_dict = {}
-    # Compute weight alphas
-    for layer in tqdm(
-        model.layers,
-        desc="Computing weight alphas",
-        file=sys.stdout,
-        leave=False,
-    ):
-        if layer.get_weights():
-            alpha_dict[layer.name] = {}
-            # Simplified alpha calculation for weights
-            weights = layer.get_weights()[0]
-            alpha_dict[layer.name]["kernel"] = np.max(np.abs(weights))
-
-    # Compute activation alphas
+def get_activations_output(model, x_train, batch_size=128):
+    """Gets the activations of the model for the training data."""
     intermediate_model = models.Model(
         inputs=model.input, outputs=[layer.output for layer in model.layers]
     )
     activations = intermediate_model.predict(
         x_train, batch_size=batch_size, verbose=0
     )
+    return activations
 
-    for layer, activation_data in tqdm(
-        zip(model.layers, activations),
-        total=len(model.layers),
-        desc="Computing activation alphas",
-        file=sys.stdout,
-        leave=False,
-    ):
-        if layer.name not in alpha_dict:
-            alpha_dict[layer.name] = {}
-        alpha_dict[layer.name]["activation"] = np.max(np.abs(activation_data))
+
+def compute_alpha_dict(model, x_train, batch_size=128):
+    """Computes alpha values for weights and activations in a single
+    comprehension."""
+    activations = get_activations_output(model, x_train, batch_size)
+
+    alpha_dict = {
+        layer.name: {
+            **{
+                weight.name: np.max(np.abs(weight.numpy()))
+                for weight in layer.weights
+            },
+            "activation": np.max(np.abs(activation_data)),
+        }
+        for layer, activation_data in zip(model.layers, activations)
+    }
 
     return alpha_dict
 
 
-def apply_alpha_dict(q_model, alpha_dict):
+# def compute_flex_dict(model, x_train, batch_size=128):
+
+
+def apply_alpha_dict(model, alpha_dict):
     """Applies pre-computed alpha values to a quantized model."""
-    for layer in q_model.layers:
-        original_name = layer.name.replace("quant_", "")
-        if original_name in alpha_dict:
-            for alpha_type in ["kernel", "activation"]:
-                if new_alpha := alpha_dict[original_name].get(alpha_type):
-                    for weight_var in layer.weights:
-                        if (
-                            alpha_type in weight_var.name
-                            and "alpha" in weight_var.name
-                        ):
-                            weight_var.assign(new_alpha)
-                            print(
-                                f"Updated {weight_var.name} with alpha: {new_alpha:.4f}"
-                            )
-    return q_model
+    for layer in model.layers:
+        original_layer_name = layer.name.replace("quant_", "")
+
+        if original_layer_name not in alpha_dict:
+            continue
+
+        for weight in layer.weights:
+            if (
+                not weight.name.endswith("_alpha")
+                or weight.name not in alpha_dict[original_layer_name]
+            ):
+                continue
+
+            # See the quantizers weight naming convention
+            # No name_suffix for now
+            weight.assign(alpha_dict[original_layer_name][weight.name])
+            print(
+                f"Updated {weight.name} with alpha: {alpha_dict[original_layer_name][weight.name]:.4f}"
+            )
+    return model
 
 
 def model_initialize_parameters(model, ref_model, **params) -> tf.keras.Model:
