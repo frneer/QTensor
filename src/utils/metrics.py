@@ -30,8 +30,7 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
         if isinstance(quantizer, UniformQuantizer):
             weight_size = weight.shape.num_elements() * quantizer.bits
         elif isinstance(quantizer, FlexQuantizer):
-            qweight = quantizer.quantize_op(weight)
-            weight_size = compute_huffman_nominal_complexity(qweight)
+            weight_size = compute_huffman_nominal_complexity(weight)
             weight_size += quantizer.n_levels * quantizer.bits
         else:
             raise ValueError(f"Unknown quantizer type: {type(quantizer)}")
@@ -42,7 +41,7 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
 
 def compute_space_complexity(layer):
     """Compute the space complexity for a normal layer."""
-    total_layer_size = 0
+    total_layer_size = 0.0
     for weight in layer.weights:
         weight_size = (
             8 * weight.dtype.size * weight.shape.num_elements()
@@ -55,7 +54,10 @@ def compute_space_complexity(layer):
 def compute_space_complexity_model(model: tf.keras.Model) -> float:
     """Compute the uniform space complexity of a model based on its
     quantization configuration."""
-    total_space_complexity = 0
+    total_space_complexity = 0.0
+
+    # Make an inference to ensure the model is built
+    model(tf.random.normal((1,) + model.input_shape[1:]))
 
     for layer in model.layers:
         if isinstance(layer, QuantizeWrapperV2):
