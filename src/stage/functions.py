@@ -159,6 +159,32 @@ def model_create(model, **params: dict) -> tf.keras.Model:
         )
         return new_model
 
+    if model_name == "colo_custom_cnn1_for_cifar10":
+        new_model = models.Sequential(
+            [
+                layers.Conv2D(
+                    64,
+                    (3, 3),
+                    padding="same",
+                    activation="relu",
+                    input_shape=input_shape[1:],
+                ),
+                layers.MaxPooling2D((2, 2)),
+                layers.Conv2D(128, (3, 3), padding="same", activation="relu"),
+                layers.MaxPooling2D((2, 2)),
+                layers.Flatten(),
+                layers.Dense(256, activation="relu"),
+                layers.Dropout(0.5),
+                layers.Dense(categories, activation="softmax"),
+            ]
+        )
+        new_model.compile(
+            optimizer=Adam(),
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return new_model
+
     if model_name == "vgg16":
         new_model = tf.keras.applications.VGG16(
             include_top=True,
