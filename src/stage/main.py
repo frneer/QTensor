@@ -22,7 +22,7 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-            "model_name": "lenet5_custom_v2",
+            "model_name": "colo_custom_cnn1_for_cifar10",
         },
     },
     # Stage 1: Initial training
@@ -34,37 +34,13 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-            "epochs": 200,
-            "batch_size": 1024,
-            "learning_rate": 0.001,
-            "validation_split": 0.1,
-        },
-    },
-    # Stage 2: BN folding
-    {
-        "name": "bnf",
-        "seed": 12345,
-        "function": "model_transform_bnf",
-        "kwargs": {
-            "merge_activation": True,
-        },
-    },
-    # Stage 3: Post BN folding training
-    {
-        "name": "pbnf_training",
-        "seed": 12345,
-        "function": "model_train",
-        "kwargs": {
-            "dataset": "cifar10",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 10,
-            "epochs": 1,
-            "batch_size": 32,
+            "epochs": 100,
+            "batch_size": 512,
             "learning_rate": 0.0005,
             "validation_split": 0.1,
         },
     },
-    # Stage 4: Model quantization
+    # Stage 2: Model quantization
     {
         "name": "quantization",
         "seed": 12345,
@@ -75,22 +51,20 @@ stages_hyperparams = [
             # updated inside the experimental loop below.
             "kernel": None,
             "bias": [
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
             ],
             "activations": [
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 10},
+                {"type": "uniform", "bits": 10},
+                {"type": "uniform", "bits": 10},
+                {"type": None},
             ],
         },
     },
-    # Stage 5: Alpha initialization
+    # Stage 3: Alpha initialization
     {
         "name": "alpha_initialization",  # Fixed typo from original "initialiation"
         "seed": 12345,
@@ -102,7 +76,7 @@ stages_hyperparams = [
             "type": "alpha",
         },
     },
-    # Stage 6: QAT
+    # Stage 4: QAT
     {
         "name": "qat",
         "seed": 12345,
@@ -111,12 +85,13 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-            "epochs": 10,
-            "batch_size": 32,
+            "epochs": 25,
+            "batch_size": 512,
             "learning_rate": 0.0001,
             "validation_split": 0.1,
         },
     },
+    # Stage 5: Final Evaluation
     {
         "name": "final_evaluation",
         "seed": 12345,
@@ -125,145 +100,6 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-        },
-    },
-]
-
-vgg_stages_hyperparams = [
-    # Stage 0: Model creation
-    {
-        "name": "model_creation",
-        "seed": 12345,
-        "function": "model_create",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
-            "model_name": "vgg16",
-        },
-    },
-    # Stage 1: Initial training
-    {
-        "name": "initial_training",
-        "seed": 12345,
-        "function": "model_train",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
-            "epochs": 20,
-            "batch_size": 1024,
-            "learning_rate": 0.001,
-            "validation_split": 0.1,
-        },
-    },
-    # Stage 2: BN folding
-    {
-        "name": "bnf",
-        "seed": 12345,
-        "function": "model_transform_bnf",
-        "kwargs": {
-            "merge_activation": True,
-        },
-    },
-    # Stage 3: Post BN folding training
-    {
-        "name": "pbnf_training",
-        "seed": 12345,
-        "function": "model_train",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
-            "epochs": 1,
-            "batch_size": 128,
-            "learning_rate": 0.0005,
-            "validation_split": 0.1,
-        },
-    },
-    # Stage 4: Model quantization
-    {
-        "name": "quantization",
-        "seed": 12345,
-        "function": "model_quantize",
-        "kwargs": {
-            "input_shape": [None, 32, 32, 3],
-            # 'kernel' is set to None because it will be dynamically
-            # updated inside the experimental loop below.
-            "kernel": None,
-            "bias": [
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-                {"type": None},
-            ],
-            "activations": [
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-                {"type": "uniform", "bits": 8},
-            ],
-        },
-    },
-    # Stage 5: Alpha initialization
-    {
-        "name": "alpha_initialization",  # Fixed typo from original "initialiation"
-        "seed": 12345,
-        "function": "model_initialize_parameters",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
-            "type": "alpha",
-        },
-    },
-    # Stage 6: QAT
-    {
-        "name": "qat",
-        "seed": 12345,
-        "function": "model_train",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
-            "epochs": 10,
-            "batch_size": 32,
-            "learning_rate": 0.0001,
-            "validation_split": 0.1,
-        },
-    },
-    {
-        "name": "final_evaluation",
-        "seed": 12345,
-        "function": "model_evaluate",
-        "kwargs": {
-            "dataset": "cifar100",
-            "input_shape": [None, 32, 32, 3],
-            "categories": 100,
         },
     },
 ]
@@ -272,7 +108,8 @@ if __name__ == "__main__":
 
     # This is the main experimental loop from your coworker's script.
     # It runs the entire 7-stage pipeline multiple times.
-    for bits in range(1, 11):
+    # for bits in range(1, 25):
+    for bits in [1, 2, 3, 4, 5, 6, 8, 10, 16, 24]:
         print(
             f"\n{'='*20} STARTING EXPERIMENT: UNIFORM BITS = {bits} {'='*20}\n"
         )
@@ -280,7 +117,7 @@ if __name__ == "__main__":
         # --- Configure the Experiment ---
         # Dynamically set the 'kernel' quantization parameter for this specific run.
         kernel_config = [{"type": "uniform", "bits": bits} for _ in range(5)]
-        stages_hyperparams[4]["kwargs"]["kernel"] = kernel_config
+        stages_hyperparams[2]["kwargs"]["kernel"] = kernel_config
 
         # Create the list of Stage objects from the (now updated) configurations
         dataset = stages_hyperparams[0]["kwargs"].get("dataset")
@@ -314,7 +151,7 @@ if __name__ == "__main__":
             )
 
             # Save the ref model after the last stage we dont quantize
-            if stage.initial_config["name"] == "pbnf_training":
+            if stage.initial_config["name"] == "initial_training":
                 ref_model = tf.keras.models.clone_model(model)
 
         print(
