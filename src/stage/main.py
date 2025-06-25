@@ -57,9 +57,9 @@ stages_hyperparams = [
                 {"type": "uniform", "bits": 8},
             ],
             "activations": [
-                {"type": "uniform", "bits": 10},
-                {"type": "uniform", "bits": 10},
-                {"type": "uniform", "bits": 10},
+                {"type": None},
+                {"type": None},
+                {"type": None},
                 {"type": None},
             ],
         },
@@ -91,7 +91,22 @@ stages_hyperparams = [
             "validation_split": 0.1,
         },
     },
-    # Stage 5: Final Evaluation
+    # Stage 5: Model quantization
+    {
+        "name": "quantization",
+        "seed": 12345,
+        "function": "model_quantize",
+        "kwargs": {
+            "input_shape": [None, 32, 32, 3],
+            "activations": [
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
+                {"type": "uniform", "bits": 8},
+            ],
+        },
+    },
+    # Stage 6: Final Evaluation
     {
         "name": "final_evaluation",
         "seed": 12345,
