@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # path =  Path("checkpoints/lenet5_custom-fashion_mnist")
-path = Path("checkpoints/flex_lenet5_custom-cifar10")
+# path = Path("checkpoints/flex_lenet5_custom-cifar10")
+# path = Path("checkpoints/flex_lenet5_custom-cifar10")
+# path = Path("checkpoints/lenet5_custom-mnist")
+path = Path("checkpoints/colo_custom_cnn1_for_cifar10-cifar10")
 
 experiment_paths = [
     experiment_path
@@ -34,11 +37,13 @@ for experiment_path in experiment_paths:
             ]
             df = pd.concat([df, metadata], ignore_index=True)
 
-simple_df = df[df["name"].isin(["pbnf_training", "final_evaluation"])].copy()
+simple_df = df[
+    df["name"].isin(["initial_training", "final_evaluation"])
+].copy()
 
 simple_df["name"] = simple_df["name"].replace(
     {
-        "pbnf_training": "Original",
+        "initial_training": "Original",
         "final_evaluation": "Quantized",
     }
 )
