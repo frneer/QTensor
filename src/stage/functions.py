@@ -123,7 +123,6 @@ def model_create(model, **params: dict) -> tf.keras.Model:
             ],
             name=model_name,
         )
-
         new_model.compile(
             optimizer=Adam(),
             loss="categorical_crossentropy",
@@ -153,13 +152,13 @@ def model_create(model, **params: dict) -> tf.keras.Model:
             ],
             name=model_name,
         )
-
         new_model.compile(
             optimizer=Adam(),
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )
         return new_model
+
     if model_name == "vgg16":
         new_model = tf.keras.applications.VGG16(
             include_top=True,
@@ -375,32 +374,63 @@ def model_quantize(model: tf.keras.Model, **params) -> tf.keras.Model:
 # --- Alpha Initialization for QAT ---
 
 
-def get_activations_output(model, x_train, batch_size=128):
-    """Gets the activations of the model for the training data."""
-    intermediate_model = models.Model(
-        inputs=model.input, outputs=[layer.output for layer in model.layers]
-    )
-    activations = intermediate_model.predict(
-        x_train, batch_size=batch_size, verbose=0
-    )
-    return activations
+def compute_alpha_dict(
+    model, x_train, batch_size=1, sample_size=512, random_state=None
+):
+    """Compute the maximum absolute values of weights and activations using
+    only `sample_size` samples from x_train (if specified), processed in
+    batches of `batch_size`.
 
+    Args:
+        model:         A tf.keras.Model instance.
+        x_train:       Training data array of shape (N, ...).
+        batch_size:    Size of each batch for predict_on_batch.
+        sample_size:   Optional number of samples to draw (approximate).
+        random_state:  Seed for reproducible sampling.
 
-def compute_alpha_dict(model, x_train, batch_size=128):
-    """Computes alpha values for weights and activations in a single
-    comprehension."""
-    activations = get_activations_output(model, x_train, batch_size)
+    Returns:
+        alpha_dict: A dict mapping each layer name to a sub‐dict containing:
+            'activation': maximum |activation| over the sampled data,
+            weight_name : maximum |weight| for each weight in the layer.
+    """
+    # 1) Prepare the sample subset
+    n_total = x_train.shape[0]
+    if sample_size is not None and sample_size < n_total:
+        # Create a RNG for reproducible sampling
+        rng = np.random.RandomState(random_state)
+        # Randomly choose `sample_size` distinct indices
+        idx = rng.choice(n_total, size=sample_size, replace=False)
+        x_sample = x_train[idx]
+    else:
+        # Use the entire dataset if no sampling or sample_size >= total
+        x_sample = x_train
 
-    alpha_dict = {
-        layer.name: {
-            **{
-                weight.name: np.max(np.abs(weight.numpy()))
-                for weight in layer.weights
-            },
-            "activation": np.max(np.abs(activation_data)),
+    # 2) Initialize dictionary of maximums for weights and activations
+    alpha_dict = {}
+    for layer in model.layers:
+        # Compute max absolute value for each weight tensor in this layer
+        weights_max = {
+            w.name: float(np.max(np.abs(w.numpy()))) for w in layer.weights
         }
-        for layer, activation_data in zip(model.layers, activations)
-    }
+        # Start activation max at zero
+        alpha_dict[layer.name] = {"activation": 0.0, **weights_max}
+
+    # 3) Build an intermediate model that outputs every layer's activations
+    intermediate = tf.keras.Model(
+        inputs=model.input, outputs=[lay.output for lay in model.layers]
+    )
+
+    # 4) Iterate over the sampled data in small batches
+    n_samples = x_sample.shape[0]
+    for start in range(0, n_samples, batch_size):
+        x_batch = x_sample[start : start + batch_size]
+        # Predict activations for this batch (low memory overhead)
+        acts = intermediate.predict_on_batch(x_batch)
+        # Update the activation max per layer if this batch has a larger value
+        for lay, act in zip(model.layers, acts):
+            batch_max = float(np.max(np.abs(act)))
+            if batch_max > alpha_dict[lay.name]["activation"]:
+                alpha_dict[lay.name]["activation"] = batch_max
 
     return alpha_dict
 
