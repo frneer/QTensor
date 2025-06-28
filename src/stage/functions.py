@@ -103,6 +103,32 @@ def model_create(model, **params: dict) -> tf.keras.Model:
     model_name = params["model_name"]
     input_shape = params["input_shape"]
     categories = params["categories"]
+    if model_name == "custom_cnn1_for_cifar10":
+        new_model = models.Sequential(
+            [
+                layers.Conv2D(
+                    64,
+                    (3, 3),
+                    padding="same",
+                    activation="relu",
+                    input_shape=input_shape[1:],
+                ),
+                layers.MaxPooling2D((2, 2)),
+                layers.Conv2D(128, (3, 3), padding="same", activation="relu"),
+                layers.MaxPooling2D((2, 2)),
+                layers.Flatten(),
+                layers.Dense(256, activation="relu"),
+                layers.Dropout(0.5),
+                layers.Dense(categories, activation="softmax"),
+            ],
+            name=model_name,
+        )
+        new_model.compile(
+            optimizer=Adam(),
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return new_model
     if model_name == "lenet5_custom":
         new_model = models.Sequential(
             [
@@ -375,21 +401,40 @@ def model_quantize(model: tf.keras.Model, **params) -> tf.keras.Model:
 # --- Alpha Initialization for QAT ---
 
 
-def get_activations_output(model, x_train, batch_size=128):
-    """Gets the activations of the model for the training data."""
+def activation_output_generator(model, x_train, batch_size=128):
+    """Generator to yield activations of the model for the training data."""
     intermediate_model = models.Model(
         inputs=model.input, outputs=[layer.output for layer in model.layers]
     )
-    activations = intermediate_model.predict(
-        x_train, batch_size=batch_size, verbose=0
-    )
-    return activations
+    num_samples = x_train.shape[0]
+    for start in range(0, num_samples, batch_size):
+        end = min(start + batch_size, num_samples)
+        yield intermediate_model.predict_on_batch(
+            x_train[start:end],
+        )
+
+
+def compute_max_abs_activations(model, x_train, batch_size=128):
+    """Computes the maximum absolute activations for each layer."""
+    activations = activation_output_generator(model, x_train, batch_size)
+    max_abs_activations = {}
+
+    for layer_outputs in activations:
+        for layer, output in zip(model.layers, layer_outputs):
+            if layer.name not in max_abs_activations:
+                max_abs_activations[layer.name] = np.max(np.abs(output))
+            else:
+                max_abs_activations[layer.name] = max(
+                    max_abs_activations[layer.name], np.max(np.abs(output))
+                )
+
+    return max_abs_activations
 
 
 def compute_alpha_dict(model, x_train, batch_size=128):
     """Computes alpha values for weights and activations in a single
     comprehension."""
-    activations = get_activations_output(model, x_train, batch_size)
+    max_activations = compute_max_abs_activations(model, x_train, batch_size)
 
     alpha_dict = {
         layer.name: {
@@ -397,12 +442,41 @@ def compute_alpha_dict(model, x_train, batch_size=128):
                 weight.name: np.max(np.abs(weight.numpy()))
                 for weight in layer.weights
             },
-            "activation": np.max(np.abs(activation_data)),
+            "activation": activation_data,
         }
-        for layer, activation_data in zip(model.layers, activations)
+        for layer, activation_data in zip(model.layers, max_activations)
     }
 
     return alpha_dict
+
+
+# def get_activations_output(model, x_train, batch_size=128):
+#     """Gets the activations of the model for the training data."""
+#     intermediate_model = models.Model(
+#         inputs=model.input, outputs=[layer.output for layer in model.layers]
+#     )
+#     activations = intermediate_model.predict(
+#         x_train, batch_size=batch_size, verbose=0
+#     )
+#     return activations
+
+# def compute_alpha_dict(model, x_train, batch_size=128):
+#     """Computes alpha values for weights and activations in a single
+#     comprehension."""
+#     activations = get_activations_output(model, x_train, batch_size)
+
+#     alpha_dict = {
+#         layer.name: {
+#             **{
+#                 weight.name: np.max(np.abs(weight.numpy()))
+#                 for weight in layer.weights
+#             },
+#             "activation": np.max(np.abs(activation_data)),
+#         }
+#         for layer, activation_data in zip(model.layers, activations)
+#     }
+
+#     return alpha_dict
 
 
 # def compute_flex_dict(model, x_train, batch_size=128):
