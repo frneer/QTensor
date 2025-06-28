@@ -141,11 +141,16 @@ class Stage:
 class Pipeline:
     def __init__(
         self,
+        name: str,
         stage_definitions: List[StageMetadata],
         store_path: Optional[Path] = None,
     ):
+        self.name = name
         self.stage_definitions = stage_definitions
         self.store_path = store_path or Path("checkpoints")
+        self.pipeline_metadata_path = self.store_path / "pipelines"
+        self.pipeline_metadata_path.mkdir(parents=True, exist_ok=True)
+        self.hash_history = []
 
     def run(self) -> Tuple[tf.keras.Model, str]:
         previous_stage_hash: Optional[str] = None
@@ -175,8 +180,12 @@ class Pipeline:
             current_model, stage_hash = current_stage.run(
                 input_model=current_model
             )
+            self.hash_history.append(stage_hash)
             # Workaround for a particular case
             if stage_def.name == "initial_training":
                 pass
 
             previous_stage_hash = stage_hash
+
+        with open(self.pipeline_metadata_path / f"{self.name}.json", "w") as f:
+            json.dump({"history": self.hash_history}, f)

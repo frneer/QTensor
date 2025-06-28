@@ -108,5 +108,8 @@ if __name__ == "__main__":
             StageMetadata.from_dict(stage_dict)
             for stage_dict in stages_hyperparams
         ]
-        pipeline = Pipeline(stage_definitions=stages_metadata)
+        pipeline = Pipeline(
+            name=f"experiment_uniform_bits_{bits}",
+            stage_definitions=stages_metadata,
+        )
         pipeline.run()
