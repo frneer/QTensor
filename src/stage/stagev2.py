@@ -183,7 +183,9 @@ class Pipeline:
             self.hash_history.append(stage_hash)
             # Workaround for a particular case
             if stage_def.name == "initial_training":
-                pass
+                ref_model = (
+                    current_model  # pyright: ignore[reportUnboundVariable]
+                )
 
             previous_stage_hash = stage_hash
 
