@@ -159,13 +159,6 @@ class Pipeline:
         for i, stage_def in enumerate(self.stage_definitions):
             # Workaround for a particular case
             print("--- Running stage:", stage_def.name, "----")
-            if stage_def.name == "alpha_initialization":
-                assert (
-                    ref_model is not None
-                ), "Reference model for alpha initialization is not set."
-                stage_def.function = partial(
-                    stage_def.function, ref_model=ref_model
-                )
             final_metadata = StageMetadata(
                 name=stage_def.name,
                 seed=stage_def.seed,
@@ -181,11 +174,6 @@ class Pipeline:
                 input_model=current_model
             )
             self.hash_history.append(stage_hash)
-            # Workaround for a particular case
-            if stage_def.name == "initial_training":
-                ref_model = (
-                    current_model  # pyright: ignore[reportUnboundVariable]
-                )
 
             previous_stage_hash = stage_hash
 
