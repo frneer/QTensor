@@ -8,6 +8,7 @@ from tensorflow.keras.datasets import mnist
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
 
+from configs.generate_config import GenerateConfig
 from configs.qmodel import apply_quantization
 from quantizers.flex_quantizer import FlexQuantizer
 from quantizers.uniform_quantizer import UniformQuantizer
@@ -398,13 +399,19 @@ def model_quantize(model: tf.keras.Model, **params) -> tf.keras.Model:
     return quantized_model
 
 
-# --- Alpha Initialization for QAT ---
+# --- Quantizer Weight Initialization for QAT ---
 
 
 def activation_output_generator(model, x_train, batch_size=128):
     """Generator to yield activations of the model for the training data."""
+    # run an inference
+    model(x_train[:1])  # Ensure the model is built
+    layers_to_inspect = [
+        layer for layer in model.layers if hasattr(layer, "quantize_config")
+    ]
     intermediate_model = models.Model(
-        inputs=model.input, outputs=[layer.output for layer in model.layers]
+        inputs=model.input,
+        outputs=[layer.output for layer in layers_to_inspect],
     )
     num_samples = x_train.shape[0]
     for start in range(0, num_samples, batch_size):
@@ -431,96 +438,164 @@ def compute_max_abs_activations(model, x_train, batch_size=128):
     return max_abs_activations
 
 
-def compute_alpha_dict(model, x_train, batch_size=128):
-    """Computes alpha values for weights and activations in a single
-    comprehension."""
-    max_activations = compute_max_abs_activations(model, x_train, batch_size)
-
-    alpha_dict = {
-        layer.name: {
-            **{
-                weight.name: np.max(np.abs(weight.numpy()))
-                for weight in layer.weights
-            },
-            "activation": activation_data,
-        }
-        for layer, activation_data in zip(model.layers, max_activations)
-    }
-
-    return alpha_dict
+from quantizers.common import max_value, min_value
 
 
-# def get_activations_output(model, x_train, batch_size=128):
-#     """Gets the activations of the model for the training data."""
-#     intermediate_model = models.Model(
-#         inputs=model.input, outputs=[layer.output for layer in model.layers]
-#     )
-#     activations = intermediate_model.predict(
-#         x_train, batch_size=batch_size, verbose=0
-#     )
-#     return activations
-
-# def compute_alpha_dict(model, x_train, batch_size=128):
-#     """Computes alpha values for weights and activations in a single
-#     comprehension."""
-#     activations = get_activations_output(model, x_train, batch_size)
-
-#     alpha_dict = {
-#         layer.name: {
-#             **{
-#                 weight.name: np.max(np.abs(weight.numpy()))
-#                 for weight in layer.weights
-#             },
-#             "activation": np.max(np.abs(activation_data)),
-#         }
-#         for layer, activation_data in zip(model.layers, activations)
-#     }
-
-#     return alpha_dict
+def get_max_alpha(weight):
+    max_value = np.max(np.abs(weight))
+    return max_value if max_value != 0 else 0.1
 
 
-# def compute_flex_dict(model, x_train, batch_size=128):
+def get_uniform_levels(alpha, signed, n_levels):
+    start = min_value(alpha, signed)
+    end = max_value(alpha, n_levels, signed)
+    return np.linspace(start, end, n_levels)
 
 
-def apply_alpha_dict(model, alpha_dict):
-    """Applies pre-computed alpha values to a quantized model."""
-    for layer in model.layers:
-        original_layer_name = layer.name.replace("quant_", "")
-
-        if original_layer_name not in alpha_dict:
-            continue
-
-        for weight in layer.weights:
-            if (
-                not weight.name.endswith("_alpha")
-                or weight.name not in alpha_dict[original_layer_name]
-            ):
-                continue
-
-            # See the quantizers weight naming convention
-            # No name_suffix for now
-            weight.assign(alpha_dict[original_layer_name][weight.name])
-            print(
-                f"Updated {weight.name} with alpha: {alpha_dict[original_layer_name][weight.name]:.4f}"
-            )
-    return model
+def get_uniform_thresholds(alpha, signed, n_levels):
+    # Thresholds include the start and end points by design.
+    start = min_value(alpha, signed)
+    end = alpha
+    return np.linspace(start, end, n_levels + 1)
 
 
-def model_initialize_parameters(model, ref_model, **params) -> tf.keras.Model:
-    """Initializes quantization parameters (alphas) using a reference model."""
-    print("Function: model_initialize_parameters called")
-    if ref_model is None:
-        raise ValueError(
-            "model_initialize_parameters requires a ref_model, but none was provided."
-        )
-    if params["type"] == "alpha":
-        data = load_data(params["dataset"])
-        alpha_dict = compute_alpha_dict(ref_model, data["x_train"])
-        model = apply_alpha_dict(model, alpha_dict)
-        return model
-    raise ValueError(
-        f"Unknown parameter initialization type: {params['type']!r}"
+def initialize_quantizer_weights(model, **params):
+    """Initializes quantizer weights for the model."""
+    data = load_data(params["dataset"])
+    x_train = data["x_train"]
+
+    model.compile(
+        optimizer=Adam(), loss="categorical_crossentropy", metrics=["accuracy"]
     )
+    model.predict(x_train[:1], verbose=0)
+
+    batch_size = params.get("batch_size", 128)
+    max_activations = compute_max_abs_activations(model, x_train, batch_size)
+    print("Max absolute activations:", max_activations)
+    for layer in model.layers:
+        print(f"Layer: {layer.name}")
+        if hasattr(layer, "quantize_config") and isinstance(
+            layer.quantize_config, (GenerateConfig)
+        ):
+            layer_config = layer.quantize_config
+            print(f"layer weights: {[w.name for w in layer.weights]}s")
+            weights_dict = layer_config.weights
+            activations_dict = layer_config.activations
+            for weight_name, quantize_config in weights_dict.items():
+
+                # Get layer and weight info
+                print("layer name:", layer.name)
+                original_layer_name = layer.name.replace("quant_", "")
+                original_weight_name = f"{original_layer_name}/{weight_name}:0"
+                filtered_weights = [
+                    w for w in layer.weights if w.name == original_weight_name
+                ]
+                if not filtered_weights:
+                    print(
+                        f"Warning: No weight found for {original_weight_name} in layer {layer.name}"
+                    )
+                    continue
+                weight = filtered_weights[0]
+
+                # Compute and assign alpha
+                alpha = get_max_alpha(weight)
+                alpha_weight = [
+                    w
+                    for w in layer.weights
+                    if w.name == f"{layer.name}/{weight_name}_alpha:0"
+                ]
+                if not alpha_weight:
+                    print(
+                        f"Warning: No alpha weight found for {weight_name} in layer {layer.name}"
+                    )
+                    continue
+                alpha_weight = alpha_weight[0]
+                alpha_weight.assign(alpha)
+
+                # If flex, we need to do the same with levels and thresholds
+                if isinstance(quantize_config, FlexQuantizer):
+
+                    # Compute and assign levels
+                    levels = get_uniform_levels(
+                        alpha, quantize_config.signed, quantize_config.n_levels
+                    )
+                    levels_weight = [
+                        w
+                        for w in layer.weights
+                        if w.name == f"{layer.name}/{weight_name}_levels:0"
+                    ]
+                    if not levels_weight:
+                        print(
+                            f"Warning: No levels weight found for {weight_name} in layer {layer.name}"
+                        )
+                        continue
+                    levels_weight = levels_weight[0]
+                    levels_weight.assign(levels)
+
+                    # Compute and assign thresholds
+                    thresholds = get_uniform_thresholds(
+                        alpha, quantize_config.signed, quantize_config.n_levels
+                    )
+                    thresholds_weight = [
+                        w
+                        for w in layer.weights
+                        if w.name == f"{layer.name}/{weight_name}_thresholds:0"
+                    ]
+                    if not thresholds_weight:
+                        print(
+                            f"Warning: No thresholds weight found for {weight_name} in layer {layer.name}"
+                        )
+                        continue
+                    thresholds_weight = thresholds_weight[0]
+                    thresholds_weight.assign(thresholds)
+
+            for activation_name, quantize_config in activations_dict.items():
+                alpha = max_activations.get(layer.name, 0)
+                alpha_weight = [
+                    w
+                    for w in layer.weights
+                    if w.name == f"{layer.name}/post_activation_alpha:0"
+                ]
+                if not alpha_weight:
+                    print(
+                        f"Warning: No alpha weight found for activation {activation_name} in layer {layer.name}"
+                    )
+                    continue
+                alpha_weight = alpha_weight[0]
+                alpha_weight.assign(alpha)
+                if isinstance(quantize_config, FlexQuantizer):
+                    levels = get_uniform_levels(
+                        alpha, quantize_config.signed, quantize_config.n_levels
+                    )
+                    thresholds = get_uniform_thresholds(
+                        alpha, quantize_config.signed, quantize_config.n_levels
+                    )
+                    levels_weight = [
+                        w
+                        for w in layer.weights
+                        if w.name == f"{layer.name}/post_activation_levels:0"
+                    ]
+                    if not levels_weight:
+                        print(
+                            f"Warning: No levels weight found for activation {activation_name} in layer {layer.name}"
+                        )
+                        continue
+                    levels_weight = levels_weight[0]
+                    levels_weight.assign(levels)
+                    thresholds_weight = [
+                        w
+                        for w in layer.weights
+                        if w.name
+                        == f"{layer.name}/post_activation_thresholds:0"
+                    ]
+                    if not thresholds_weight:
+                        print(
+                            f"Warning: No thresholds weight found for activation {activation_name} in layer {layer.name}"
+                        )
+                        continue
+                    thresholds_weight = thresholds_weight[0]
+                    thresholds_weight.assign(thresholds)
+    return model
 
 
 def model_evaluate(model, **params):
@@ -540,5 +615,5 @@ FUNCTION_MAP = {
     "model_train": model_train,
     "model_transform_bnf": model_transform_bnf,  # Assuming you will add this
     "model_quantize": model_quantize,
-    "model_initialize_parameters": model_initialize_parameters,
+    "initialize_quantizer_weights": initialize_quantizer_weights,
 }

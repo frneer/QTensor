@@ -66,7 +66,6 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
                 # Use epsilon to avoid dividing by zero during backpropagation.
                 return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 
-        print(f"name is {name}")
         alpha = layer.add_weight(
             name=f"{name}{self.name_suffix}_alpha",
             initializer=self.initializer,

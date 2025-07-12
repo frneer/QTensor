@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     combined_df = pd.DataFrame()
 
-    for pipeline_metadata_file in pipeline_path.glob("*.json"):
+    for pipeline_metadata_file in pipeline_path.glob("experiment_flex*.json"):
         print(f"Loading pipeline metadata from {pipeline_metadata_file}")
         df = load_pipeline(pipeline_metadata_file, results_path, metadata_path)
         # expermient_[TYPE]_bits_[NBITS]_n_levels_[NLEVELS]
@@ -101,4 +101,4 @@ if __name__ == "__main__":
     )
     plt.grid(which="both", linestyle="--", linewidth=0.5)
     plt.legend()
-    plt.savefig("complexity_vs_quantized.png")
+    plt.savefig("complexity_vs_quantized_flex.png")
