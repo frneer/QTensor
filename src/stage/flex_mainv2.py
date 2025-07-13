@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 
-from functions import (
-    initialize_quantizer_weights,
-    model_create,
-    model_quantize,
-    model_train,
-)
+from functions import model_create, model_quantize, model_train
 from stagev2 import Pipeline, StageMetadata
 
 # --- Configuration for All 7 Pipeline Stages ---
@@ -34,8 +29,8 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-            "epochs": 100,
-            "batch_size": 512,
+            "epochs": 10,
+            "batch_size": 128,
             "learning_rate": 0.001,
             "validation_split": 0.1,
         },
@@ -57,6 +52,10 @@ stages_hyperparams = [
                 {"type": "uniform", "bits": 8},
             ],
             "activations": [
+                # {"type": "none"},
+                # {"type": "none"},
+                # {"type": "none"},
+                # {"type": "none"},
                 {"type": "uniform", "bits": 16},
                 {"type": "uniform", "bits": 16},
                 {"type": "uniform", "bits": 16},
@@ -65,18 +64,33 @@ stages_hyperparams = [
         },
     },
     # Stage 5: Alpha initialization
-    {
-        "name": "alpha_initialization",
-        "seed": 12345,
-        "function": initialize_quantizer_weights,
-        "parameters": {
-            "dataset": "cifar10",
-            "batch_size": 512,
-            "input_shape": [None, 32, 32, 3],
-            "categories": 10,
-            "type": "alpha",
-        },
-    },
+    # {
+    #     "name": "alpha_initialization",
+    #     "seed": 12345,
+    #     "function": initialize_quantizer_weights,
+    #     "parameters": {
+    #         "dataset": "cifar10",
+    #         "batch_size": 512,
+    #         "input_shape": [None, 32, 32, 3],
+    #         "categories": 10,
+    #         "type": "alpha",
+    #     },
+    # },
+    # Stage 6: QAT
+    # {
+    #     "name": "qat_fast",
+    #     "seed": 12345,
+    #     "function": model_train,
+    #     "parameters": {
+    #         "dataset": "cifar10",
+    #         "input_shape": [None, 32, 32, 3],
+    #         "categories": 10,
+    #         "epochs": 15,
+    #         "batch_size": 128,
+    #         "learning_rate": 0.0001,
+    #         "validation_split": 0.2,
+    #     },
+    # },
     # Stage 6: QAT
     {
         "name": "qat",
@@ -86,10 +100,10 @@ stages_hyperparams = [
             "dataset": "cifar10",
             "input_shape": [None, 32, 32, 3],
             "categories": 10,
-            "epochs": 75,
+            "epochs": 35,
             "batch_size": 128,
-            "learning_rate": 0.00001,
-            "validation_split": 0.1,
+            "learning_rate": 0.001 / 10,
+            "validation_split": 0.2,
         },
     },
 ]
@@ -98,7 +112,8 @@ stages_hyperparams = [
 if __name__ == "__main__":
     bits = [4, 6, 8, 10]
     # n_levels = [2, 3, 4, 5, 6, 7, 8, 12, 16, 20]
-    n_levels = [8, 10, 12, 14, 16]
+    # n_levels = [4, 6, 8, 10]
+    n_levels = range(4, 13)
     combinations = [
         (b, n) for b in reversed(bits) for n in reversed(n_levels) if n <= 2**b
     ]

@@ -67,9 +67,11 @@ if __name__ == "__main__":
     combined_df.sort_values(by=["complexity"], inplace=True)
     all_accuracies = combined_df["accuracy"].tolist()
     all_complexities = combined_df["complexity"].tolist()
-    all_accuracies.append(original_accuracy)
-    all_complexities.append(original_complexity)
-    print(combined_df)
+    # all_accuracies.append(original_accuracy)
+    # all_complexities.append(original_complexity)
+    print(
+        combined_df.sort_values(by=["accuracy", "complexity"], ascending=False)
+    )
     plt.figure()
     combined_df.plot(
         x="complexity",
@@ -82,13 +84,13 @@ if __name__ == "__main__":
         color="blue",
         label="Quantized Model",
     )
-    plt.scatter(
-        original_complexity,
-        original_accuracy,
-        color="red",
-        label="Original Model",
-        zorder=3,
-    )
+    # plt.scatter(
+    #     original_complexity,
+    #     original_accuracy,
+    #     color="red",
+    #     label="Original Model",
+    #     zorder=3,
+    # )
     plt.axhline(
         original_accuracy, color="red", linestyle=":", alpha=0.3, zorder=1
     )

@@ -441,7 +441,7 @@ def compute_max_abs_activations(model, x_train, batch_size=128):
 from quantizers.common import max_value, min_value
 
 
-def get_max_alpha(weight):
+def get_max_weight_value(weight):
     max_value = np.max(np.abs(weight))
     return max_value if max_value != 0 else 0.1
 
@@ -498,7 +498,7 @@ def initialize_quantizer_weights(model, **params):
                 weight = filtered_weights[0]
 
                 # Compute and assign alpha
-                alpha = get_max_alpha(weight)
+                alpha = get_max_weight_value(weight)
                 alpha_weight = [
                     w
                     for w in layer.weights
@@ -511,6 +511,7 @@ def initialize_quantizer_weights(model, **params):
                     continue
                 alpha_weight = alpha_weight[0]
                 alpha_weight.assign(alpha)
+                print(f"Alpha: {alpha_weight}")
 
                 # If flex, we need to do the same with levels and thresholds
                 if isinstance(quantize_config, FlexQuantizer):
@@ -531,6 +532,7 @@ def initialize_quantizer_weights(model, **params):
                         continue
                     levels_weight = levels_weight[0]
                     levels_weight.assign(levels)
+                    print(f"Levels: {levels_weight}")
 
                     # Compute and assign thresholds
                     thresholds = get_uniform_thresholds(
@@ -548,6 +550,7 @@ def initialize_quantizer_weights(model, **params):
                         continue
                     thresholds_weight = thresholds_weight[0]
                     thresholds_weight.assign(thresholds)
+                    print(f"Thresholds: {thresholds_weight}")
 
             for activation_name, quantize_config in activations_dict.items():
                 alpha = max_activations.get(layer.name, 0)
@@ -563,6 +566,7 @@ def initialize_quantizer_weights(model, **params):
                     continue
                 alpha_weight = alpha_weight[0]
                 alpha_weight.assign(alpha)
+                print(f"Activation Alpha: {alpha_weight}")
                 if isinstance(quantize_config, FlexQuantizer):
                     levels = get_uniform_levels(
                         alpha, quantize_config.signed, quantize_config.n_levels
@@ -582,6 +586,7 @@ def initialize_quantizer_weights(model, **params):
                         continue
                     levels_weight = levels_weight[0]
                     levels_weight.assign(levels)
+                    # print
                     thresholds_weight = [
                         w
                         for w in layer.weights
