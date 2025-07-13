@@ -50,6 +50,7 @@ def main(args):
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
+    # initialize_quantizer_weights(qmodel, qconfig)
 
     callback_tuples = [
         (CaptureWeightCallback(qlayer), qconfig[layer.name])

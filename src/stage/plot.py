@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # path =  Path("checkpoints/lenet5_custom-fashion_mnist")
-path = Path("checkpoints/flex_lenet5_custom-cifar10")
+path = Path("checkpoints/lenet5_custom_v2-cifar10")
 
 experiment_paths = [
     experiment_path
