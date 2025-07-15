@@ -13,7 +13,7 @@ import pandas as pd
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
-pd.set_option("display.width", 220)
+pd.set_option("display.width", None)
 
 
 def load_pipeline(pipeline_metadata_file, results_path, metadata_path):
@@ -186,7 +186,16 @@ if __name__ == "__main__":
     for root in roots:
         _collect_paths(root, [root])
 
-    print("Found", len(experiments), "experiments:")
+    blacklist = {
+        "fe398b8e7dfdc1cb8c71d2183a84de07",
+        "c8a4f191f560ea10931775d0a8320c08",
+        "04ccc689dc66e77aa8ecd339281c5ff0",
+    }
+    experiments = [
+        exp for exp in experiments if not any(h in blacklist for h in exp)
+    ]
+
+    print("After blacklisting, keeping", len(experiments), "experiments:")
     for exp in experiments:
         print(" → ".join(exp))
 
@@ -207,8 +216,15 @@ if __name__ == "__main__":
 
     # 3) make a DataFrame
     experiments_df = pd.DataFrame(experiments_data)
-
-    print(experiments_df.head())
+    print(
+        experiments_df[
+            [
+                "qat_accuracy",
+                "qat_complexity",
+                "qat_hash",
+            ]
+        ].sort_values(by=["qat_accuracy"], ascending=False)
+    )
 
     to_drop = [
         "model_creation*",
@@ -240,7 +256,6 @@ if __name__ == "__main__":
         for col in experiments_df.columns
         if any(fnmatch.fnmatch(col, pat) for pat in to_drop)
     ]
-    # print(cols_to_drop)
     experiments_df = experiments_df.drop(columns=cols_to_drop)
 
     rename_map = {
@@ -251,12 +266,7 @@ if __name__ == "__main__":
         "initial_training_seed": "seed",
     }
     experiments_df = experiments_df.rename(columns=rename_map)
-    print(experiments_df)
-    # for k in experiments_df.columns:
-    #     print(k)
-    # print(experiments_df.head())
     experiments_df = experiments_df.dropna()
-    print(experiments_df)
 
     experiments_df["qat_complexity"] = (
         experiments_df["qat_complexity"] / 1024
@@ -288,8 +298,6 @@ if __name__ == "__main__":
         for col in experiments_df.columns
         if col in ("type", "bits", "n_levels")
     ]
-    print("Hyperparameter columns:", hyperparam_cols)
-    print("All columns in df:", experiments_df.columns.tolist())
 
     # 2) Group by those hyperparams, compute mean & var of the metrics
     stats = (
