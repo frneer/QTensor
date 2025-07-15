@@ -4,6 +4,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
@@ -217,6 +218,16 @@ def model_train(model: tf.keras.Model, **params: dict) -> tf.keras.Model:
         metrics=["accuracy"],
     )
 
+    callbacks = []
+    if params.get("early_stopping", False):
+        callbacks.append(
+            EarlyStopping(
+                monitor=params.get("monitor", "val_loss"),
+                patience=params.get("patience", 3),
+                restore_best_weights=True,
+            )
+        )
+
     if params.get("epochs", 0) > 0:
         model.fit(
             data["x_train"],
@@ -225,6 +236,7 @@ def model_train(model: tf.keras.Model, **params: dict) -> tf.keras.Model:
             epochs=params["epochs"],
             validation_split=params["validation_split"],
             verbose=1,  # Set to 1 to see progress
+            callbacks=callbacks if callbacks else None,
         )
     return model
 
