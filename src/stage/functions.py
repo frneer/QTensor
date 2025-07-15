@@ -1,6 +1,8 @@
 # functions.py
 
 
+import re
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
@@ -615,6 +617,54 @@ def initialize_quantizer_weights(model, **params):
     return model
 
 
+def model_freeze(model: tf.keras.Model, **params: dict) -> tf.keras.Model:
+    """Freeze subsets of weights in the model according to the four flags in
+    params, and skip any weights related to optimizer state."""
+    print("Function: model_freeze called")
+    if model is None:
+        raise ValueError("model_freeze received an empty model.")
+
+    # read the four flags (defaults to False)
+    freeze_conv_params = params.get("conv_parqameters", False)
+    freeze_conv_qparams = params.get("conv_qparqameters", False)
+    freeze_dense_params = params.get("dense_parqameters", False)
+    freeze_dense_qparams = params.get("dense_qparqameters", False)
+
+    # regex to detect quantization variables
+    qparam_pattern = re.compile(r"(alpha|levels|thresholds)")
+
+    for weight in model.weights:
+        name = weight.name
+
+        # **new**: skip any optimizer-related variables entirely
+        if "optimizer" in name:
+            print(f"  → skipping optimizer var: {name}")
+            continue
+
+        is_qparam = bool(qparam_pattern.search(name))
+        is_conv = "conv2d" in name
+        is_dense = "dense" in name
+
+        # DEBUG:
+        # print(f"{name}: is_qparam={is_qparam}, is_conv={is_conv}, is_dense={is_dense}")
+
+        # decide whether this weight belongs to a group the user asked to freeze
+        should_freeze = (
+            (is_conv and not is_qparam and freeze_conv_params)
+            or (is_conv and is_qparam and freeze_conv_qparams)
+            or (is_dense and not is_qparam and freeze_dense_params)
+            or (is_dense and is_qparam and freeze_dense_qparams)
+        )
+
+        if should_freeze:
+            weight._trainable = False
+            print(f"  → freezing: {name}")
+        else:
+            print(f"  → not freezing: {name}")
+
+    return model
+
+
 def model_evaluate(model, **params):
     """Evaluates the model on the test dataset."""
     if model is None:
@@ -633,4 +683,5 @@ FUNCTION_MAP = {
     "model_transform_bnf": model_transform_bnf,  # Assuming you will add this
     "model_quantize": model_quantize,
     "initialize_quantizer_weights": initialize_quantizer_weights,
+    "model_freeze": model_freeze,
 }
