@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -64,43 +65,61 @@ if __name__ == "__main__":
         combined_df["stage"] == "initial_training"
     ]["complexity"].mean()
     combined_df = combined_df[combined_df["stage"] == "qat"]
+    # combined_df = combined_df[combined_df["stage"] == "activation_quantization"]
     combined_df.sort_values(by=["complexity"], inplace=True)
     all_accuracies = combined_df["accuracy"].tolist()
     all_complexities = combined_df["complexity"].tolist()
     # all_accuracies.append(original_accuracy)
     # all_complexities.append(original_complexity)
+    pd.set_option("display.width", 200)
     print(
         combined_df.sort_values(by=["accuracy", "complexity"], ascending=False)
     )
+    print(combined_df.sort_values(by=["complexity"], ascending=False))
     plt.figure()
-    combined_df.plot(
-        x="complexity",
-        y=["accuracy"],
-        kind="scatter",
-        title="Complexity vs Accuracy",
-        xlabel="Complexity (Kbits)",
-        ylabel="Accuracy",
-        zorder=3,
-        color="blue",
-        label="Quantized Model",
-    )
-    # plt.scatter(
-    #     original_complexity,
-    #     original_accuracy,
-    #     color="red",
-    #     label="Original Model",
+    # combined_df.plot(
+    #     x="complexity",
+    #     y=["accuracy"],
+    #     kind="scatter",
+    #     title="Complexity vs Accuracy",
+    #     xlabel="Complexity (Kbits)",
+    #     ylabel="Accuracy",
     #     zorder=3,
+    #     color="blue",
+    #     label="Quantized Model",
     # )
+    plt.scatter(
+        original_complexity,
+        original_accuracy,
+        color="red",
+        label="Original Model",
+        zorder=3,
+    )
     plt.axhline(
         original_accuracy, color="red", linestyle=":", alpha=0.3, zorder=1
     )
-    plt.plot(
-        all_complexities,
-        all_accuracies,
-        color="gray",
-        linestyle="--",
-        zorder=1,
-    )
+    bits_values = combined_df["bits"].unique()
+    cmap = mpl.colormaps["tab10"]
+    for i, bits in enumerate(sorted(bits_values)):
+        subset = combined_df[combined_df["bits"] == bits].sort_values(
+            "complexity"
+        )
+        plt.semilogx(
+            subset["complexity"],
+            subset["accuracy"],
+            label=f"{bits} bits",
+            color=cmap(i % 10),
+            zorder=3,
+            marker="o",
+            linestyle="--",
+        )
+    # plt.semilogx(
+    #     all_complexities,
+    #     all_accuracies,
+    #     color="gray",
+    #     linestyle="--",
+    #     zorder=1,
+    # )
     plt.grid(which="both", linestyle="--", linewidth=0.5)
     plt.legend()
     plt.savefig("complexity_vs_quantized_flex.png")
