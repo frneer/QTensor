@@ -225,7 +225,7 @@ def model_train(model: tf.keras.Model, **params: dict) -> tf.keras.Model:
         callbacks.append(
             EarlyStopping(
                 monitor=params.get("monitor", "val_loss"),
-                patience=params.get("patience", 3),
+                patience=params.get("patience", 8),
                 restore_best_weights=True,
             )
         )
