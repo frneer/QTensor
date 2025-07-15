@@ -73,6 +73,60 @@ def flatten_json(obj, parent_key: str = "", sep: str = "_"):
     return items
 
 
+def add_horizontal_se_band(
+    ax,
+    mean,
+    se,
+    *,
+    color="red",
+    label="Original Model",
+    alpha_line=0.8,
+    alpha_band=0.2,
+    z_mean=3,
+    z_line=2,
+    z_band=1,
+):
+    """On ax, draw a dotted line at `mean`, dashed lines at ±se, and fill
+    between them."""
+    # mean line
+    ax.axhline(
+        mean,
+        color=color,
+        linestyle=":",
+        linewidth=0.3,
+        alpha=alpha_line,
+        zorder=z_mean,
+        # label=f"{label}"
+    )
+    # ±1 SE lines
+    ax.axhline(
+        mean + se,
+        color=color,
+        linestyle="-",
+        linewidth=0.3,
+        alpha=0.6,
+        zorder=z_line,
+    )
+    ax.axhline(
+        mean - se,
+        color=color,
+        linestyle="-",
+        linewidth=0.3,
+        alpha=0.6,
+        zorder=z_line,
+    )
+    # filled band
+    x0, x1 = ax.get_xlim()
+    ax.fill_between(
+        [x0, x1],
+        [mean - se, mean - se],
+        [mean + se, mean + se],
+        color=color,
+        alpha=alpha_band,
+        zorder=z_band,
+    )
+
+
 if __name__ == "__main__":
     checkpoint_path = Path("checkpoints")
     # pipeline_path = checkpoint_path / "pipelines"
@@ -275,6 +329,9 @@ if __name__ == "__main__":
     print(stats.sort_values(by=["qat_complexity_mean"], ascending=False))
 
     cmap = mpl.colormaps["tab10"]
+    xmin = stats["qat_complexity_mean"].min() * 0.9
+    xmax = stats["qat_complexity_mean"].max() * 1.1
+    xmax = original_complexity_mean * 1.1
 
     plt.figure(figsize=(6, 4))
     plt.scatter(
@@ -284,26 +341,40 @@ if __name__ == "__main__":
         label="Original Model",
         zorder=3,
     )
-    plt.axhline(
-        original_accuracy_mean, color="red", linestyle=":", alpha=0.3, zorder=1
-    )
     bits_values = experiments_df["bits"].unique()
     for i, bits in enumerate(sorted(bits_values)):
         subset = experiments_df[experiments_df["bits"] == bits].sort_values(
             "qat_complexity"
         )
+        # 1) dashed line only, semi-transparent
         plt.semilogx(
             subset["qat_complexity"],
             subset["qat_accuracy"],
-            label=f"{bits} bits",
+            linestyle="--",
+            color=cmap(i % 10),
+            alpha=0.3,
+            zorder=2,
+            label=None,  # we’ll label in the marker call
+        )
+        # 2) opaque markers on top, with label
+        plt.scatter(
+            subset["qat_complexity"],
+            subset["qat_accuracy"],
+            marker=".",
             color=cmap(i % 10),
             zorder=3,
-            marker=".",
-            linestyle="--",
+            label=f"{bits} bits",
         )
+    add_horizontal_se_band(
+        plt.gca(),
+        original_accuracy_mean,
+        original_accuracy_se,
+        color="red",
+    )
     plt.xlabel("Quantized Complexity (Kbits)")
     plt.ylabel("Quantized Accuracy")
     plt.ylim([0.6, 0.75])
+    plt.xlim([xmin, xmax])
     plt.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.6)
     plt.legend()
     plt.tight_layout()
@@ -318,28 +389,43 @@ if __name__ == "__main__":
         label="Original Model",
         zorder=3,
     )
-    plt.axhline(
-        original_accuracy_mean, color="red", linestyle=":", alpha=0.3, zorder=1
-    )
     bits_list = sorted(stats["bits"].unique())
     for i, bits in enumerate(bits_list):
         grp = stats[stats["bits"] == bits].sort_values("qat_complexity_mean")
-
+        # 1) draw only the dashed line + errorbars (no markers)
         plt.errorbar(
             grp["qat_complexity_mean"],
             grp["qat_accuracy_mean"],
             xerr=grp["se_complexity"],
             yerr=grp["se_accuracy"],
-            label=f"{bits} bits",
+            fmt="--",  # just the line
             color=cmap(i % 10),
-            zorder=3,
-            marker=".",
-            linestyle="--",
+            ecolor=cmap(i % 10),
+            alpha=0.3,
+            capsize=3,
+            zorder=2,
         )
+        # 2) draw the opaque markers on top
+        plt.scatter(
+            grp["qat_complexity_mean"],
+            grp["qat_accuracy_mean"],
+            marker=".",
+            s=30,
+            color=cmap(i % 10),
+            label=f"{bits} bits",
+            zorder=3,
+        )
+    add_horizontal_se_band(
+        plt.gca(),
+        original_accuracy_mean,
+        original_accuracy_se,
+        color="red",
+    )
     plt.xscale("log")
     plt.xlabel("Quantized Complexity (Kbits)")
     plt.ylabel("Quantized Accuracy")
     plt.ylim([0.6, 0.75])
+    plt.xlim([xmin, xmax])
     plt.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.6)
     plt.legend()
     plt.tight_layout()
