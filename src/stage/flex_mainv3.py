@@ -92,19 +92,24 @@ stages_hyperparams = [
 
 
 if __name__ == "__main__":
+    seeds = [12345, 123456, 1234567, 12345678, 123456789]
     bits = [4, 6, 8]
     n_levels = [2, 3, 4, 6, 8, 10, 16]
     combinations = [
-        (b, n)
+        (seed, b, n)
+        for seed in seeds
         for b in reversed(bits)
         for n in reversed(n_levels)
-        if n <= 2**b
+        if n < 2**b
         # (b, n) for b in bits for n in n_levels if n <= 2**b
     ]
-    for bits, n_levels in combinations:
+    for seed, bits, n_levels in combinations:
         print(
-            f"\n{'='*20} STARTING EXPERIMENT: FLEX BITS = {bits}, N_LEVELS = {n_levels} {'='*20}\n"
+            f"\n{'='*20} STARTING EXPERIMENT: SEED = {seed}, FLEX BITS = {bits}, N_LEVELS = {n_levels} {'='*20}\n"
         )
+
+        for i in range(len(stages_hyperparams)):
+            stages_hyperparams[i]["seed"] = seed
 
         # --- Configure the Experiment ---
         # Dynamically set the 'kernel' quantization parameter for this specific run.
