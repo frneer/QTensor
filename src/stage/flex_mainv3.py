@@ -92,6 +92,12 @@ stages_hyperparams = [
 
 
 if __name__ == "__main__":
+    # Check that there are no repeated names.
+    names = [stage["name"] for stage in stages_hyperparams]
+    cnt = Counter(names)
+    dups = [name for name, c in cnt.items() if c > 1]
+    assert not dups, f"Duplicate stage names detected: {dups}"
+
     seeds = [12345, 123456, 1234567, 12345678, 123456789]
     bits = [4, 6, 8]
     n_levels = [2, 3, 4, 6, 8, 10, 16]
