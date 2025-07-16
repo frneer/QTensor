@@ -290,6 +290,14 @@ if __name__ == "__main__":
     n = experiments_df["initial_training_accuracy"].count()
     original_accuracy_se = original_accuracy_sd / np.sqrt(n)
     original_complexity_se = original_complexity_sd / np.sqrt(n)
+    original_accuracy_min = experiments_df["initial_training_accuracy"].min()
+    original_complexity_min = experiments_df[
+        "initial_training_complexity"
+    ].min()
+    original_accuracy_max = experiments_df["initial_training_accuracy"].max()
+    original_complexity_max = experiments_df[
+        "initial_training_complexity"
+    ].max()
 
     # 1) Identify the metrics and the hyperparam columns to group by
     metrics = ["qat_loss", "qat_accuracy", "qat_complexity"]
@@ -302,7 +310,7 @@ if __name__ == "__main__":
     # 2) Group by those hyperparams, compute mean & var of the metrics
     stats = (
         experiments_df.groupby(hyperparam_cols)[metrics]
-        .agg(["mean", "var"])
+        .agg(["mean", "var", "max", "min"])
         .reset_index()
     )
 
@@ -310,24 +318,27 @@ if __name__ == "__main__":
     stats.columns = [
         f"{lvl0}_{lvl1}" if lvl1 else lvl0 for lvl0, lvl1 in stats.columns
     ]
+
     counts = (
         experiments_df.groupby(hyperparam_cols)[metrics].count().reset_index()
     )
-    # rename columns back to match stats
-    counts.columns = hyperparam_cols + [f"{m}_count" for m in metrics]
-
-    # 2) Merge counts into stats
-    stats = stats.merge(counts, on=hyperparam_cols)
+    count_cols = [f"{m}_count" for m in metrics]
+    counts.columns = hyperparam_cols + count_cols
+    row_uniques = counts[count_cols].nunique(axis=1)
+    assert (
+        row_uniques == 1
+    ).all(), "❌ Not all metric‐counts agree per group!"
+    counts["count"] = counts[count_cols[0]]
+    counts = counts[hyperparam_cols + ["count"]]
+    stats = stats.merge(counts, on=hyperparam_cols, how="left")
 
     # 3) Compute standard deviations and errors
     stats["se_accuracy"] = np.sqrt(stats["qat_accuracy_var"]) / np.sqrt(
-        stats["qat_accuracy_count"]
+        stats["count"]
     )
     stats["se_complexity"] = np.sqrt(stats["qat_complexity_var"]) / np.sqrt(
-        stats["qat_complexity_count"]
+        stats["count"]
     )
-    stats["sd_accuracy"] = np.sqrt(stats["qat_accuracy_var"])
-    stats["sd_complexity"] = np.sqrt(stats["qat_complexity_var"])
 
     print(
         stats.sort_values(
