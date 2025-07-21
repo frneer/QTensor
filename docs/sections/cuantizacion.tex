@@ -1,2 +1,26 @@
-La cuantización de redes neuronales consiste en representar los parámetros de la red con menos bits de los que se utilizan en la representación original. \\
+La cuantización de redes neuronales consiste en representar los parámetros de la red con menor precision. En otras palabras, convertir los valores de punto flotante, generalmente de 32 bits a valores de menor precision, como por ejemplo a 8 o 4 bits. Este proceso reduce la demanda computacional y el tamaño de a red y acelera el tiempo de inferencia. \\
 
+Sin embargo, esto viene con un costo, ya que inevitablemente, al cuantizar, se introduce un error, conocido como error de cuantización, lo cual afecta la exactitud de la red. Dado ese problema, se buscan alternativas para mitigar el impacto de la cuantización en la exactitud de la red. \\
+
+% Comparemos ahora los dos tipos de implementación de cuantización, la cuantización post-entrenamiento y la cuantización durante el entrenamiento. \\
+
+En la cuantización de redes, existen dos formas principales de implementarla, la cuantización post-entrenamiento (\textit{Post-Training Quantization, PTQ}) y la cuantización durante el entrenamiento (\textit{Quantization Aware Training, QAT}). \\
+
+Como puede observarse en la figura \reffig{ptq_vs_qat}, la cuantización post-entrenamiento (\texttt{PTQ}) consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizarla. Sin entrenamiento \textit{fine-tunning} posterior. Por otro lado, la cuantización durante el entrenamiento (\texttt{QAT}) consiste en entrenar la red neuronal emulando la cuantización en la inferencia durante el entrenamiento, lo que permite que los pesos se entrenen adaptandose a la cuantización, logrando una mejor perfomance al momento de estar cuantizada. \\
+
+% TODO(frneer): agregar diagrama custom
+% \input{diagrams/cuantizacion/ptq_vs_qat}
+\defaultfigure{cuantizacion/ptq_vs_qat.png}{QAT a la izquierda y PTQ a la derecha}{ptq_vs_qat}
+
+\subsubsection{Quantization Aware Training}
+
+Para emular la cuantización durante el entrenamiento, se debe intervenir el algoritmo usual de entrenamiento, que consiste como se explico en la seccion \ref{sec:redes_neuronales} en realizar una pasada hacia adelante (forward-pass), calcular la perdida y luego realizar una pasada hacia atrás (backpropagation) para actualizar los pesos. \\
+
+¿Cómo se logra emular el efecto de la cuantización? Para esto, se realiza lo que se llama \textit{fake quantization}, que consiste en aplicar una función de cuantización a los pesos al realizar el forward-pass. Estos pesos cuantizados se calculan únicamente para la inferencia; para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Esto es clave, debido a que si se utilizaran los pesos cuantizados, es altamente probable caer en problemas de gradiente desvaneciente o en grandes errores de propagación. \\
+
+Pero, ¿cómo es posible aplicar el algoritmo de backpropagation si se tiene una función no diferenciable como la cuantización? Para esto, existen diversas técnicas, las cuales consisten en aproximar la función de cuantización con una función diferenciable, por ejemplo, una línea recta, conocido como Straight-Through Estimator (STE). Esta técnica permite que el algoritmo de backpropagation pueda calcular los gradientes y actualizar los pesos de la red. Sin embargo, hay otras opciones posibles para aproximar la función de cuantización, que serán extremadamente útiles en la implementación del cuantizador flexible. \\
+
+En definitiva nuestro algoritmo de entrenamiento se veria como se muestra en la figura \reffig{qat_algorithm}, donde se puede observar que se realiza una pasada hacia adelante con los pesos cuantizados, se calcula la perdida y luego se realiza una pasada hacia atrás con los pesos originales en punto flotante pasando por el STE. \\
+
+% TODO(frneer): agregar diagrama custom
+\defaultfigure{cuantizacion/qat_algorithm.png}{Algoritmo de entrenamiento con cuantización durante el entrenamiento}{qat_algorithm}

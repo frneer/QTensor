@@ -39,11 +39,22 @@
 
 % Tikz
 \usepackage{tikz}
-\usetikzlibrary{shapes,arrows, positioning, quotes}
-\usetikzlibrary{arrows.meta, positioning, decorations.markings}
+\usetikzlibrary{
+    shapes,
+    arrows,
+    positioning,
+    quotes,
+    arrows.meta,
+    decorations.markings,
+    shapes.geometric,
+    fit
+}
 
 % Allow saying
 \usepackage{dirtytalk}
+
+% Useful for tables
+\usepackage{makecell}
 
 % Custom commands
 \input{commands}
@@ -69,27 +80,30 @@
 \subsection{Compresión} % en general
 \label{sec:compresion}
 \input{sections/compresion}
-Reducir la complejidad de los parametros, complejidad espacial.
-Reducir la cantidad de operaciones matematicos. (cambiar tmb en el plan)
+% Reducir la complejidad de los parametros, complejidad espacial.
+% Reducir la cantidad de operaciones matematicos. (cambiar tmb en el plan)
 \subsection{Compresión de redes neuronales}
 \label{sec:compresion_de_redes}
 \input{sections/compresion_de_redes}
 \subsubsection{Cuantización}
-
-
-\subsubsection{Quantization Aware Training}
+\label{sec:cuantizacion}
+\input{sections/cuantizacion}
 \section{Desarrollo}
 \subsection{Quantizadores}
 \subsubsection{Quantizador uniforme}
 \label{sec:uniform}
 \input{sections/uniform}
 \subsubsection{Quantizador flexible}
-\subsubsection{Codificación de Huffman (cita o explicarla en un apendice)}
 % Solo reduce la cantidad de datos es si usas huffman para la codificacion de estos parametros
 % Si utilizo una codificacion binaria de los datos no logras compresion
 \label{sec:flex}
 \input{sections/flex}
+\section{Diseño e Implementación de la librería}
+\label{sec:implementacion}
+\input{sections/implementacion}
 \section{Resultados}
+\label{sec:resultados}
+\input{sections/resultados}
 % Resultado de la MLP, LENTE, otras redes
 % MobileNet va peola
 % VGG16 tmb se va anotar mucho algo
@@ -104,6 +118,7 @@ Reducir la cantidad de operaciones matematicos. (cambiar tmb en el plan)
 \section{Conclusiones}
 \section{Trabajos Futuros}
 \section{Agradecimientos}
+\section{Apendice A: Codificación de Huffman}
 
 \printbibliography
 \end{document}

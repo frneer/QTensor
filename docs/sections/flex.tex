@@ -13,7 +13,9 @@ Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_
 \defaultfigure{quantizers/flex/q.png}{Quantización flexible signada.}{flexible_signed}
 
 
-When training the network it's necessary to store the levels in FP32., and they are quantized when computing the forward pass. This way, the levels can be adjusted to better fit the data distribution. En \reffig{flexible_signed_q} se muestra el ejemplo anterior, pero mostrando los niveles no cuantizados y la grilla mostrando todos los posibles niveles de cuantización para los niveles (que depende de la cantidad de bits). \\
+% When training the network it's necessary to store the levels in FP32., and they are quantized when computing the forward pass. This way, the levels can be adjusted to better fit the data distribution. En \reffig{flexible_signed_q} se muestra el ejemplo anterior, pero mostrando los niveles no cuantizados y la grilla mostrando todos los posibles niveles de cuantización para los niveles (que depende de la cantidad de bits). \\
 
 
 \defaultfigure{quantizers/flex/q_q.png}{Quantización flexible signada con niveles no cuantizados.}{flexible_signed_q}
+
+TODO(Fran): Escribir las derivadas analiticas. como en el caso del uniforme. \\

@@ -1,0 +1,57 @@
+\begin{tikzpicture}[
+    font=\footnotesize,
+    % Tighter spacing between nodes
+    node distance=3.5em and 3.5em,
+    % Base style for boxes
+    box/.style={
+        rectangle,
+        rounded corners,
+        align=center, % Use align for multi-line text
+        minimum height=3.5em,
+        thick
+    },
+    % Specific styles
+    pretrain/.style={box, fill=blue!50, minimum width=7em, align=left}, forces wrapping
+    data/.style={box, fill=orange!50, minimum width=7em, align=left},
+    databig/.style={box, fill=orange!50, minimum size=7em, align=left},
+    process/.style={box, fill=cyan!20, minimum width=14em, align=left},
+    final/.style={box, fill=blue!20, minimum width=14em, align=left},
+    % Container styles
+    sub_container/.style={draw=blue!70, rounded corners, thick},
+    main_container/.style={draw=blue!90, rounded corners, thick},
+    % Arrow style
+    arrow/.style={-Straight Barb, thick, color=black!80}
+]
+
+% --- Left Flowchart ---
+\node[pretrain] (pml) at (0,0) {Pre-trained model};
+\node[databig, right=of pml] (td) {Training data};
+\node[process, below=of pml] (q1) {Quantization};
+\node[process, below=of q1] (rf) {Retraining/ Finetuning};
+\node[final, below=of rf] (qm1) {Quantized model};
+
+% Arrows
+% \draw[arrow] (pml.south) -- (q1.north);
+% \draw[arrow] (q1.south) -- (rf.north);
+% \draw[arrow] (td.south) -- (rf.north);
+% \draw[arrow] (rf.south) -- (qm1.north);
+
+% --- Right Flowchart ---
+% \node[pretrain, right=of td, xshift=0.8cm] (pmr) {Pre-trained model};
+% \node[data, right=of pmr] (cd) {Calibration data};
+% \node[process, below=of pmr] (c) {Calibration};
+% \node[process, below=of c] (q2) {Quantization};
+% \node[final, below=of q2] (qm2) {Quantized model};
+
+% Arrows
+% \draw[arrow] (pmr.south) -- (c.north);
+% \draw[arrow] (cd.south) -- (c.north);
+% \draw[arrow] (c.south) -- (q2.north);
+% \draw[arrow] (q2.south) -- (qm2.north);
+
+% --- Containers ---
+% \node[sub_container, inner sep=0.6em, fit=(pml) (td) (qm1)] (sub1) {};
+% \node[sub_container, inner sep=0.6em, fit=(pmr) (cd) (qm2)] (sub2) {};
+% \node[main_container, inner sep=1em, fit=(sub1) (sub2)] {};
+
+\end{tikzpicture}
