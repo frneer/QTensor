@@ -1,0 +1,43 @@
+\section{Implementación de la librería}
+\label{sec:implementacion}
+
+\subsection{Atributos de calidad}
+\label{sec:atributos_calidad}
+
+Los atributos de calidad los elegiremos basado en la ISO 25010, que define un modelo de calidad de software. Este modelo se compone de dos partes: características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas. Las mismas se muestran en la \reffig{iso_25010}. \\
+
+\defaultfigure{implementacion/iso_25010.png}{Modelo de calidad de software ISO 25010.}{iso_25010}
+
+En este caso, buscamos obtener un software que permita a otros investigadores y desarrolladores trabajar de manera eficiente, intuitiva y directa. Que no requieran un entrenamiento extenso para poder utilizarlo. Por lo tanto, los atributos de calidad que consideraremos son de las características Capacidad de Interaccion, y Adecuación Funcional. Particularmente:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|p{6cm}|}
+\hline
+\textbf{Requisito} & \textbf{Caracteristica} & \textbf{Descripcion} \\ \hline
+Adecuacion Funcional & Pertinencia funcional. & Capacidad del producto software para proporcionar un conjunto de funciones que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
+Capacidad de interaccion & Auto-descriptividad. & Capacidad de un producto para presentar la información adecuada, haciendo su uso inmediatamente evidente para el usuario sin interacciones excesivas con el producto u otros recursos (documentación, help desks, otros usuarios...). \\ \hline
+\end{tabular}
+\caption{Atributos de calidad elegidos}
+\label{tab:iso25010}
+\end{table}
+
+\subsection{Herramientas existentes}
+
+Una vez entendido el problema a resolver y qué atributos de calidad se quieren priorizar, conviene entender cuál es el estado del arte hoy en cuanto a herramientas que permitan realizar \textit{quantization aware training}. ¿Debemos construir una librería desde cero? ¿Podemos utilizar otras librerías como base? ¿Existe una solución completa ya disponible que podamos utilizar sin desarrollar ninguna librería?
+
+Tanto en la industria como en los entornos académicos, existen dos librerías de facto \texttt{Tensorflow} y \texttt{PyTorch}. \\
+
+Ambos tienen un framework de cuantización, PyTorch lo implementa en la misma libreria, a traves del modulo \texttt{\href{https://docs.pytorch.org/docs/stable/quantization.html}{quantization}} y Tensorflow a traves de una libreria secundaria \texttt{\href{https://www.tensorflow.org/model_optimization}{tensorflow-model-optimization}}. En ambos casos las funciones directamente utilizables tienen soporte nativo para 8 bits, pero no suelen soportar múltiples configuraciones de cuantización, sin embargo ambas soportan definir cuantizadores personalizados e inyectarlos en el modelo a cuantizar. \\
+
+Debido a que ambas librerías parecen tener un soporte similar, y no hay diferencias significativas en la cantidad de usuarios entre una y la otra. Se eligio tensorflow debido a que en el entorno del laboratorio de sistemas embebidos, en el que se desarrolla este trabajo, se utiliza principalmente esta libreria.
+
+\subsection{Metodología de trabajo}
+
+Para desarrollar la libreria, se eligio trabajar con un repositorio de Git, con un flujo de trabajo basado en \textit{Git Flow}. Este flujo de trabajo permite tener una rama principal estable, y ramas de desarrollo que permiten trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se pueden fusionar a la rama principal una vez que se ha completado el desarrollo y se han realizado las pruebas necesarias. \\
+
+\subsubsection{Testing}
+
+Para la implementación de la librería se utilizó el framework de testing \texttt{unittest} de Python. Este framework permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática. Las pruebas se definen en archivos separados, y se pueden ejecutar de manera individual o en conjunto. \\
+
+En particular,

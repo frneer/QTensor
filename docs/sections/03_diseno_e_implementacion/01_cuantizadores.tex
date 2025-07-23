@@ -1,3 +1,8 @@
+\section{Especificación de los cuantizadores a implementar}
+\subsection{Quantizador uniforme}
+\label{sec:uniform}
+% \input{sections/uniform}
+
 El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, \
 siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
 \begin{equation}
@@ -54,3 +59,28 @@ Si observamos la \reffig{uniform_signed}, podemos ver que la función de cuantiz
 \end{equation}
 
 Pues para un $x$ dado, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción.
+
+\subsection{Quantizador flexible}
+\label{sec:flex}
+
+El cuantizador flexible consiste en un cojunto de $n$ niveles, con valores $l$ cuyos limites estan determinados por los umbrales $t$. Al igual que en el caso del cuantizador uniforme, se fija el rango a traves del parametro $\alpha$, el cuantizador puede ser signado, con rango $[-\alpha, \alpha]$, o no signado, con rango $[0, \alpha]$. \\
+
+La primera diferencia con el uniforme es que los niveles $n$ no dependen de la cantidad de $bits$ utilizados, si no que tanto $l$ como $t$ son parametros del cuantizador que se ajustan durante el entrenamiento de la red. \\
+
+\begin{equation}
+    \label{eq:flexible_quantizer}
+    q\left(x; \alpha, t, l\right) = \sum_{i=0}^{n-1} q_u\left({l_i; \alpha}\right) \cdot \mathbbm{1}_{\left[t_i, t_{i+1}\right]}\left(x\right)
+\end{equation}
+
+Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_quantizer_signed}. \\
+% TODO(Fran): Pensar que pasa si baja de alpha
+
+\defaultfigure{quantizers/flex/q.png}{Quantización flexible signada.}{flexible_signed}
+
+
+% When training the network it's necessary to store the levels in FP32., and they are quantized when computing the forward pass. This way, the levels can be adjusted to better fit the data distribution. En \reffig{flexible_signed_q} se muestra el ejemplo anterior, pero mostrando los niveles no cuantizados y la grilla mostrando todos los posibles niveles de cuantización para los niveles (que depende de la cantidad de bits). \\
+
+
+\defaultfigure{quantizers/flex/q_q.png}{Quantización flexible signada con niveles no cuantizados.}{flexible_signed_q}
+
+TODO(Fran): Escribir las derivadas analiticas. como en el caso del uniforme. \\

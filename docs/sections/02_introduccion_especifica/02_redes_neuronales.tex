@@ -1,3 +1,6 @@
+\section{Redes Neuronales}
+\label{sec:redes_neuronales}
+
 Una red neuronal es un modelo matemático que se inspira en la estructura y funcionamiento del cerebro humano. Está compuesta por un conjunto de unidades de procesamiento llamadas neuronas \reffig{neuron}, organizadas en capas y conectadas entre sí mediante conexiones ponderadas por un peso ($w_{i_j}$). Cada neurona recibe una serie de entradas, las procesa mediante una función de activación ($\varphi$) y produce una salida ($y_j$) que se propaga a las neuronas de la capa siguiente. La red neuronal se entrena mediante un algoritmo de optimización que ajusta los pesos $\mathbf{w}$ de las conexiones para minimizar una función de costo. \\
 
 \input{diagrams/neuron}
@@ -19,4 +22,3 @@ De esta manera obtendremos una aproximación de la función $f$ mediante la red 
 Una de las limitaciones de las redes neuronales es que requieren una gran cantidad de datos de entrenamiento para ajustar los pesos de las conexiones, y en algunos casos pueden sufrir de sobreajuste, es decir, ajustar demasiado los pesos a los datos de entrenamiento y no generalizar bien a datos no vistos. \\
 
 Ademas, cuanto mas complejo el sistema a modelar, generalmente se requiere una red neuronal mas grande, con mas capas y neuronas, lo cual aumenta la cantidad de parametros a ajustar y la cantidad de operaciones a realizar, lo cual puede ser computacionalmente costoso. \\
-

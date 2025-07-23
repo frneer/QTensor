@@ -1,3 +1,23 @@
+\section{Compresión de redes neuronales}
+\label{sec:compresion_de_redes}
+
+La compresión de redes neuronales es también un proceso que consiste en reducir el tamaño de los datos, en particular, de una red neuronal. Donde se buscara preservar lo mejor posible su performance. La misma, es usada tanto para reducir el espacio de almacenamiento necesario como el tiempo de inferencia. \\
+
+Esta optimizacion es crucial en diversas aplicaciones. Por ejemplo, en el caso de las modelos LLMs la compresion permite respuestas mas rapidas. En el caso de querer correr modelos en dispositivos moviles, permite ejecutar modelos altamente complejos en hardware con recursos limitados. \\
+
+Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son: \\
+
+\begin{itemize}
+    \item \textbf{Compartición de pesos (Weight Sharing):} Se agrupan los pesos de la red en un conjunto reducido de valores, permitiendo una representación más compacta sin afectar demasiado la capacidad de generalización.
+    \item \textbf{Poda (Weight Pruning):} Se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, reduciendo la cantidad de parámetros sin afectar significativamente la precisión del modelo.
+    \item \textbf{Cuantización (Quantization):} Se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia.
+    \item \textbf{Descomposición tensorial (Tensor Decomposition):} Se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de operaciones necesarias durante la inferencia.
+    \item \textbf{Destilación de conocimiento (Knowledge Distillation):} Se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), transfiriendo la información esencial en una forma más compacta.
+\end{itemize}
+
+\subsection{Cuantización}
+\label{sec:cuantizacion}
+
 La cuantización de redes neuronales consiste en representar los parámetros de la red con menor precision. En otras palabras, convertir los valores de punto flotante, generalmente de 32 bits a valores de menor precision, como por ejemplo a 8 o 4 bits. Este proceso reduce la demanda computacional y el tamaño de a red y acelera el tiempo de inferencia. \\
 
 Sin embargo, esto viene con un costo, ya que inevitablemente, al cuantizar, se introduce un error, conocido como error de cuantización, lo cual afecta la exactitud de la red. Dado ese problema, se buscan alternativas para mitigar el impacto de la cuantización en la exactitud de la red. \\

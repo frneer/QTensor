@@ -1,34 +1,30 @@
-\documentclass[11pt]{article}
-
-% Page layout
-\usepackage[a4paper]{geometry}
+\documentclass[
+    11pt,
+    spanish,
+    singlespacing,
+    parskip,
+    headsepline,
+    bookmarks=true,
+    unicode=true,
+    pdftoolbar=true,
+    pdfmenubar=true,
+    pdffitwindow=false,
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+]{MastersDoctoralThesis}
 
 % Writing definitions
-\usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}  % Set language to Spanish
-\usepackage[]{biblatex}
-\usepackage{csquotes}
-\addbibresource{/workspace/references.bib}
-
-% Extras
-\usepackage[pdftex]{graphicx}
-
-% Set graphics path
-\graphicspath{{/workspace/pics/}}
-
-% Set hyperlinks
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    filecolor=magenta,
-    urlcolor=blue,
-}
-\urlstyle{same}
+\usepackage[utf8]{inputenc} % Codificación de entrada UTF-8
+\usepackage[T1]{fontenc}    % Codificación de salida para caracteres especiales
+\usepackage{graphicx}       % Manejo de gráficos
+\usepackage{eso-pic}        % Permite agregar fondos
+\usepackage{hyperref}       % Manejo de hipervínculos y marcadores
 
 % Image control
-\usepackage[pdftex]{graphicx}
-\usepackage{adjustbox}
+% \usepackage[pdftex]{graphicx}
+% \usepackage{adjustbox}
 \usepackage{float}
 
 % Math
@@ -56,69 +52,136 @@
 % Useful for tables
 \usepackage{makecell}
 
+% Redefinición de caracteres problemáticos en marcadores
+\hypersetup{
+    pdftitle={Título del Documento},
+    pdfauthor={Autor del Documento},
+    pdfkeywords={Sistemas Embebidos, Internet de las Cosas, Inteligencia Artificial},
+    pdfstartview={FitH},
+    unicode=true,
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\pdfstringdefDisableCommands{%
+  \def\texttt#1{#1}%
+  \def\textbf#1{#1}%
+  \def\textit#1{#1}%
+  \def\"{\"}%
+  \def\~{~}%
+  \def\'{'}%
+  \def\^{}%
+  \def\textunderscore{\_} % Manejo del subrayado en marcadores
+}
+
+
+% Definir comandos requeridos por la clase
+\newcommand{\degreename}{Maestría en Ciencias} % Cambia según tu título
+\newcommand{\univname}{Universidad Nacional de Ejemplo} % Cambia según tu universidad
+\newcommand{\keywordnames}{Palabras clave:}
+\graphicspath{{/workspace/pics/}}
+
+% Set hyperlinks
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+\urlstyle{same}
+
+
 % Custom commands
 \input{commands}
 
 \begin{document}
 
-\input{cover}
-\newpage
+% Configuración de la portada
+\posgrado{Carrera / Maestría}
+\keywords{Sistemas Embebidos, Internet de las Cosas, Inteligencia Artificial}
+
+% Incluir la portada desde un archivo separado
+\include{portada}
+
+% Configuración del contenido preliminar
+\frontmatter % Usar numeración romana para las páginas preliminares
+\pagestyle{plain} % Estilo de encabezado simple
+
+%----------------------------------------------------------------------------------------
+% Resumen
+%----------------------------------------------------------------------------------------
+
+\begin{abstract}
+\addchaptertocentry{\abstractname} % Agregar resumen al índice
+El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin ningún elemento de formato en el texto como itálicas o negritas. Tampoco se deben usar siglas ni acrónimos que no resulten obvios para un lector promedio de la memoria, ni referencias bibliográficas o notas al pie de página. No debe faltar qué es lo que se hizo/logró, qué importancia/valor tiene el proyecto/resultado, qué va a encontrar el lector en la memoria y qué contenidos de la especialización/maestría se aplicaron en el proyecto.
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+% Agradecimientos
+%----------------------------------------------------------------------------------------
+
+\begin{acknowledgements}
+\vspace{1.5cm}
+Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONAL}.
+\end{acknowledgements}
+
+%----------------------------------------------------------------------------------------
+% Índice
+%----------------------------------------------------------------------------------------
 
 \tableofcontents
-\newpage
+\listoffigures
+\listoftables
 
-\section{Objetivos}
-\label{sec:objetivos}
-\input{sections/objetivos}
-\section{Introducción}
-\subsection{Modelado de sistemas}
-\label{sec:modelado_de_sistemas}
-\input{sections/linear_regression}
-\subsection{Redes Neuronales} % backpropagation
-\label{sec:redes_neuronales}
-\input{sections/redes_neuronales}
-\subsection{Compresión} % en general
-\label{sec:compresion}
-\input{sections/compresion}
-% Reducir la complejidad de los parametros, complejidad espacial.
-% Reducir la cantidad de operaciones matematicos. (cambiar tmb en el plan)
-\subsection{Compresión de redes neuronales}
-\label{sec:compresion_de_redes}
-\input{sections/compresion_de_redes}
-\subsubsection{Cuantización}
-\label{sec:cuantizacion}
-\input{sections/cuantizacion}
-\section{Desarrollo}
-\subsection{Quantizadores}
-\subsubsection{Quantizador uniforme}
-\label{sec:uniform}
-\input{sections/uniform}
-\subsubsection{Quantizador flexible}
-% Solo reduce la cantidad de datos es si usas huffman para la codificacion de estos parametros
-% Si utilizo una codificacion binaria de los datos no logras compresion
-\label{sec:flex}
-\input{sections/flex}
-\section{Diseño e Implementación de la librería}
-\label{sec:implementacion}
-\input{sections/implementacion}
-\section{Resultados}
-\label{sec:resultados}
-\input{sections/resultados}
-% Resultado de la MLP, LENTE, otras redes
-% MobileNet va peola
-% VGG16 tmb se va anotar mucho algo
-% Cuadro comparativo de perf
-% https://www.tensorflow.org/model_optimization/guide/clustering#image_classification
-% Base FP32
-% Cuantizacion wheigh clustering? Sigue siendo punto fijo
-% Uniforme y para todas las capas misma config (no mixed-precision). Achica pero pierde mucha accuracy
-% Uniforme mixed-precision Buen balance entre compresion y accuracy
-% Flexible mixed-precision - Mejora ambas, con misma perdida de accuracy redes mas chicas. (o mens tamano mejor accuracy)
-% buscar PARETO front https://en.wikipedia.org/wiki/Pareto_front
-\section{Conclusiones}
-\section{Trabajos Futuros}
-\section{Agradecimientos}
-\section{Apendice A: Codificación de Huffman}
+%----------------------------------------------------------------------------------------
+% Dedicatoria
+%----------------------------------------------------------------------------------------
 
-\printbibliography
+\dedicatory{\textbf{Dedicado a... [OPCIONAL]}}
+
+%----------------------------------------------------------------------------------------
+% Capítulos
+%----------------------------------------------------------------------------------------
+
+\mainmatter % Iniciar numeración numérica para el contenido principal
+\pagestyle{thesis} % Estilo de encabezado de tesis
+
+% \input{cover}
+
+\chapter{Introducción general}
+\input{sections/01_introduccion_general/01_objetivos}
+\chapter{Introducción Específica}
+\input{sections/02_introduccion_especifica/01_linear_regression}
+\input{sections/02_introduccion_especifica/02_redes_neuronales}
+\input{sections/02_introduccion_especifica/03_compresion}
+\input{sections/02_introduccion_especifica/04_compresion_de_redes}
+\chapter{Diseño e Implementación}
+\input{sections/03_diseno_e_implementacion/01_cuantizadores}
+\input{sections/03_diseno_e_implementacion/02_implementacion_libreria}
+\chapter{Ensayos y resultados}
+\input{sections/04_ensayos_y_resultados/01_ensayos}
+\input{sections/04_ensayos_y_resultados/02_resultados}
+\chapter{Conclusiones}
+% \section{Trabajos Futuros}
+
+%----------------------------------------------------------------------------------------
+% Apéndices
+%----------------------------------------------------------------------------------------
+
+\appendix
+
+% Incluir apéndices desde archivos separados si es necesario
+%\include{Appendices/AppendixA}
+
+%----------------------------------------------------------------------------------------
+% Bibliografía
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\bibname}{Bibliografía} % Para asegurarte de que el título sea correcto
+\phantomsection % Necesario para que el enlace del marcador sea correcto
+
+\printbibliography[heading=bibintoc]
 \end{document}
