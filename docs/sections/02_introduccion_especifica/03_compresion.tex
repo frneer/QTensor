@@ -1,8 +1,13 @@
 \section{Compresión}
 \label{sec:compresion}
 
-La compresión es un proceso que consiste en reducir el tamaño de los datos, preservando lo mejor posible la información original. La misma, es usada tanto para reducir el espacio de almacenamiento necesario asi como el tiempo de transmisión de los datos. \\
+La compresión es el proceso que consiste en reducir el tamaño de los datos, con el objetivo de disminuir el espacio de almacenamiento requerido y el tiempo de transmisión. Es una técnica fundamental en el procesamiento digital, con aplicaciones como la compresión de imágenes (ej. JPEG, PNG) y la de audio (ej. MP3, FLAC).
 
-Es utilizada en un amplio espectro de aplicaciones, por ejemplo para comprimir imagen y audio. En el caso de las imágenes, se utilizan algoritmos de compresión como JPEG, PNG, GIF, entre otros. En el caso de audio, se utilizan algoritmos como MP3, OGG, FLAC, entre otros. \\
+Existen dos tipos principales de compresión:
 
-Existen dos tipos principales de compresión, la compresión sin pérdida y la compresión con pérdida. La compresión sin pérdida, como su nombre lo indica, no pierde información, es decir, que al descomprimir los datos se obtiene la información original. Por otro lado, la compresión con pérdida, sacrifica información para reducir el tamaño de los datos. \\
+\begin{itemize}
+    \item \textbf{Compresión sin pérdida (Lossless)}: Permite reconstruir los datos originales de forma exacta a partir de los datos comprimidos, sin ninguna pérdida de información.
+    \item \textbf{Compresión con pérdida (Lossy)}: Sacrifica parte de la información, que se considera menos perceptible o relevante, para lograr una tasa de compresión mucho mayor. El objetivo es que la diferencia entre el dato original y el reconstruido sea mínima desde un punto de vista perceptual.
+\end{itemize}
+
+Este último concepto, el de una compresión con pérdida, es análogo a lo que se busca en la compresión de redes neuronales, donde se sacrifica precisión numérica para ganar eficiencia. \\

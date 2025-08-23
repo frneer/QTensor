@@ -1,24 +1,36 @@
 \section{Redes Neuronales}
 \label{sec:redes_neuronales}
 
-Una red neuronal es un modelo matemático que se inspira en la estructura y funcionamiento del cerebro humano. Está compuesta por un conjunto de unidades de procesamiento llamadas neuronas \reffig{neuron}, organizadas en capas y conectadas entre sí mediante conexiones ponderadas por un peso ($w_{i_j}$). Cada neurona recibe una serie de entradas, las procesa mediante una función de activación ($\varphi$) y produce una salida ($y_j$) que se propaga a las neuronas de la capa siguiente. La red neuronal se entrena mediante un algoritmo de optimización que ajusta los pesos $\mathbf{w}$ de las conexiones para minimizar una función de costo. \\
+Una red neuronal es un modelo matemático inspirado en la estructura y funcionamiento del cerebro humano. Como se muestra en la \reffig{neuron}, está compuesta por un conjunto de unidades de procesamiento llamadas neuronas artificiales, organizadas en capas y conectadas entre sí mediante conexiones ponderadas por un peso ($w_{i_j}$). Cada neurona recibe una serie de entradas, las procesa mediante una función de activación ($\varphi$) y produce una salida ($y_j$) que se propaga a las neuronas de la capa siguiente. La red neuronal se entrena mediante un algoritmo de optimización iterativo que ajusta los pesos $\mathbf{w}$ de las conexiones para minimizar una función de costo. \\
 
 \input{diagrams/neuron}
 
-El algoritmo de optimización utilizado es el algoritmo de gradiente descendiente, el cual utiliza backpropagation, que consiste en propagar hacia atrás el error de la salida hasta la entrada, ajustando los pesos de las conexiones en función de la derivada de la función de costo con respecto a los pesos, este proceso se repite iterativamente hasta que la red converge a un mínimo local de la función de costo. \\
+El algoritmo de optimización utilizado es el algoritmo de gradiente descendiente, el cual utiliza backpropagation, que consiste en propagar hacia atrás el error de la salida hasta la entrada, una capa a la vez, ajustando los pesos de las conexiones en función de la derivada de la función de costo con respecto a los pesos. Por cada entrada del conjunto de entrenamiento:
 
-Ahora volviendo al ejemplo de la sección \ref{sec:modelado_de_sistemas}, podemos modelar el sistema mediante una red neuronal. En este caso, la red neuronal sería un modelo no lineal que aproxima la función $f$ mediante una serie de funciones no lineales. La red neuronal se entrena con un conjunto de datos de entrada y salida, y ajusta los pesos de las conexiones para minimizar la función de costo que se definio anteirormente como el $MSE$. \\
+\begin{itemize}
+    \item \textbf{Pasada hacia adelante \textit{forward pass}} Se calcula la salida de la red para una entrada dada.
+    \item \textbf{Cálculo del error} Se calcula el error entre la salida de la red y la salida esperada.
+    \item \textbf{Pasada hacia atrás \textit{backward pass}} El error se propaga hacia atrás a través de la red. Usando la regla de la cadena, se calculan los gradientes de la función de costo con respecto a cada peso.
+    \item \textbf{Actualización de pesos} Los pesos se actualizan en la dirección opuesta al gradiente, minimizando el error. La magnitud del paso de esta actualización es controlada por la tasa de aprendizaje $\eta$.
+\end{itemize}
 
-El proceso de entrenamiento de la red es un proceso iterativo, donde para cada tupla de datos de entrada y salida, se calcula la salida de la red, lo cual se conoce como \textit{forward pass}, y luego se calcula el error mediante la función de costo, luego se propaga hacia atrás el error mediante backpropagation \textit{backward pass}, lo que consiste en calcular los gradientes de la función de costo con respecto a los pesos de las conexiones utilizando la regla de la cadena, y finalmente se actualizan los pesos de las conexiones mediante el algoritmo de gradiente descendiente. \\
+% TODO(frneer): Insertar imagen del proceso descripto en el itemizado anterior.
 
+Este proceso se repite iterativamente hasta que la red converge a un mínimo local de la función de costo. \\
+
+La actualización de los pesos se realiza mediante la siguiente ecuación:
 \begin{equation}
-    \mathbf{w} = \mathbf{w} - \eta \frac{\partial}{\partial \mathbf{w}} \text{MSE}
+    \mathbf{w} = \mathbf{w} - \eta \frac{\partial L}{\partial \mathbf{w}}
 \end{equation}
+% TODO(frneer): Creo que deberia ser loss function generica
 
 Siendo $\eta$, una constante, llamada la \textit{tasa de aprendizaje} (o \textit{learning rate}), que determina el paso que se da en la dirección del gradiente. \\
 
-De esta manera obtendremos una aproximación de la función $f$ mediante la red neuronal, la cual permite escalar la cantidad de datos de entrada y salida. \\
+Ahora volviendo al ejemplo de la sección \ref{sec:modelado_de_sistemas}, podemos modelar el sistema mediante una red neuronal. En este caso, la red neuronal sería un modelo no lineal que aproxima la función $f$ mediante una serie de funciones no lineales. La red neuronal se entrena con un conjunto de datos de entrada y salida, y ajusta los pesos de las conexiones para minimizar la función de costo que se definio anteirormente como el $MSE$. \\
 
-Una de las limitaciones de las redes neuronales es que requieren una gran cantidad de datos de entrenamiento para ajustar los pesos de las conexiones, y en algunos casos pueden sufrir de sobreajuste, es decir, ajustar demasiado los pesos a los datos de entrenamiento y no generalizar bien a datos no vistos. \\
+% TODO(frneer): Quizas hacer un script para mostrar el ajuste de ambos?
+Al entrenar la red con el conjunto de datos, se obtiene una aproximación de la función $f$, $\hat{f}$, mediante la red neuronal, la cual permite escalar la cantidad de datos de entrada y salida utilizados para la aproximación. \\
 
-Ademas, cuanto mas complejo el sistema a modelar, generalmente se requiere una red neuronal mas grande, con mas capas y neuronas, lo cual aumenta la cantidad de parametros a ajustar y la cantidad de operaciones a realizar, lo cual puede ser computacionalmente costoso. \\
+Si bien las redes neuronales son modelos muy potentes, su complejidad puede ser una desventaja. Una de las limitaciones de las redes neuronales es que requieren una gran cantidad de datos de entrenamiento para ajustar los pesos de las conexiones, y en algunos casos pueden sufrir de sobreajuste, es decir, ajustar demasiado los pesos a los datos de entrenamiento y no generalizar bien a datos no vistos, lo cual resultara en un mal desempeño en la predicción de nuevos datos. \\
+
+Ademas, cuanto mas complejo el sistema a modelar, generalmente se requiere una red neuronal mas compleja, con mas capas y neuronas, lo cual aumenta la cantidad de parametros a ajustar y la cantidad de operaciones a realizar. \\

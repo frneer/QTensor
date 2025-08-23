@@ -7,6 +7,8 @@ cd "$(dirname "$0")"
 mkdir -p ../docs/build
 
 rm -f ../docs/build/*.bbl
+rm -f ../docs/build/*.bcf
+rm -f ../docs/build/*.run.xml
 
 # First pass: Generate .aux and .bcf files
 docker compose run --rm qtensor_tex \
@@ -17,7 +19,7 @@ docker compose run --rm qtensor_tex \
 
 # Run biber to generate the bibliography
 docker compose run --rm qtensor_tex \
-    biber build/plan && \
+    biber build/main && \
 
 # Second and third passes to resolve references
 docker compose run --rm qtensor_tex \
@@ -31,4 +33,3 @@ docker compose run --rm qtensor_tex \
         -interaction=nonstopmode \
         -output-directory=build \
         main.tex
-

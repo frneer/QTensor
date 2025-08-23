@@ -203,7 +203,7 @@
 \RequirePackage[utf8]{inputenc} % Required for inputting international characters
 \RequirePackage[T1]{fontenc} % Output font encoding for international characters
 \RequirePackage{palatino} % Use the Palatino font by default
-\RequirePackage[backend=bibtex,natbib=true, style=numeric, sorting=none]{biblatex} % Use the bibtex backend for bibliography
+\RequirePackage[backend=biber,natbib=true, style=numeric, sorting=none]{biblatex} % Use the bibtex backend for bibliography
 \RequirePackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
 \RequirePackage{xcolor}
 \RequirePackage{subcaption}

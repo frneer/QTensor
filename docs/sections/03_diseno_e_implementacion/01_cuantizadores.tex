@@ -1,16 +1,20 @@
 \section{Especificación de los cuantizadores a implementar}
+
 \subsection{Quantizador uniforme}
 \label{sec:uniform}
-% \input{sections/uniform}
 
 El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, \
-siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango de la señal a cuantizar. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, notaremos el intervalo del rango como $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
+siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango del cuantizador. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, se utilizara la notación del intervalo del rango $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
+
+Los niveles de cuantización se pueden expresar como:
+
 \begin{equation}
     \label{eq:uniform_quantizer_level_value}
     l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
 \end{equation}
 
-La función de cuantización uniforme puede escribirse como en la ecuación \refeq{uniform_quantizer_signed} y se ve como en la \reffig{uniform_signed}.
+La función de cuantización uniforme puede escribirse como en la ecuación \refeq{uniform_quantizer_signed}. El gráfico de la misma se muestra en la \reffig{uniform_signed}.
+
 \begin{equation}
     \label{eq:uniform_quantizer_signed}
     q(x; \alpha) =
@@ -23,11 +27,17 @@ La función de cuantización uniforme puede escribirse como en la ecuación \ref
 
 \defaultfigure{quantizers/uniform/q.png}{Quantización uniforme signada.}{uniform_signed}
 
-Para determinar las derivadas respecto a la entrda $\frac{\partial q}{\partial x}$, se puede utilizar el STE (Straight Through Estimator) que consiste en aproximar la función de cuantización como en la \refeq{uniform_quantizer_ste_signed}, como se muestra en la \reffig{uniform_signed_ste}.
+\subsubsection{Gradiente del cuantizador uniforme}
+
+Como resulta evidente al visualizar la \reffig{uniform_signed}, la función de cuantización uniforme en los umbrales (o \textit{thresholds}) no es diferenciable. Entonces, no existe una derivada definida en esos puntos. Sin embargo, para poder entrenar la red, es necesario definir una aproximación de la derivada de la función de cuantización uniforme. \\
+
+Para determinar las derivadas respecto a la entrada $\frac{\partial q}{\partial x}$, se puede aproximar la función de cuantización. Existen diferentes posibilidades para aproximarla, la mas sencilla es conocida como \textit{Straight Through Estimator} (STE), que consiste en aproximar la función de cuantización como una función identidad, es decir, que la derivada es 1 en todos los puntos.\\
+
+Es decir consiste en aproximar la función de cuantización como en la \refeq{uniform_quantizer_ste_signed}, como se muestra en la \reffig{uniform_signed_ste}.
 
 \begin{equation}
     \label{eq:uniform_quantizer_ste_signed}
-    q\left(x; \alpha\right) =
+    \hat{q}\left(x; \alpha\right) =
     \begin{cases}
         - \alpha & \text{si $x \leq -\alpha$} \\
         x \\
@@ -37,11 +47,11 @@ Para determinar las derivadas respecto a la entrda $\frac{\partial q}{\partial x
 
 \defaultfigure{quantizers/uniform/q_ste.png}{Aproximación de la cuantización uniforme signada con STE.}{uniform_signed_ste}
 
-Con lo cual resulta evidente que la derivada de la función de cuantización uniforme es la derivada de la función identidad, es:
+Y su derivada es: \\
 
 \begin{equation}
     \label{eq:uniform_quantizer_ste_signed_derivative}
-    \frac{\partial q}{\partial x}\left(x; \alpha\right) =
+    \frac{\partial \hat{q}}{\partial x}\left(x; \alpha\right) =
     \begin{cases}
         0 & \text{si $x \leq -\alpha$} \\
         1 & \text{si $-\alpha < x < \alpha$} \\
@@ -49,31 +59,30 @@ Con lo cual resulta evidente que la derivada de la función de cuantización uni
     \end{cases}
 \end{equation}
 
-Ahora queda resolver la derivada con respecto a $\alpha$ de la función de cuantización uniforme, $\frac{\partial q}{\partial \alpha}$.
+Ahora queda resolver la derivada con respecto a $\alpha$ de la función de cuantización uniforme, $\frac{\partial q}{\partial \alpha}$. La derivada que utilizaremos para optimizar el parámetro $\alpha$. \\
 
-Si observamos la \reffig{uniform_signed}, podemos ver que la función de cuantización uniforme signada se puede expresar como:
+Si observamos la \reffig{uniform_signed}, es posible ver que para un $x$ dado, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción y la cuantización uniforme signada se puede expresar como:
 
 \begin{equation}
     \label{eq:uniform_quantizer_signed_dq_dalpha}
     \frac{\partial q}{\partial \alpha}\left(x; \alpha\right) = \frac{q(x; \alpha)}{\alpha}
 \end{equation}
 
-Pues para un $x$ dado, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción.
-
 \subsection{Quantizador flexible}
 \label{sec:flex}
 
 El cuantizador flexible consiste en un cojunto de $n$ niveles, con valores $l$ cuyos limites estan determinados por los umbrales $t$. Al igual que en el caso del cuantizador uniforme, se fija el rango a traves del parametro $\alpha$, el cuantizador puede ser signado, con rango $[-\alpha, \alpha]$, o no signado, con rango $[0, \alpha]$. \\
 
-La primera diferencia con el uniforme es que los niveles $n$ no dependen de la cantidad de $bits$ utilizados, si no que tanto $l$ como $t$ son parametros del cuantizador que se ajustan durante el entrenamiento de la red. \\
+La principal diferencia con el uniforme es que los niveles $n$ no dependen de la cantidad de bits utilizados, sino que tanto $l$ como $t$ son parámetros del cuantizador. En otras palabras, desacopla los niveles de cuantización de la cantidad de bits. \\
+
+Para optimizar la implementación en la librería, se definen $n$ niveles, y $n+1$ umbrales, esto puede resaltar poco intuitivo, pero hace que la implementación sea más sencilla en un futuro. Sin embargo, los umbrales $t_0$ y $t_n$ no se utilizan, ya que no son necesarios para la cuantización, son fijos y estarán fijados a los límites del rango. $t_0 = m$ y $t_n = M$. \\
 
 \begin{equation}
     \label{eq:flexible_quantizer}
     q\left(x; \alpha, t, l\right) = \sum_{i=0}^{n-1} q_u\left({l_i; \alpha}\right) \cdot \mathbbm{1}_{\left[t_i, t_{i+1}\right]}\left(x\right)
 \end{equation}
 
-Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_quantizer_signed}. \\
-% TODO(Fran): Pensar que pasa si baja de alpha
+Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_quantizer_signed}. Podemos ver el efecto de la misma comparando las figuras \reffig{flexible_signed} y \reffig{flexible_signed_q}. En la primera se muestra la función de cuantización flexible, mientras que en la segunda se ilustran los niveles previos a la cuantización.
 
 \defaultfigure{quantizers/flex/q.png}{Quantización flexible signada.}{flexible_signed}
 
@@ -83,4 +92,7 @@ Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_
 
 \defaultfigure{quantizers/flex/q_q.png}{Quantización flexible signada con niveles no cuantizados.}{flexible_signed_q}
 
-TODO(Fran): Escribir las derivadas analiticas. como en el caso del uniforme. \\
+% TODO(Fran): Escribir las derivadas analiticas. como en el caso del uniforme. \\
+\subsubsection{Gradiente del cuantizador flexible}
+
+\textbf{NOTA: Falta replicar el analisis de los gradientes del cuantizador uniforme para el flexible.}

@@ -1,0 +1,40 @@
+En este capítulo se presenta el contexto, la motivación y los objetivos del presente trabajo. Se comienza exponiendo las necesidades que disparan el interés de la compresión de redes neuronales. A continuación, se realiza un análisis del estado del arte, describiendo las técnicas de compresión existentes. Finalmente, se definen los objetivos generales y específicos que guían el desarrollo de esta tesis.
+
+
+\section{Motivación}
+\label{sec:motivacion}
+
+La compresión de redes neuronales es un campo de estudio que ha tomado relevancia en los últimos años. En un contexto donde las arquitecturas de los modelos de redes neuronales son cada vez más complejas y presentan un claro incremento en la cantidad de parámetros, surge la necesidad de reducir el tamaño de las mismas para su implementación. Esta necesidad es particularmente crítica en dispositivos con recursos limitados, como teléfonos móviles y sistemas embebidos, pero también es relevante en la búsqueda de soluciones computacionales más eficientes en general. Por ejemplo, en el caso de redes LLMs\cite{IBM_LLM}, que requieren una gran cantidad de memoria y operaciones de punto flotante (\textbf{FLOPs}) para su inferencia, la compresión se vuelve esencial para su uso práctico, permitiendo, por ejemplo, respuestas más rápidas al interactuar con el usuario. \\
+
+Con la compresión, se busca obtener una reducción en la cantidad de memoria requerida para almacenar el modelo y en el número de \textbf{FLOPs} necesarias para realizar una inferencia, sin sacrificar de manera significativa el \textit{desempeño}\footnote{En este caso utilizaremos la \textit{precisión} como métrica para evaluar el desempeño} de la red. \\
+
+Existen diversas técnicas de compresión relevantes en el caso de redes neuronales, las mismas detallarán más adelante en la sección \ref{sec:compresion_de_redes}. Este trabajo se enfoca en una de las técnicas: la \textbf{cuantización}, la cual consiste en reducir la resolución numérica utilizada para representar los parámetros (pesos y activaciones) de la red. \\
+
+
+\section{Estado del arte}
+\label{sec:estado_arte}
+
+La cuantización provee mejoras significativas, pero también afecta el \textit{desempeño} de la red, por ende es crucial elegir cuidadosamente el esquema y los parámetros de cuantización. \\
+
+Existen diferentes \textbf{funciones de cuantización}, entre las que se encuentran la cuantización uniforme y no uniforme. La \textbf{cuantización uniforme} es la más común y consiste en mapear un rango de valores a un conjunto de valores discretos equidistantes. Por otro lado, la \textbf{cuantización no uniforme} permite una mayor flexibilidad al asignar diferentes intervalos a diferentes rangos de valores, lo que trae mayores beneficios en el caso de capas con una distribución de pesos no uniforme. En este trabajo se implementará un \textbf{cuantizador flexible} el cual mezcla ambos tipos de cuantizacion, lo que le provee la mayor compresión que permite la cuantizacion no uniforme, pero con las ventajas de la cuantización uniforme, como su implementación en sistemas embebidos utilizando punto fijo. \\
+
+En el caso de las redes neuronales, el \textbf{proceso de cuantización} puede implementarse de dos maneras diferentes:
+
+\textbf{Cuantización post-entrenamiento} (\textbf{PTQ}) consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizarla con alguna de las técnicas mencionadas. Esta técnica es rápida y fácil de implementar, pero puede llevar a una pérdida significativa de exactitud. \\
+
+\textbf{Cuantización durante el entrenamiento} (\textbf{QAT}) consiste en entrenar la red neuronal emulando la cuantización en la inferencia, pero manteniendo la resolución de los parámetros en punto flotante para realizar backpropagation, esto permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. \textbf{QAT} puede, además, incluir el entrenamiento de los propios parámetros de cuantización, como el rango y la resolución, lo que puede optimizar aún más el rendimiento del modelo cuantizado, es decir, es una cuantizacion adaptable a los datos. Esta técnica es más compleja de implementar, pero puede llevar a una mejor preservación de la exactitud del modelo. \\
+
+% https://www.ibm.com/think/topics/quantization-aware-training#f01
+\section{Objetivos}
+\label{sec:objetivos}
+
+El objetivo principal de esta tesis es el diseño, la implementación y la evaluación de una librería de software en \texttt{Python}, compatible con el framework \textbf{Keras}\cite{keras}, que facilite el entrenamiento de redes neuronales utilizando la metodología de cuantización adaptable durante el entrenamiento (QAT). La librería deberá permitir inyectar de manera sencilla diversos esquemas de cuantización y ser fácilmente aplicable a cualquier arquitectura de red previamente definida.
+
+Para alcanzar este fin, se plantean los siguientes objetivos específicos:
+
+\begin{itemize}
+    \item Diseñar e implementar una librería que permita entrenar redes neuronales con cuantización durante el entrenamiento basada en \textbf{TensorFlow}\cite{tensorflow} y \textbf{Keras}.
+    \item Implementar un esquema de cuantización uniforme.
+    \item Implementar un esquema de cuantización flexible.
+    \item Desarrollar ejemplos con arquitecturas de redes neuronales y datasets del estado del arte y evaluar el rendimiento de la librería.
+\end{itemize}
