@@ -1,7 +1,7 @@
 \section{Modelado de sistemas}
 \label{sec:modelado_de_sistemas}
 
-El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$. \\
+El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$.
 
 \begin{figure}[H]
     \centering
@@ -16,7 +16,7 @@ El modelado de los sistemas y relaciones entre variables es una tarea fundamenta
 \end{figure}
 
 
-El objetivo del modelado es encontrar una función $\hat{f}$ que aproxime a $f$ de la \say{mejor manera posible}, $\hat{y} = \hat{f}(x)$. \\
+El objetivo del modelado es encontrar una función $\hat{f}$ que aproxime a $f$ de la \say{mejor manera posible}, $\hat{y} = \hat{f}(x)$.
 
 \begin{figure}[H]
     \centering
@@ -36,11 +36,11 @@ La pregunta a responder es ¿cómo obtener $\hat{f}$?. Para ilustrar cómo se ob
     \hat{y} = \mathbf{w} x + \mathbf{b}
 \end{equation}
 
-Donde $\mathbf{w}$ y $\mathbf{b}$ son los parámetros del modelo, los cuales se deben ajustar para que $\hat{f}$ se aproxime lo \say{mejor posible} a $f$. \\
+Donde $\mathbf{w}$ y $\mathbf{b}$ son los parámetros del modelo, los cuales se deben ajustar para que $\hat{f}$ se aproxime lo \say{mejor posible} a $f$.
 
-La forma de ajustar estos parámetros es a partir de un conjunto de datos conocidos de entrada y salida de la forma $\left(x_i, y_i\right)$. Es decir, tenemos una serie de entradas conocidas $X$ y sus respectivas salidas $Y$, y a partir de estos datos \textit{etiquetados}, se busca ajustar los parámetros del modelo. Este conjunto de datos se denomina \textbf{conjunto de entrenamiento} o \textbf{dataset}. \\
+La forma de ajustar estos parámetros es a partir de un conjunto de datos conocidos de entrada y salida de la forma $\left(x_i, y_i\right)$. Es decir, tenemos una serie de entradas conocidas $X$ y sus respectivas salidas $Y$, y a partir de estos datos \textit{etiquetados}, se busca ajustar los parámetros del modelo. Este conjunto de datos se denomina \textbf{conjunto de entrenamiento} o \textbf{dataset}.
 
-Se buscarán los parámetros $\mathbf{w}$, $\mathbf{b}$ que minimicen alguna métrica de error, definida por una función de costo $L$, la cual determina que significa \say{mejor posible}. \\
+Se buscarán los parámetros $\mathbf{w}$, $\mathbf{b}$ que minimicen alguna métrica de error, definida por una función de costo $L$, la cual determina que significa \say{mejor posible}.
 
 Para la regresión lineal, la función de costo más común es el error cuadrático medio (MSE). Es decir, se busca minimizar la siguiente función:
 
@@ -48,7 +48,7 @@ Para la regresión lineal, la función de costo más común es el error cuadrát
     L = \frac{1}{n} \sum_{i=1}^{n} \left(y_i - \hat{y}_i\right)^2
 \end{equation}
 
-Donde $n$ es la cantidad de datos de entrenamiento.\\
+Donde $n$ es la cantidad de datos de entrenamiento.
 
 En este caso es posible deducir analíticamente los valores de $\mathbf{w}$ y $\mathbf{b}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Lo cual nos lleva a las siguientes soluciones:
 
@@ -59,4 +59,4 @@ En este caso es posible deducir analíticamente los valores de $\mathbf{w}$ y $\
     \end{split}
 \end{equation}
 
-Sin embargo, en la práctica, el cálculo de estas soluciones puede ser computacionalmente costoso, especialmente cuando la cantidad de datos es muy grande. Computar la inversa de una matriz es un proceso de orden cúbico en la cantidad de datos. Esto da paso a métodos de optimización iterativos, como los utilizados en las redes neuronales. \\
+Sin embargo, en la práctica, el cálculo de estas soluciones puede ser computacionalmente costoso, especialmente cuando la cantidad de datos es muy grande. Computar la inversa de una matriz es un proceso de orden cúbico en la cantidad de datos. Esto da paso a métodos de optimización iterativos, como los utilizados en las redes neuronales.

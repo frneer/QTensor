@@ -19,6 +19,11 @@
         \node[circle, draw, minimum size=1.2cm] (sum) at (3, -2.5) {$\sum$};
         % \node[above of=sum, node distance=1.2cm] {Suma};
 
+        % Bias Node
+        \node[circle, draw, minimum size=1cm, above of=sum, node distance=1.5cm] (b) {$b_j$};
+        \draw[-stealth] (b) -- (sum);
+        % \node[below of=b,
+
         % Activation Function
         \node[rectangle, draw, minimum width=1.5cm, minimum height=1cm] (act) at (6, -2.5) {$\varphi$};
         % \node[above of=act, node distance=1.2cm] {Funcion de Activación};

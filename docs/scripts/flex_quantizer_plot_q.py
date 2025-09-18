@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # TODO(Fran): Migrate this plots to src and leverage the quantizers.common module
 def min_value(alpha, signed):
     """Return the minimum possible value of the quantization range."""
@@ -34,22 +35,28 @@ def quantize(x, alpha, m_levels, signed):
 
 
 def main():
-    plot_ste = False
+    plot_ste = True
     name = "q_ste" if plot_ste else "q"
     bits = 3
     alpha = 1
     n_levels = 2 ** (bits - 1)
-    step = alpha / n_levels
-    m_levels = 2 ** bits
+    alpha / n_levels
+    m_levels = 2**bits
     signed = True
-
 
     alpha = 0.15165123343467712
     levels = [-0.15165123, -0.08514632, -0.02999737, 0.02491043, 0.07670338]
     # levels += [levels[-1]]
     qlevels = [-0.15165123, -0.11373842, -0.03791281, 0.0, 0.07582562]
     # qlevels += [qlevels[-1]]
-    thresholds = [-0.15165123, -0.01363241,  0.0057151, 0.0173785, 0.08350082,  0.15165123]
+    thresholds = [
+        -0.15165123,
+        -0.01363241,
+        0.0057151,
+        0.0173785,
+        0.08350082,
+        0.15165123,
+    ]
 
     # levels = np.insert(levels, 0, levels[0])
     # levels = np.insert(levels, -1, levels[-1])
@@ -64,15 +71,16 @@ def main():
     plt.figure()
     # Domain of the quantizer
     plt.axvline(
-        x=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5,
+        x=min_value(alpha, signed),
+        color="red",
+        linestyle="--",
+        alpha=0.5,
     )
     plt.axhline(
         y=min_value(alpha, signed), color="red", linestyle="--", alpha=0.5
     )
     plt.axvline(x=alpha, color="red", linestyle="--", alpha=0.5)
     plt.axhline(y=alpha, color="red", linestyle="--", alpha=0.5)
-
-
 
     # Generate the levels without quantization
     plt.step(
@@ -99,7 +107,9 @@ def main():
     xticks = thresholds
     plt.xticks(
         xticks,
-        labels=[fr"$t_0 = -\alpha$"] + [fr"$t_{i}$" for i in range(1, len(thresholds) - 1)] + [fr"$t_{len(thresholds) - 1} = \alpha$"],
+        labels=[rf"$t_0 = -\alpha$"]
+        + [rf"$t_{i}$" for i in range(1, len(thresholds) - 1)]
+        + [rf"$t_{len(thresholds) - 1} = \alpha$"],
     )
 
     # Ticks and grid configuration
@@ -120,13 +130,20 @@ def main():
     print("qlevels", qlevels)
     plt.yticks(
         bit_levels,
-        labels=[fr"$l_{i}$" if np.isin(np.round(bit_levels[i], 5), np.round(qlevels, 5)) else "" for i in range(m_levels)],
+        labels=[
+            (
+                rf"$l_{i}$"
+                if np.isin(np.round(bit_levels[i], 5), np.round(qlevels, 5))
+                else ""
+            )
+            for i in range(m_levels)
+        ],
     )
     # Plot labels
     plt.xlabel(r"$x$")
     plt.ylabel(r"$q(x; \alpha, \overline{t}, \overline{l})$")
     # plt.legend(loc="upper left", fontsize=8)
-    ax = plt.gca()
+    plt.gca()
     plt.grid(which="both", alpha=0.3, linestyle=":")
     plt.savefig(f"../pics/quantizers/flex/{name}_q.png")
 

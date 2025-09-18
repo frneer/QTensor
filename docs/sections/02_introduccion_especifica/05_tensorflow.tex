@@ -1,0 +1,19 @@
+
+
+\section{Frameworks de Aprendizaje Profundo}
+
+La implementación de modelos de redes neuronales complejos y los algoritmos de entrenamiento asociados, como \textit{backpropagation}, requieren de un gran volumen de operaciones matemáticas, principalmente sobre tensores. Para facilitar este proceso, la comunidad académica y la industria han desarrollado bibliotecas de software especializadas conocidas como \textit{frameworks} de aprendizaje profundo. En este trabajo, se utilizaron dos herramientas centrales del ecosistema de Google: \texttt{TensorFlow} \cite{tensorflow} y \texttt{TensorFlow Model Optimization} \cite{tensorflow-model-optimization}.
+
+\subsection{TensorFlow}
+
+\texttt{TensorFlow} es una biblioteca de software de código abierto desarrollada por el equipo de Google Brain (ahora parte de la compania Google DeepMind), que se ha consolidado como una de las herramientas de facto para el aprendizaje automático tanto en la industria como en la academia. Proporciona un ecosistema completo para la creación, entrenamiento y despliegue de modelos de \textit{machine learning}.
+
+Para simplificar la construcción de arquitecturas de redes neuronales, se apoya en la biblioteca \texttt{Keras}, una API de alto nivel integrada dentro de \texttt{TensorFlow}, la cual ofrece una interfaz intuitiva y modular para definir modelos capa por capa, lo que acelera significativamente el ciclo de desarrollo y experimentación.
+
+\subsection{TensorFlow Model Optimization}
+
+Para abordar específicamente la compresión y optimización de modelos, el ecosistema de \texttt{TensorFlow} cuenta con una biblioteca secundaria llamada \texttt{TensorFlow Model Optimization} (de ahora en adelante \texttt{TFMOT}).
+
+\texttt{TFMOT} es un conjunto de herramientas diseñado para reducir la complejidad de los modelos de redes neuronales, facilitando su despliegue en dispositivos con recursos limitados.
+
+\texttt{TFMOT} ofrece funcionalidades para diversas técnicas de compresión, entre las que destaca la cuantización. Provee mecanismos tanto para la Cuantización Post-Entrenamiento (PTQ) como para la Cuantización Durante el Entrenamiento (QAT).
