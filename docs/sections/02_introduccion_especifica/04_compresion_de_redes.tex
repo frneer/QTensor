@@ -1,7 +1,10 @@
 \section{Compresión de redes neuronales}
 \label{sec:compresion_de_redes}
 
-La compresión de redes neuronales es, también, un proceso que consiste en reducir el tamaño de los datos, en particular, de una red neuronal. La compresión de modelos busca reducir su tamaño y complejidad, preservando lo mejor posible su rendimiento. Para reducir su tamaño y acelerar el tiempo de inferencia.
+La compresión de redes neuronales es, también, un proceso que consiste en reducir el tamaño de los datos, en particular, de una red neuronal. La compresion busca reducir la compejidad del modelo, tanto en terminos de memoria, del tamano del modelo, y por otro lado, la de complejidad de las operaciones.
+
+% TODO frneer explicar un poco la complejidad, algunos reducen mas una otras otras, y la cuantizacion en particular reduce ambas...
+% La compresión de modelos busca reducir su tamaño y complejidad, preservando lo mejor posible su rendimiento. Para reducir su tamaño y acelerar el tiempo de inferencia.
 
 Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
 
@@ -30,9 +33,9 @@ Como puede observarse en la figura \reffig{ptq_vs_qat}, la cuantización post-en
 
 \subsubsection{Quantization Aware Training}
 
-Para emular la cuantización durante el entrenamiento, se debe intervenir el algoritmo usual de entrenamiento, que consiste como se explico en la seccion \ref{sec:redes_neuronales} en realizar una pasada hacia adelante (forward-pass), calcular la perdida y luego realizar una pasada hacia atrás (backpropagation) para actualizar los pesos.
+Para emular la cuantización durante el entrenamiento, se debe intervenir el algoritmo usual de entrenamiento, que consiste como se explico en la seccion \ref{sec:redes_neuronales} en realizar una pasada hacia adelante (forward-pass), calcular la perdida y luego realizar una pasada hacia atrás (backpropagation) para calcular las derivadas y finalmente SGD para actualizar los pesos.
 
-¿Cómo se logra emular el efecto de la cuantización? Para esto, se realiza lo que se llama \textit{fake quantization}, que consiste en aplicar una función de cuantización a los pesos al realizar el forward-pass. Estos pesos cuantizados se calculan únicamente para la inferencia; para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Esto es clave, debido a que si se utilizaran los pesos cuantizados, es altamente probable caer en problemas de gradiente desvaneciente o en grandes errores de propagación.
+¿Cómo se logra emular el efecto de la cuantización? Para esto, se realiza lo que se llama \textit{fake quantization}, que consiste en aplicar una función de cuantización a los pesos al realizar el forward-pass. Estos pesos cuantizados se calculan únicamente para la inferencia; para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Esto es clave, debido a que si se utilizaran los pesos cuantizados, es altamente probable caer en problemas de gradiente desvaneciente.
 
 Pero, ¿cómo es posible aplicar el algoritmo de backpropagation si se tiene una función no diferenciable como la cuantización? Para esto, existen diversas técnicas, las cuales consisten en aproximar la función de cuantización con una función diferenciable, por ejemplo, una línea recta, conocido como Straight-Through Estimator (STE). Esta técnica permite que el algoritmo de backpropagation pueda calcular los gradientes y actualizar los pesos de la red. Sin embargo, hay otras opciones posibles para aproximar la función de cuantización, que serán extremadamente útiles en la implementación del cuantizador flexible.
 

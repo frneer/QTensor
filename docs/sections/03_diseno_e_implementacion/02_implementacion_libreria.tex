@@ -46,9 +46,71 @@ En particular, se usara la metrica de cobertura de código para evaluar la calid
 
 Se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está siendo probado adecuadamente.
 
+\subsection{Analisis del funcionamiento de la libreria \texttt{TensorFlow}}
+
+Para entender como funciona la libreria \texttt{TFMOT}, es primero necesario entender algunos conceptos de \texttt{TensorFlow}.
+
+¿Cómo realiza TensorFlow la definición del proceso de inferencia y entrenamiento de un modelo? TensorFlow define un grafo computacional, que es una representación de las operaciones matemáticas que se realizan en el modelo. Este grafo se compone de nodos y aristas, donde los nodos representan las operaciones matemáticas y las aristas representan los tensores que se pasan entre las operaciones.
+
+Además de representar operaciones y tensores, el grafo computacional en TensorFlow también permite realizar el cálculo automático de derivadas, lo cual es esencial para entrenar redes neuronales mediante backpropagation.
+
+TensorFlow construye de manera automática un grafo de gradientes asociado al grafo directo. Cada operación tiene definida su regla de derivación (por ejemplo, para $z = x \cdot y$, el gradiente de $z$ respecto a $x$ es $y$). A partir de la derivada de la función de pérdida, TensorFlow recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables.
+
+Una funcionalidad importante en el contexto de esta tesis es la capacidad de intervenir en la definicion automatica de los gradientes de estas operaciones. Esto es posible a traves de la funcionalidad de \textit{custom gradients}, que permite definir una operacion matematica y su derivada de manera independiente. Esto es util para definir operaciones que no tienen una derivada bien definida, o que tienen una derivada que no es adecuada para el entrenamiento.
+
+Un \texttt{decorador} en Python es una función o clase que envuelve otra función o clase (\textit{wrapper} en inglés) para modificar su comportamiento. En el caso de la definicion de gradientes personalizados, su implementación es mediante un \texttt{decorador}, \texttt{@tf.custom\_gradient} aplicado sobre una función que define una operación matemática en el grafo computacional.
+
+Supongamos por ejemplo, la multiplicación de dos tensores \texttt{a} y \texttt{b}, como se muestra en el fragmento de código \ref{code:custom_gradient}. La función \texttt{mul} define la operación de multiplicación y TensorFlow computa automáticamente los gradientes de esta operación. En este caso, los gradientes son $\frac{\partial y}{\partial a} = b$ y $\frac{\partial y}{\partial b} = a$.
+
+\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+# Operacion
+def mul(a, b):
+    return a * b
+
+# Valores de entrada
+a = tf.constant(3.0)
+b = tf.constant(4.0)
+
+# Observa la salida y las derivadas
+with tf.GradientTape(persistent=True) as tape1:
+    tape1.watch([a, b])
+    y_auto = mul(a, b)  # = 12.0
+
+da_auto = tape1.gradient(y_auto, a)  # = 4.0 (dy/da = b)
+db_auto = tape1.gradient(y_auto, b)  # = 3.0 (dy/db = a)
+\end{lstlisting}
+
+Ahora, es posible modificar la función \texttt{mul} para definir una operación con gradiente personalizado, como se muestra en el fragmento de código \ref{code:custom_gradient}. En este caso, la función \texttt{mul\_custom} define la operación de multiplicación y su gradiente personalizado. En este caso, los gradientes son $\frac{\partial y}{\partial a} = 2b$ y $\frac{\partial y}{\partial b} = 2a$.
+
+\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+# Operacion con gradiente personalizado
+@tf.custom_gradient
+def custom_mul(a, b):
+    y = a * b
+    def grad(dy):
+        da = 2 * b * dy
+        db = 2 * a * dy
+        return da, db
+    return y, grad
+
+# Valores de entrada
+a = tf.constant(3.0)
+b = tf.constant(4.0)
+
+# Observa la salida y las derivadas
+with tf.GradientTape(persistent=True) as tape2:
+    tape2.watch([a, b])
+    y_custom = custom_mul(a, b)  # = 12
+
+da_custom = tape2.gradient(y_custom, a)  # = 8.0 (dy/da = 2b)
+db_custom = tape2.gradient(y_custom, b)  # = 6.0 (dy/db = 2a)
+\end{lstlisting}
+
+Esta funcionalidad será una de las claves para poder implementar las derivadas de los cuantizadores desarrollados en la sección \ref{sec:cuantizacion}.
 
 \subsection{Analisis de las capacidades y limitaciones de \texttt{TFMOT}}
 
+% TODO(frneer): a que llamamos esquema?
 El mayor punto de dificultad con la libreria \texttt{TFMOT} es la ergonomia para definir esquemas de cuantización complejos. Es muy intutivo usarla para esquemas de cuantización uniformes (para todas las capas tener la misma cuantizacion), y especificamente incorpora el cuantizador uniforme de 8 bits.
 
 Esta limitacion dificulta la interaccion de los usuarios con la libreria, ya que no pueden definir y aplicar sencillamente diferentes esquemas de cuantización a diferentes capas.
@@ -79,3 +141,65 @@ En el caso de querer utilizar una configuracion especifica para una capa, se deb
 %   Source https://github.com/tensorflow/model-optimization/blob/e2d531bfa2ce10916a1066c67b1438d17cc67dac/tensorflow_model_optimization/python/core/quantization/keras/quantize.py#L83
 
 Esto es incoveniente, por dos razones, la primera es que esto debe realizarse en la definicion del modelo, o al menos asi se propone su utilizacion. Y la segunda es lo verboso que resulta el código, ya que se deben agregar anotaciones de cuantización en cada capa de forma explícita mientras se define el modelo. \\
+
+Para analizar que flexibilidad tiene la libreria para ser extendida, se analizaron las interfaces que permiten la cuantizacion. TFMOT provee una serie de interfaces que permiten controlar como se realiza la cuantización de un modelo.
+
+
+\subsection{Implementación de los cuantizadores}
+
+\subsubsection{Clase \texttt{Quantizer}}
+
+La interfaz \texttt{Quantizer} define las operaciones matemáticas que transforman tensores durante la cuantización. Proporciona dos métodos principales:
+
+\begin{enumerate}
+    \item \texttt{build}, que construye las variables de estado necesarias para el algoritmo de cuantización.
+    \item \texttt{\_\_call\_\_}, que aplica la operación de cuantización a los tensores de entrada.
+\end{enumerate}
+
+Sigue el mismo patrón que las capas de Keras, y permite definir variables de estado que se entrenan junto con el modelo. El método \texttt{build} se llama una vez que se conoce la forma de los tensores de entrada, y permite inicializar las variables de estado. El método \texttt{\_\_call\_\_} se llama cada vez que se aplica la cuantización, y debe implementar la lógica de cuantización, esta es la que se coloca en el grafo computacional, permitiendo la cuantización de los tensores y por ende, esta en el camino del gradiente.
+
+\subsubsection{Cuantizador uniforme}
+
+\subsubsection{Cuantizador flexible}
+
+\subsubsection{Clase \texttt{QuantizeConfig}}
+
+Para definir como cuantizar una capa, se define la interfaz \texttt{QuantizeConfig}, que permite definir como cuantizar los pesos, las activaciones y las salidas de la capa.
+
+\begin{lstlisting}[language=Python,label=code:quantize_config,caption=Interfaz QuantizeConfig de TFMOT.]
+
+class MyQuantizer(Quantizer):
+  def build(self, tensor_shape, name, layer):
+    ...
+
+  def __call__(self, inputs):
+    ...
+
+class SomeOtherQuantizer(Quantizer):
+  def build(self, tensor_shape, name, layer):
+    ...
+
+  def __call__(self, inputs):
+    ...
+
+class MyQuantizeConfig(QuantizeConfig):
+  def get_weights_and_quantizers(self, layer):
+    return [(layer.kernel, MyQuantizer())]
+
+  def get_activations_and_quantizers(self, layer):
+    return [(layer.activation, SomeOtherQuantizer()())]
+
+  def set_quantize_weights(self, layer, quantize_weights):
+    layer.kernel = quantize_weights[0]
+
+  def set_quantize_activations(self, layer, quantize_activations):
+    layer.activation = quantize_activations[0]
+
+  def get_output_quantizers(self, layer):
+    # Does not quantize output, since we return an empty list.
+    return []
+
+  def get_config(self):
+    return {}
+
+\end{lstlisting}

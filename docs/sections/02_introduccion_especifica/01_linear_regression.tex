@@ -1,7 +1,7 @@
 \section{Modelado de sistemas}
 \label{sec:modelado_de_sistemas}
 
-El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$.
+El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$, como se muestra en la \reffig{system}.
 
 \begin{figure}[H]
     \centering
@@ -13,10 +13,15 @@ El modelado de los sistemas y relaciones entre variables es una tarea fundamenta
         \draw[-stealth] (system) -- (output);
     \end{tikzpicture}
     \caption{Sistema a modelar}
+    \label{fig:system}
 \end{figure}
 
+Al desconocer la función $f$, se busca aproximarla mediante un modelo $\hat{f}$ con parámetros $\theta$, que permita estimar la salida $\hat{y}$ a partir de la entrada $x$, como se muestra en la \refeq{system_approximation} y la \reffig{system_model}.
 
-El objetivo del modelado es encontrar una función $\hat{f}$ que aproxime a $f$ de la \say{mejor manera posible}, $\hat{y} = \hat{f}(x)$.
+\begin{equation}
+    \label{eq:system_approximation}
+    \hat{y} = \hat{f}(x; \theta) \approx f(x)
+\end{equation}
 
 \begin{figure}[H]
     \centering
@@ -28,35 +33,97 @@ El objetivo del modelado es encontrar una función $\hat{f}$ que aproxime a $f$ 
         \draw[-stealth] (system) -- (output);
     \end{tikzpicture}
     \caption{Modelo del sistema}
+    \label{fig:system_model}
 \end{figure}
 
-La pregunta a responder es ¿cómo obtener $\hat{f}$?. Para ilustrar cómo se obtiene $\hat{f}$, consideremos un modelo simple de regresión lineal, donde la función se aproxima con una recta:
+Para obtener los parámetros del modelo $\theta$, se define una función de costo $L$ que mide el error entre la salida real $y$ y la salida estimada $\hat{y}$. Luego, se buscan los parámetros $\theta$ que minimicen la función de costo $L(y, \hat{y})$.
+
+En general se puede distinguir en dos tipos de problemas de modelado: regresión y clasificación. La diferencia esta en el tipo del espacio de salida $y$. En los problemas de regresión, la variable de salida es continua, mientras que en los problemas de clasificación, la variable de salida es discreta y representa categorías o clases.
+
+El proceso de encontrar los parámetros óptimos $\theta$ se denomina entrenamiento. Existen casos donde se tienen soluciones cerradas que pueden ser calculadas analíticamente, pero en la mayoría de los casos, se utilizan métodos numéricos iterativos para aproximar la solución óptima. Sin embargo, en general, las soluciones cerradas no suelen ser el caso común en las aplicaciones prácticas \cite{e23081012}.
+
+Para ajustar los parámetros del modelo se requiere un conjunto de datos de entrada y salida conocidos (etiquetados) $\left(x_i, y_i\right)$, denominado conjunto de entrenamiento (o \textit{dataset} en inglés). Este tipo de aprendizaje, donde se estima una función a partir de datos etiquetados, se denomina aprendizaje supervisado.
+
+\subsection{Gradiente descendiente}
+\label{sec:gradiente_descendiente}
+
+El metodo iterativo más común para ajustar los parámetros es el \textbf{descenso por gradiente}, que consiste en actualizar los parámetros en la dirección contraria al gradiente de la función de costo ($\nabla_{\theta} L(y, \hat{y})$), es decir, en la dirección que reduce el error \cite{9603742}. La actualización de los parámetros se realiza como se muestra en la ecuación \ref{eq:gradient_descent}.
 
 \begin{equation}
-    \hat{y} = \mathbf{w} x + \mathbf{b}
+    \label{eq:gradient_descent}
+    \theta_{n+1} = \theta_n - \eta \nabla_{\theta} L(y, \hat{y})
 \end{equation}
 
-Donde $\mathbf{w}$ y $\mathbf{b}$ son los parámetros del modelo, los cuales se deben ajustar para que $\hat{f}$ se aproxime lo \say{mejor posible} a $f$.
+Donde $\eta$ es la tasa de aprendizaje, que determina el tamaño del paso en cada iteración.
 
-La forma de ajustar estos parámetros es a partir de un conjunto de datos conocidos de entrada y salida de la forma $\left(x_i, y_i\right)$. Es decir, tenemos una serie de entradas conocidas $X$ y sus respectivas salidas $Y$, y a partir de estos datos \textit{etiquetados}, se busca ajustar los parámetros del modelo. Este conjunto de datos se denomina \textbf{conjunto de entrenamiento} o \textbf{dataset}.
-
-Se buscarán los parámetros $\mathbf{w}$, $\mathbf{b}$ que minimicen alguna métrica de error, definida por una función de costo $L$, la cual determina que significa \say{mejor posible}.
-
-Para la regresión lineal, la función de costo más común es el error cuadrático medio (MSE). Es decir, se busca minimizar la siguiente función:
+Una variante de este algoritmo es el descenso por gradiente estocástico (de ahora en adelante \textit{SGD}, por sus siglas en inglés), que utiliza un subconjunto aleatorio de los datos de entrenamiento en cada iteración para calcular el gradiente como puede observarse en la \ref{eq:sgd}.. Esto reduce el costo computacional y puede ayudar a escapar de mínimos locales, aunque introduce más ruido en el proceso de optimización, puede acelerar la convergencia \cite{robbins1951stochastic}.
 
 \begin{equation}
-    L = \frac{1}{n} \sum_{i=1}^{n} \left(y_i - \hat{y}_i\right)^2
+    \label{eq:sgd}
+    \theta_{n+1} = \theta_n - \eta \nabla_{\theta} L(y_i, \hat{y}_i)
 \end{equation}
 
-Donde $n$ es la cantidad de datos de entrenamiento.
-
-En este caso es posible deducir analíticamente los valores de $\mathbf{w}$ y $\mathbf{b}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Lo cual nos lleva a las siguientes soluciones:
+\subsection{Regresión lineal}
+\label{sec:regresion_lineal}
+El modelo de regresión lineal es uno de los modelos más simples y ampliamente utilizados en el aprendizaje supervisado, este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en la ecuación \refeq{eq:linear_regression}.
 
 \begin{equation}
-    \begin{split}
-        \mathbf{w} &= \left(X^T X\right)^{-1} X^T \mathbf{y} \\
-        \mathbf{b} &= \bar{y} - \mathbf{w} \bar{x}
-    \end{split}
+    \label{eq:linear_regression}
+    \hat{y} = \beta_0 + \beta_1 x
 \end{equation}
 
-Sin embargo, en la práctica, el cálculo de estas soluciones puede ser computacionalmente costoso, especialmente cuando la cantidad de datos es muy grande. Computar la inversa de una matriz es un proceso de orden cúbico en la cantidad de datos. Esto da paso a métodos de optimización iterativos, como los utilizados en las redes neuronales.
+El objetivo es ajustar los parámetros $\beta_0$, $\beta_1$ que minimicen alguna métrica de error, definida por una función de costo $L$. En el caso de la regresión lineal, la función de costo utilizada comunmente es el error cuadrático medio (o MSE por sus siglas en inglés \textit{Mean Squared Error}). Si se extrapola este modelo a un problema multi-variable, la ecuación \refeq{eq:linear_regression} se puede expresar como se muestra en la ecuación \refeq{eq:linear_regression_multivariable}.
+
+\begin{equation}
+    \label{eq:linear_regression_multivariable}
+    \hat{y} = \beta_0 + \sum_{j=1}^{m} \beta_j x_j
+\end{equation}
+
+Se busca encontrar los valores de $\beta_0$, $\beta_1$, ..., $\beta_m$ que minimicen la función de costo definida en la ecuación \refeq{mse}, a partir de un conjunto de datos de tamaño $n$, donde $\mathbf{y}$ es el vector de salidas reales, $\hat{\mathbf{y}}$ es el vector de salidas estimadas por el modelo para las entradas correspondientes $\mathbf{X}$.
+
+\begin{equation}
+    \label{eq:mse}
+    L(\mathbf{y}, \hat{\mathbf{y}}) = \frac{1}{n} \sum_{i=1}^{n} \left(y_i - \hat{y}_i\right)^2
+\end{equation}
+
+En este caso es posible deducir analíticamente los valores de $\mathbf{\beta}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Al realizar esto se obtiene la fórmula conocida como OLS, (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos de manera directa, como se muestra en la ecuación \refeq{ols}.
+
+\begin{equation}
+    \label{eq:ols}
+        \beta = \left(X^T X\right)^{-1} X^T y
+\end{equation}
+
+Con
+
+\begin{equation}
+    \label{eq:ols}
+      X =
+        \begin{bmatrix}
+        1 & x_{1,1} & x_{2,1} & \dots & x_{n,1} \\
+        1 & x_{1,2} & x_{2,2} & \dots & x_{n,2} \\
+        \vdots & \vdots & \vdots & \dots & \vdots \\
+        1 & x_{1,m} & x_{2,m} & \dots & x_{n,m}
+        \end{bmatrix}
+      \quad \quad
+      \beta =
+        \begin{bmatrix}
+          \beta_0 \\ \beta_1 \\ \beta_2 \\ \dots \\ \beta_n
+        \end{bmatrix}
+      \quad \quad
+      y = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_m \end{bmatrix}
+    \end{equation}
+
+
+Este es un caso con solución cerrada, ya que permite calcular los parámetros óptimos de manera directa sin necesidad de utilizar métodos iterativos como el descenso por gradiente.
+
+\subsection{Regresión Logística}
+\label{sec:regresion_logistica}
+
+El modelo de regresión logística es utilizado para problemas de clasificación binaria, predice la probabilidad de que una observación pertenezca a una clase, mediante la función sigmoide como se muestra en la ecuación \refeq{logistic_regression}.
+
+\begin{equation}
+    \label{eq:logistic_regression}
+    \hat{y} = \mathbb{P}\left(y=1 | x\right)  = \frac{1}{1 + e^{-\left(\beta_0 + \sum_{j=1}^{n} \beta_j x_j\right)}}
+\end{equation}
+
+El valor de salida $\hat{y}$ está en el rango (0, 1) y representa la probabilidad de que la observación pertenezca a la clase 1. Para clasificar una observación, se utiliza un umbral (comúnmente 0.5), donde si $\hat{y} \geq 0.5$, se asigna a la clase 1, y si $\hat{y} < 0.5$, se asigna a la clase 0. Como se muestra en la \reffig{logistic_regression}.

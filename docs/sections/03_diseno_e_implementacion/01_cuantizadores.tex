@@ -16,7 +16,7 @@ La función de cuantización uniforme puede escribirse como en la ecuación \ref
 
 \begin{equation}
     \label{eq:uniform_quantizer_signed}
-    q(x; \alpha) =
+    q_u(x; \alpha) =
     \begin{cases}
         l_{0} & \text{si $x \leq m$} \\
         \Delta \cdot \lfloor \frac{x}{\Delta} \rfloor & \text{si } m < x < M \\
@@ -36,7 +36,7 @@ Es decir consiste en aproximar la función de cuantización como en la \refeq{un
 
 \begin{equation}
     \label{eq:uniform_quantizer_ste_signed}
-    \hat{q}\left(x; \alpha\right) =
+    \hat{q_u}\left(x; \alpha\right) =
     \begin{cases}
         - \alpha & \text{si $x \leq -\alpha$} \\
         x \\
@@ -50,7 +50,8 @@ Y su derivada es: \\
 
 \begin{equation}
     \label{eq:uniform_quantizer_ste_signed_derivative}
-    \frac{\partial \hat{q}}{\partial x}\left(x; \alpha\right) =
+    \frac{\partial q_u}{\partial x}\left(x; \alpha\right) \approx
+    \frac{\partial \hat{q_u}}{\partial x}\left(x; \alpha\right) =
     \begin{cases}
         0 & \text{si $x \leq -\alpha$} \\
         1 & \text{si $-\alpha < x < \alpha$} \\
@@ -64,7 +65,7 @@ Si observamos la \reffig{uniform_signed}, es posible ver que para un $x$ dado, s
 
 \begin{equation}
     \label{eq:uniform_quantizer_signed_dq_dalpha}
-    \frac{\partial q}{\partial \alpha}\left(x; \alpha\right) = \frac{q(x; \alpha)}{\alpha}
+    \frac{\partial q_u}{\partial \alpha}\left(x; \alpha\right) = \frac{q_u(x; \alpha)}{\alpha}
 \end{equation}
 
 \subsection{Quantizador flexible}
@@ -78,7 +79,7 @@ Para optimizar la implementación en la biblioteca, se definen $n$ niveles, y $n
 
 \begin{equation}
     \label{eq:flexible_quantizer}
-    q\left(x; \alpha, t, l\right) = \sum_{i=0}^{n-1} q_u\left({l_i; \alpha}\right) \cdot \mathbbm{1}_{\left[t_i, t_{i+1}\right]}\left(x\right)
+    q_f\left(x; \alpha, t, l\right) = \sum_{i=0}^{n-1} q_u\left({l_i; \alpha}\right) \cdot \mathbbm{1}_{\left[t_i, t_{i+1}\right]}\left(x\right)
 \end{equation}
 
 Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_quantizer_signed}. Podemos ver el efecto de la misma comparando las figuras \reffig{flexible_signed} y \reffig{flexible_signed_q}. En la primera se muestra la función de cuantización flexible, mientras que en la segunda se ilustran los niveles previos a la cuantización.
@@ -96,24 +97,45 @@ Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_
 
 Al igual que en el caso del cuantizador uniforme, la función de cuantización flexible no es diferenciable en los umbrales. Por lo tanto, es necesario definir una aproximación de las derivadas, tanto respecto a la entrada $x$, como respecto a los parámetros del cuantizador ($\alpha$, $t$ y $l$).
 
-La derivada con respecto a la entrada $\frac{\partial q}{\partial x}$ se puede aproximar utilizando STE, de la misma manera que en el caso del cuantizador uniforme. La aproximación es idéntica a la definida en \refeq{uniform_quantizer_ste_signed} y su derivada es la misma que la definida en \refeq{uniform_quantizer_ste_signed_derivative}, como puede observarse en la \reffig{flexible_signed_ste}.
+La derivada con respecto a la entrada $\frac{\partial q}{\partial x}$ se puede aproximar utilizando STE, de la misma manera que en el caso del cuantizador uniforme. Como puede observarse en la \reffig{flexible_signed_ste}, la aproximación es idéntica a la definida en \refeq{uniform_quantizer_ste_signed} y su derivada es la misma que la definida en \refeq{uniform_quantizer_ste_signed_derivative}.
 
 \defaultfigure{quantizers/flex/q_ste.png}{Aproximación de la cuantización flexible signada con STE.}{flexible_signed_ste}
 
-La derivada con respecto a $\alpha$, $\frac{\partial q}{\partial \alpha}$, se puede aproximar de la misma manera que en el caso del cuantizador uniforme, como se muestra en la \refeq{uniform_quantizer_signed_dq_dalpha}.
+La derivada con respecto a $\alpha$, $\frac{\partial q}{\partial \alpha}$, también se puede aproximar de la misma manera que en el caso del cuantizador uniforme, como se muestra en la \refeq{uniform_quantizer_signed_dq_dalpha}.
 
-La derivada con respecto a los niveles $\frac{\partial q}{\partial l_i}$ también se aproxima utilizando STE, pero en este caso la dimensión de la variable de entrada no corresponde con la dimensión de la variable de los umbrales. Por ende, se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Como se muestra en la \refeq{flexible_quantizer_dq_dl}.
+% TODO Aca quizas explicar mas adelante con el backprop la acumulacion
+% La derivada con respecto a los niveles $\frac{\partial q}{\partial l_i}$ también se aproxima utilizando STE, como se muestra en la \reffig{flexible_signed_dq_dl} pero en este caso la dimensión de la variable de entrada no corresponde con la dimensión de la variable de los umbrales. Por ende, se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Como se muestra en la \refeq{flexible_quantizer_dq_dl}.
+
+% \begin{equation}
+% \label{eq:flexible_quantizer_dq_dl}
+% \frac{\partial q}{\partial l_i} \left(x; \alpha, t, l\right) = \sum_{j} \mathbbm{1}_{\left[t_i, t_{i+1}\right]} \left(x_j\right)
+% \end{equation}
+% END TODO
+
+La derivada con respecto a los niveles $\frac{\partial q}{\partial l_i}$ también se aproxima utilizando STE, como se muestra en la \reffig{flexible_signed_dq_dl}. En este caso, para un $x$ fijo,
+
+
+% TODO(frneer): Reemplazar con figura siguiendo el estilo de las otras.
+\defaultfigure{quantizers/flex/dq_dl.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los niveles $l_i$.}{flexible_signed_dq_dl}
 
 \begin{equation}
 \label{eq:flexible_quantizer_dq_dl}
-\frac{\partial q}{\partial l_i} \left(x; \alpha, t, l\right) = \sum_{j} \mathbbm{1}_{\left[t_i, t_{i+1}\right]} \left(x_j\right)
+\frac{\partial q}{\partial l_i} \left(x; \alpha, t, l\right) = \mathbbm{1}_{\left[t_i, t_{i+1}\right]} \left(x_j\right)
 \end{equation}
 
 La derivada con respecto a los umbrales  $\frac{\partial q}{\partial t_i}$ se aproximará utilizando una variante del STE, denominada STE por partes o \textit{Piece-wise STE} en inglés. En lugar de asumir que la derivada es 1 en todo el rango, se estima una pendiente local alrededor de cada umbral $t_i$ basándose en los niveles y umbrales adyacentes. El gradiente para un umbral interno $t_i$ (es decir, para $i=1,\ldots,n-1$) se define como:
 
 \begin{equation}
 \label{eq:flexible_quantizer_dq_dt}
-\frac{\partial q}{\partial t_i} \left(x; \alpha, t, l\right) = \frac{l_{i-1} - l_i}{t_{i+1} - t_{i-1}} \sum_{j} \frac{\partial L}{\partial q(x_j)} \cdot \mathbbm{1}{{x_j \in [t_{i-1}, t_{i+1})}}
+\frac{\partial q}{\partial t_i} \left(x; \alpha, t, l\right) = \frac{l_{i-1} - l_i}{t_{i+1} - t_{i-1}}\mathbbm{1}_{\left[t_{i-1}, t_{i+1}\right]} \left(x_j\right)
 \end{equation}
 
-\textbf{NOTA: Falta replicar el analisis de los gradientes del cuantizador uniforme para el flexible.}
+En la \reffig{flexible_signed_dq_dt} se muestra la aproximación de la derivada con respecto a los umbrales $t_i$.
+\defaultfigure{quantizers/flex/dq_dt.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los umbrales $t_i$.}{flexible_signed_dq_dt}
+
+% \begin{equation}
+% \label{eq:flexible_quantizer_dq_dt}
+% \frac{\partial q}{\partial t_i} \left(x; \alpha, t, l\right) = \frac{l_{i-1} - l_i}{t_{i+1} - t_{i-1}} \sum_{j} \mathbbm{1}_{\left[t_{i-1}, t_{i+1}\right]} \left(x_j\right)
+% \end{equation}
+
+Para los umbrales en los extremos, $t_0$ y $t_n$, la derivada se define como cero, ya que estos umbrales son fijos y no se optimizan.
