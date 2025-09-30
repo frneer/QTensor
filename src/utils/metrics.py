@@ -24,12 +24,9 @@ def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) -> float:
     total_layer_size = 0.0
     qconfig = qlayer.quantize_config
 
-    # Assumption: order is the same for layer.weights and get_weights_and_quantizers
     weights_and_quantizers = qconfig.get_weights_and_quantizers(qlayer.layer)
-    weights = qlayer.weights[: len(weights_and_quantizers)]
 
-    for weight, weight_and_quantizer in zip(weights, weights_and_quantizers):
-        quantizer = weight_and_quantizer[1]
+    for weight, quantizer in weights_and_quantizers:
         if isinstance(quantizer, UniformQuantizer):
             weight_size = weight.shape.num_elements() * quantizer.bits
         elif isinstance(quantizer, FlexQuantizer):
