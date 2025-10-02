@@ -533,24 +533,24 @@ if __name__ == "__main__":
     experiments_df = experiments_df.rename(columns=rename_map)
     experiments_df = experiments_df.dropna()
 
-    experiments_df["qat_complexity"] = (
-        experiments_df["qat_complexity"] / 1024
-    )  # Convert to Kbits
+    experiments_df["qat_complexity"] = experiments_df[
+        "qat_complexity"
+    ]  # Convert to Kbits
     # print(
     #     experiments_df.sort_values(by=["qat_accuracy_mean", "qat_complexity_mean"], ascending=False)
     # )
     # print(experiments_df.sort_values(by=["qat_complexity_mean"], ascending=False))
 
     original_accuracy_mean = experiments_df["initial_training_accuracy"].mean()
-    original_complexity_mean = (
-        experiments_df["initial_training_complexity"].mean() / 1024
-    )  # in Kbits
+    original_complexity_mean = experiments_df[
+        "initial_training_complexity"
+    ].mean()  # in Kbits
     original_accuracy_var = experiments_df["initial_training_accuracy"].var()
     original_complexity_var = experiments_df[
         "initial_training_complexity"
     ].var()
     original_accuracy_sd = np.sqrt(original_accuracy_var)
-    original_complexity_var_kbits = original_complexity_var / (1024**2)
+    original_complexity_var_kbits = original_complexity_var
     original_complexity_sd = np.sqrt(original_complexity_var_kbits)
     n = experiments_df["initial_training_accuracy"].count()
     original_accuracy_se = original_accuracy_sd / np.sqrt(n)
@@ -653,14 +653,14 @@ if __name__ == "__main__":
         original_accuracy_se,
         color="red",
     )
-    plt.xlabel("Quantized Complexity (Kbits)")
-    plt.ylabel("Quantized Accuracy")
+    plt.xlabel("BWC")
+    plt.ylabel("Precisión")
     plt.ylim([0.6, 0.75])
     plt.xlim([xmin, xmax])
     plt.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.6)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("complexity_vs_quantized_flex.png", dpi=150)
+    plt.savefig("complexity_vs_quantized_flex-es.png", dpi=150)
 
     # 2) sort bits for consistent coloring
     plt.figure(figsize=(6, 4))
@@ -704,14 +704,14 @@ if __name__ == "__main__":
         color="red",
     )
     plt.xscale("log")
-    plt.xlabel("Quantized Complexity (Kbits)")
-    plt.ylabel("Quantized Accuracy")
+    plt.xlabel("BWC")
+    plt.ylabel("Precisión")
     plt.ylim([0.6, 0.75])
     plt.xlim([xmin, xmax])
     plt.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.6)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("complexity_vs_quantized_flex_stats.png", dpi=150)
+    plt.savefig("complexity_vs_quantized_flex_stats-es.png", dpi=150)
 
     plt.figure(figsize=(6, 4))
     plt.scatter(
@@ -756,11 +756,11 @@ if __name__ == "__main__":
         color="red",
     )
     plt.xscale("log")
-    plt.xlabel("Quantized Complexity (Kbits)")
-    plt.ylabel("Quantized Accuracy")
+    plt.xlabel("BWC")
+    plt.ylabel("Precisión")
     plt.ylim([0.6, 0.75])
     plt.xlim([xmin, xmax])
     plt.grid(which="both", linestyle="--", linewidth=0.5, alpha=0.6)
     plt.legend()
     plt.tight_layout()
-    plt.savefig("complexity_vs_quantized_flex_stats2.png", dpi=150)
+    plt.savefig("complexity_vs_quantized_flex_stats2-es.png", dpi=150)

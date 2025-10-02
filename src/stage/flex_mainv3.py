@@ -100,9 +100,23 @@ if __name__ == "__main__":
     dups = [name for name, c in cnt.items() if c > 1]
     assert not dups, f"Duplicate stage names detected: {dups}"
 
-    seeds = [12345, 123456, 1234567, 12345678, 123456789]
+    seeds = [
+        # 12345, 123456,
+        # 1234567, 12345678,
+        # 123456789, 12346,
+        # 12347, 12348,
+        # 12349, 12350,
+        # 12351, 12352,
+        # 12353, 12354,
+        # 12355,
+        # 12356, 12357, 12358,
+        # 12359,
+        12360,
+        12361,
+        12362,
+    ]
     bits = [4, 6, 8]
-    n_levels = [2, 3, 4, 6, 8, 10, 16]
+    n_levels = [2, 3, 4, 6, 8, 10, 16, 5, 7, 20, 25, 30]
     combinations = [
         (seed, b, n)
         for seed in seeds
@@ -141,3 +155,7 @@ if __name__ == "__main__":
             stage_definitions=stages_metadata,
         )
         pipeline.run()
+
+        print(
+            f"\n{'='*20} END OF EXPERIMENT: SEED = {seed}, FLEX BITS = {bits}, N_LEVELS = {n_levels} {'='*20}\n"
+        )
