@@ -1,0 +1,35 @@
+\begin{tikzpicture}[
+    % Global node styles
+    % All nodes will now use a rounded rectangle style
+    node_style/.style={rectangle, draw, rounded corners=3mm, text width=3cm, align=center, font=\small},
+    output_style/.style={rectangle, draw, rounded corners=3mm, fill=blue!10, text width=3cm, align=center, font=\small, thick}, % Slightly highlighted output
+    % Global line style
+    thick,
+    % Increased separation between nodes
+    node distance=0.5cm and 1cm % vertical and horizontal separation
+]
+
+    % Nodes for Training Phase
+    \node[node_style] (model_initial) {Model};
+    \node[node_style, below=of model_initial] (training) {Training};
+    \node[node_style, below=of training] (model_trained) {Trained Model};
+    \node[node_style, left=of training] (dataset) {Dataset};
+
+    % Main Quantization step and final output
+    \node[node_style, below=of model_trained] (quantization) {Quantization};
+    \node[node_style, below=of quantization] (model_quantized) {Quantized Model};
+    \node[node_style, left=of quantization] (q_params) {Quantization Parameters};
+
+    % Arrows for Training Phase
+    \draw[-{Stealth[length=2mm]}] (dataset) -- (training);
+    \draw[-{Stealth[length=2mm]}] (model_initial) -- (training);
+    \draw[-{Stealth[length=2mm]}] (training) -- (model_trained);
+
+    % % Arrows for Quantization Phase (Calibration Path)
+    \draw[-{Stealth[length=2mm]}] (q_params) -- (quantization);
+
+    % Arrows for Main Quantization Step
+    \draw[-{Stealth[length=2mm]}] (model_trained) -- (quantization);
+    \draw[-{Stealth[length=2mm]}] (quantization) -- (model_quantized);
+
+\end{tikzpicture}

@@ -38,7 +38,7 @@ Debido a que ambas bibliotecas parecen tener un soporte similar, y no hay difere
 
 Para desarrollar la libreria, se eligio trabajar con un repositorio de Git, con un flujo de trabajo basado en \textit{Git Flow}. Este flujo de trabajo permite tener una rama principal estable, y ramas de desarrollo que permiten trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se fusionan a la rama principal una vez que se ha completado el desarrollo, la revision del codigo y se han realizado las pruebas unitarias necesarias para comprobar la funcionalidad agregada como su compatibilidad con funcionalidades existentes.
 
-\subsubsection{Testing}
+\subsubsection{Pruebas unitarias y de integración}
 
 Para la implementación de la biblioteca se utilizó el framework de testing \texttt{unittest} de Python. Este framework permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática. Las pruebas se definen en archivos separados, y se pueden ejecutar de manera individual o en conjunto.
 
@@ -162,7 +162,7 @@ Sigue el mismo patrón que las capas de Keras, y permite definir variables de es
 
 \subsubsection{Cuantizador flexible}
 
-\subsubsection{Clase \texttt{QuantizeConfig}}
+\subsection{Clase \texttt{QuantizeConfig}}
 
 Para definir como cuantizar una capa, se define la interfaz \texttt{QuantizeConfig}, que permite definir como cuantizar los pesos, las activaciones y las salidas de la capa.
 

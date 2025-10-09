@@ -106,6 +106,8 @@ def main(bits, alpha, levels):
         bits=bits,
     )
 
+    # plot_history(alpha_callback.get_history(), levels_callback.get_history(), thresholds_callback.get_history())
+
     qmodel.evaluate(x_test, y_test)
 
 
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bits",
         type=int,
-        default=6,
+        default=4,
         help="number of bits for quantization",
     )
     parser.add_argument(
@@ -138,7 +140,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--levels",
         type=int,
-        default=10,
+        default=5,
         help="number of levels for quantization",
     )
     args = parser.parse_args()

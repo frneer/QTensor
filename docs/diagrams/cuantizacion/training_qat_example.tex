@@ -1,0 +1,79 @@
+\input{diagrams/cuantizacion/uniform_quantizer.tex}
+\input{diagrams/cuantizacion/uniform_quantizer_ste.tex}
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    arrow/.style={-latex, thick}
+]
+    \tikzset{node distance = 1cm and 1cm}
+    % Nodes
+    % \node (x_input) at (0, 0) [block] {$x$};
+    \node (w_input) at (0, 0) {
+        \begin{tabular}{|w{c}{0.5cm}|w{c}{0.75cm}|}
+            \hline
+            $1.1$ & $2.2$ \\ \hline
+            $-1.7$ & $3.6$ \\
+            \hline
+        \end{tabular}
+    };
+    \node (w_input_label) [above=of w_input, yshift=-1cm] {$w$ (FP32)};
+    \node (quantizer) [right=of w_input, scale=0.3] {\usebox{\quantizerexample}};
+    \node (quantizer_label) [above=of quantizer, xshift=0.5cm, yshift=-1.2cm] {$q(\ldots)$};
+    \node (quantized_weight) [right=of quantizer] {
+        \begin{tabular}{|w{c}{0.5cm}|w{c}{0.75cm}|}
+            \hline
+            $1$ & $2$ \\ \hline
+            $-2$ & $3$ \\
+            \hline
+        \end{tabular}
+    };
+    \node (quantized_weight_label) [above=of quantized_weight, yshift=-1cm] {$w_q$ (INT)};
+    \node (forward_pass) [right=of quantized_weight] [block] {Forward Pass};
+    % \node (y_input) [below=of loss] [block] {$y$};
+    \node (gradient_q) [below=of quantizer, scale=0.3] {\usebox{\quantizerexampleste}};
+    \node (gradient_q_label) [above=of gradient_q, xshift=0.5cm, yshift=-1.2cm] {$\nabla_q$};
+    \node (previous_gradient) [right=of gradient_q] {
+        \begin{tabular}{|w{c}{0.5cm}|w{c}{0.75cm}|}
+            \hline
+            $0.1$ & $-0.2$ \\ \hline
+            $-0.4$ & $0.3$ \\
+            \hline
+        \end{tabular}
+        };
+    \node (previous_gradient_label) [below=of previous_gradient, yshift=1cm] {$\nabla$ (FP32)};
+    \node (gradient) [left=of gradient_q] {
+        \begin{tabular}{|w{c}{0.5cm}|w{c}{0.75cm}|}
+            \hline
+            $0.1$ & $-0.2$ \\ \hline
+            $-0.4$ & $0.3$ \\
+            \hline
+        \end{tabular}
+        };
+    \node (gradient_label) [below=of gradient, yshift=1cm] {$\nabla$ (FP32)};
+    \node (loss) [right=of previous_gradient] [block] {Loss};
+
+    % % Arrows
+    % \draw [arrow] (x_input) -| (forward_pass);
+    \draw [arrow] (w_input) -- (quantizer); % Connect W to quantizer
+    \draw [arrow] (quantizer) -- (quantized_weight);  % Connect quantizer to W_q
+    \draw [arrow] (quantized_weight) -- (forward_pass); % Connect W_q to forward pass
+    % \draw [arrow] (y_input) -- (loss);
+    \draw [arrow] (forward_pass) -- node[below=of forward_pass, yshift = 1.5cm, xshift = -0.2cm] {$\hat{y}$} (loss);
+    \draw [arrow] (loss) -- (previous_gradient);
+    \draw [arrow] (previous_gradient) -- (gradient_q);
+    \draw [arrow] (gradient_q) -- (gradient);
+    \draw [arrow] (gradient) -- (w_input); % Gradient updates W
+
+% This version creates a dotted outline instead of a fill
+\begin{pgfonlayer}{background}
+    \node [
+        draw,                   % <-- Add this to draw the border
+        dotted,                 % <-- Add this for the dotted style
+        thick,                  % (Optional) Make the dots thicker
+        blue,                   % (Optional) Color for the dots
+        rounded corners,
+        fit=(w_input) (forward_pass) (loss) (gradient) (quantizer) (gradient_q),
+        inner sep=0.5cm
+    ] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}

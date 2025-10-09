@@ -93,7 +93,7 @@ def main():
     plt.grid(which="both", alpha=0.3, linestyle=":")
     # plt.legend(loc="upper left", fontsize=10)
 
-    plt.savefig(f"../pics/quantizers/uniform/{name}.png")
+    plt.savefig(f"../docs/pics/quantizers/uniform/{name}.png")
 
 
 if __name__ == "__main__":

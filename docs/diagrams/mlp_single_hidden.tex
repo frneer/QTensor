@@ -1,0 +1,57 @@
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        % Distancia global entre nodos
+        node distance=1.5cm and 2.5cm,
+        % Estilo para las neuronas (círculo simple, sin color)
+        neuron/.style={
+            circle,
+            draw,
+            minimum size=1.2cm
+        },
+        % Estilo para las conexiones (flecha recta)
+        conn/.style={-stealth}
+    ]
+        % --- CAPA DE ENTRADA ---
+        % Se coloca la primera neurona y las demás debajo de ella
+        \node[neuron] (input-1) at (0, 0) {$x_1$};
+        \node[neuron] (input-2) [below=of input-1] {$x_2$};
+        \node         (input-dots) [below=0.7cm of input-2] {$\vdots$};
+        \node[neuron] (input-n) [below=0.7cm of input-dots] {$x_n$};
+        \node         (label-input) [above=0.5cm of input-1] {\textbf{Capa de Entrada}};
+
+        % --- CAPA OCULTA ---
+        % Se posiciona a la derecha de la capa anterior
+        \node[neuron] (hidden-1) [right=of input-1, yshift=1.5cm] {$h_1$};
+        \node[neuron] (hidden-2) [right=of input-2, yshift=0.75cm] {$h_2$};
+        \node         (hidden-dots) [below=0.7cm of hidden-2] {$\vdots$};
+        \node[neuron] (hidden-m) [right=of input-n, yshift=-0.75cm] {$h_m$};
+        \node         (label-hidden) [above=0.5cm of hidden-1] {\textbf{Capa Oculta}};
+
+        % --- CAPA DE SALIDA ---
+        % Se posiciona a la derecha de la capa oculta
+        \node[neuron] (output-1) [right=of hidden-1] {$y_1$};
+        \node[neuron] (output-2) [right=of hidden-2] {$y_2$};
+        \node         (output-dots) [below=0.7cm of output-2] {$\vdots$};
+        \node[neuron] (output-k) [right=of hidden-m] {$y_k$};
+        \node         (label-output) [above=0.5cm of output-1] {\textbf{Capa de Salida}};
+
+        % --- CONEXIONES ---
+        % Conexiones de la capa de entrada a la capa oculta
+        \foreach \i in {1,2,n} {
+            \foreach \j in {1,2,m} {
+                \draw[conn] (input-\i) -- (hidden-\j);
+            }
+        }
+
+        % Conexiones de la capa oculta a la capa de salida
+        \foreach \i in {1,2,m} {
+            \foreach \j in {1,2,k} {
+                \draw[conn] (hidden-\i) -- (output-\j);
+            }
+        }
+
+    \end{tikzpicture}
+    \caption{Esquema de un perceptrón multicapa}
+    \label{fig:mlp}
+\end{figure}

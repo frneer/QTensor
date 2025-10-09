@@ -1,0 +1,78 @@
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        % Distancia vertical entre nodos de una misma capa
+        node distance=1.5cm,
+        % Estilo para las neuronas
+        neuron/.style={
+            circle,
+            draw,
+            minimum size=1.2cm
+        },
+        % Estilo para las conexiones
+        conn/.style={-stealth}
+    ]
+        % --- Definir posiciones horizontales para cada capa ---
+        \def\inputX{0}
+        \def\hiddenX{4.5}
+        \def\dotsX{8}      % NUEVA POSICIÓN para los puntos suspensivos
+        \def\outputX{11.5} % Movemos la capa de salida más a la derecha
+
+        % --- Títulos alineados ---
+        \def\titleY{2.5}
+        \node[font=\bfseries] at (\inputX, \titleY) {Capa de Entrada};
+        % Título general para las capas ocultas
+        \node[font=\bfseries] at ({(\hiddenX+\dotsX)/2}, \titleY) {Capas Ocultas};
+        \node[font=\bfseries] at (\outputX, \titleY) {Capa de Salida};
+
+        % --- CAPA DE ENTRADA (Alineada en x = \inputX) ---
+        \node[neuron] (input-1) at (\inputX, 0) {$x_1$};
+        \node[neuron] (input-2) [below=of input-1] {$x_2$};
+        \node (input-dots) [below=0.7cm of input-2] {$\vdots$};
+        \node[neuron] (input-n) [below=0.7cm of input-dots] {$x_n$};
+
+        % --- PRIMERA CAPA OCULTA (Alineada en x = \hiddenX) ---
+        \node[neuron] (hidden-1) at (\hiddenX, 0) {$h_1$};
+        \node[neuron] (hidden-2) [below=of hidden-1] {$h_2$};
+        \node (hidden-dots) [below=0.7cm of hidden-2] {$\vdots$};
+        \node[neuron] (hidden-m) [below=0.7cm of hidden-dots] {$h_m$};
+
+        % ==========================================================
+        % NUEVO: Nodos para representar capas intermedias
+        % ==========================================================
+        \node (dots-1) at (\dotsX, -0.75) {$\cdots$};
+        \node (dots-2) [below=1.5cm of dots-1] {$\cdots$};
+        \node (dots-3) [below=1.5cm of dots-2] {$\cdots$};
+
+        % --- CAPA DE SALIDA (Alineada en x = \outputX) ---
+        \node[neuron] (output-1) at (\outputX, 0) {$y_1$};
+        \node[neuron] (output-2) [below=of output-1] {$y_2$};
+        \node (output-dots) [below=0.7cm of output-2] {$\vdots$};
+        \node[neuron] (output-k) [below=0.7cm of output-dots] {$y_k$};
+
+        % --- CONEXIONES ---
+        % Conexiones de Entrada -> 1ra Capa Oculta
+        \foreach \i in {1,2,n} {
+            \foreach \j in {1,2,m} {
+                \draw[conn] (input-\i) -- (hidden-\j);
+            }
+        }
+
+        % Conexiones de 1ra Capa Oculta -> Puntos intermedios
+        \foreach \i in {1,2,m} {
+            \foreach \j in {1,2,3} {
+                \draw[conn] (hidden-\i) -- (dots-\j);
+            }
+        }
+
+        % Conexiones de Puntos intermedios -> Salida
+        \foreach \i in {1,2,3} {
+            \foreach \j in {1,2,k} {
+                \draw[conn] (dots-\i) -- (output-\j);
+            }
+        }
+
+    \end{tikzpicture}
+    \caption{Esquema de un perceptrón multicapa profundo.}
+    \label{fig:mlp}
+\end{figure}

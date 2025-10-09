@@ -36,18 +36,23 @@
 % Tikz
 \usepackage{tikz}
 \usetikzlibrary{
-    shapes,
     arrows,
+    arrows.meta,
+    backgrounds,
+    calc,
+    decorations.markings,
+    fit,
     positioning,
     quotes,
-    arrows.meta,
-    decorations.markings,
+    shapes,
     shapes.geometric,
-    fit
 }
 
 % Allow saying
 \usepackage{dirtytalk}
+
+% Specific column size for tables
+\usepackage{array}
 
 % Useful for tables
 \usepackage{makecell}
@@ -94,6 +99,8 @@
 \urlstyle{same}
 
 
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
 % Custom commands
 \input{commands}
 
@@ -122,6 +129,9 @@
 }
 \usepackage{upquote} % <-- este es el importante
 
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
 
 \begin{document}
 
@@ -144,6 +154,9 @@
 \addchaptertocentry{\abstractname} % Agregar resumen al índice
 El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin ningún elemento de formato en el texto como itálicas o negritas. Tampoco se deben usar siglas ni acrónimos que no resulten obvios para un lector promedio de la memoria, ni referencias bibliográficas o notas al pie de página. No debe faltar qué es lo que se hizo/logró, qué importancia/valor tiene el proyecto/resultado, qué va a encontrar el lector en la memoria y qué contenidos de la especialización/maestría se aplicaron en el proyecto.
 \end{abstract}
+
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
 
 %----------------------------------------------------------------------------------------
 % Agradecimientos
@@ -183,9 +196,8 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 \input{sections/02_introduccion_especifica/main}
 \chapter{Diseño e Implementación}
 \input{sections/03_diseno_e_implementacion/main}
-% \chapter{Ensayos y resultados}
-% \input{sections/04_ensayos_y_resultados/01_ensayos}
-% \input{sections/04_ensayos_y_resultados/02_resultados}
+\chapter{Ensayos y resultados}
+\input{sections/04_ensayos_y_resultados/main}
 % \chapter{Conclusiones}
 % \section{Trabajos Futuros}
 

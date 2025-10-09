@@ -12,7 +12,7 @@ Los niveles de cuantización se pueden expresar como:
     l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
 \end{equation}
 
-La función de cuantización uniforme puede escribirse como en la ecuación \refeq{uniform_quantizer_signed}. El gráfico de la misma se muestra en la \reffig{uniform_signed}.
+La función de cuantización uniforme puede escribirse como en la \refeq{uniform_quantizer_signed}. El gráfico de la misma se muestra en la \reffig{uniform_signed}.
 
 \begin{equation}
     \label{eq:uniform_quantizer_signed}
@@ -114,8 +114,8 @@ La derivada con respecto a $\alpha$, $\frac{\partial q}{\partial \alpha}$, tambi
 
 La derivada con respecto a los niveles $\frac{\partial q}{\partial l_i}$ también se aproxima utilizando STE, como se muestra en la \reffig{flexible_signed_dq_dl}. En este caso, para un $x$ fijo,
 
-
 % TODO(frneer): Reemplazar con figura siguiendo el estilo de las otras.
+\TODO{Reemplazar con figura siguiendo el estilo de las otras.}
 \defaultfigure{quantizers/flex/dq_dl.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los niveles $l_i$.}{flexible_signed_dq_dl}
 
 \begin{equation}
@@ -131,6 +131,7 @@ La derivada con respecto a los umbrales  $\frac{\partial q}{\partial t_i}$ se ap
 \end{equation}
 
 En la \reffig{flexible_signed_dq_dt} se muestra la aproximación de la derivada con respecto a los umbrales $t_i$.
+\TODO{Reemplazar con figura siguiendo el estilo de las otras.}
 \defaultfigure{quantizers/flex/dq_dt.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los umbrales $t_i$.}{flexible_signed_dq_dt}
 
 % \begin{equation}

@@ -65,28 +65,28 @@ Una variante de este algoritmo es el descenso por gradiente estocástico (de aho
 
 \subsection{Regresión lineal}
 \label{sec:regresion_lineal}
-El modelo de regresión lineal es uno de los modelos más simples y ampliamente utilizados en el aprendizaje supervisado, este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en la ecuación \refeq{eq:linear_regression}.
+El modelo de regresión lineal es uno de los modelos más simples y ampliamente utilizados en el aprendizaje supervisado, este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en la \refeq{linear_regression}.
 
 \begin{equation}
     \label{eq:linear_regression}
     \hat{y} = \beta_0 + \beta_1 x
 \end{equation}
 
-El objetivo es ajustar los parámetros $\beta_0$, $\beta_1$ que minimicen alguna métrica de error, definida por una función de costo $L$. En el caso de la regresión lineal, la función de costo utilizada comunmente es el error cuadrático medio (o MSE por sus siglas en inglés \textit{Mean Squared Error}). Si se extrapola este modelo a un problema multi-variable, la ecuación \refeq{eq:linear_regression} se puede expresar como se muestra en la ecuación \refeq{eq:linear_regression_multivariable}.
+El objetivo es ajustar los parámetros $\beta_0$, $\beta_1$ que minimicen alguna métrica de error, definida por una función de costo $L$. En el caso de la regresión lineal, la función de costo utilizada comunmente es el error cuadrático medio (o MSE por sus siglas en inglés \textit{Mean Squared Error}). Si se extrapola este modelo a un problema multi-variable, la \refeq{linear_regression} se puede expresar como se muestra en la \refeq{linear_regression_multivariable}.
 
 \begin{equation}
     \label{eq:linear_regression_multivariable}
     \hat{y} = \beta_0 + \sum_{j=1}^{m} \beta_j x_j
 \end{equation}
 
-Se busca encontrar los valores de $\beta_0$, $\beta_1$, ..., $\beta_m$ que minimicen la función de costo definida en la ecuación \refeq{mse}, a partir de un conjunto de datos de tamaño $n$, donde $\mathbf{y}$ es el vector de salidas reales, $\hat{\mathbf{y}}$ es el vector de salidas estimadas por el modelo para las entradas correspondientes $\mathbf{X}$.
+Se busca encontrar los valores de $\beta_0$, $\beta_1$, ..., $\beta_m$ que minimicen la función de costo definida en la \refeq{mse}, a partir de un conjunto de datos de tamaño $n$, donde $\mathbf{y}$ es el vector de salidas reales, $\hat{\mathbf{y}}$ es el vector de salidas estimadas por el modelo para las entradas correspondientes $\mathbf{X}$.
 
 \begin{equation}
     \label{eq:mse}
     L(\mathbf{y}, \hat{\mathbf{y}}) = \frac{1}{n} \sum_{i=1}^{n} \left(y_i - \hat{y}_i\right)^2
 \end{equation}
 
-En este caso es posible deducir analíticamente los valores de $\mathbf{\beta}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Al realizar esto se obtiene la fórmula conocida como OLS, (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos de manera directa, como se muestra en la ecuación \refeq{ols}.
+En este caso es posible deducir analíticamente los valores de $\mathbf{\beta}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Al realizar esto se obtiene la fórmula conocida como OLS, (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos de manera directa, como se muestra en la \refeq{ols}.
 
 \begin{equation}
     \label{eq:ols}
@@ -116,10 +116,15 @@ Con
 
 Este es un caso con solución cerrada, ya que permite calcular los parámetros óptimos de manera directa sin necesidad de utilizar métodos iterativos como el descenso por gradiente.
 
-\subsection{Regresión Logística}
+El resultado de aplicar este modelo a un conjunto de datos es mostrado en la \reffig{linear_regression}, donde se observa la línea de regresión ajustada a los datos, así como los errores entre las predicciones del modelo y los datos reales.
+
+\defaultfigure{regression/linear_regression.png}{Regresión Lineal}{linear_regression}
+
+
+\subsection{Regresión logística}
 \label{sec:regresion_logistica}
 
-El modelo de regresión logística es utilizado para problemas de clasificación binaria, predice la probabilidad de que una observación pertenezca a una clase, mediante la función sigmoide como se muestra en la ecuación \refeq{logistic_regression}.
+El modelo de regresión logística es utilizado para problemas de clasificación binaria, predice la probabilidad de que una observación pertenezca a una clase, mediante la función sigmoide como se muestra en la \refeq{logistic_regression}.
 
 \begin{equation}
     \label{eq:logistic_regression}
@@ -127,3 +132,21 @@ El modelo de regresión logística es utilizado para problemas de clasificación
 \end{equation}
 
 El valor de salida $\hat{y}$ está en el rango (0, 1) y representa la probabilidad de que la observación pertenezca a la clase 1. Para clasificar una observación, se utiliza un umbral (comúnmente 0.5), donde si $\hat{y} \geq 0.5$, se asigna a la clase 1, y si $\hat{y} < 0.5$, se asigna a la clase 0. Como se muestra en la \reffig{logistic_regression}.
+
+\defaultfigure{regression/logistic_regression.png}{Regresión Logística}{logistic_regression}
+
+En este modelo, la forma de encontrar los parámetros $\beta_0$, $\beta_1$, ..., $\beta_n$, es mediante la maximización de la verosimilitud. La función de verosimilitud mide qué tan probable es observar los datos dados los parámetros del modelo, y se define como se muestra en la \refeq{likelihood} para una muestra de tamaño $m$.
+
+\begin{equation}
+    \label{eq:likelihood}
+      L(\beta) = \prod_{i=1}^{m} \mathbb{P}(y_i | x_i)
+\end{equation}
+
+donde $\mathbb{P}(y_i | x_i)$ es la probabilidad de observar la clase $y_i$ dado el vector de características $x_i$. Para facilitar el cálculo, se suele trabajar con el logaritmo de la función de verosimilitud, conocido como log-verosimilitud, que convierte el producto en una suma, como se muestra en la \refeq{log_likelihood}.
+
+\begin{equation}
+    \label{eq:log_likelihood}
+      \ell(\beta) = \sum_{i=1}^{m} \left[ y_i \log(\mathbb{P}(y_i | x_i)) + (1 - y_i) \log(1 - \mathbb{P}(y_i | x_i)) \right]
+\end{equation}
+
+En este caso, no existe una solución cerrada para encontrar los parámetros que maximicen la log-verosimilitud, por lo que se utilizan métodos numéricos iterativos como el descenso por gradiente para encontrar los parámetros óptimos que maximicen la función de verosimilitud.
