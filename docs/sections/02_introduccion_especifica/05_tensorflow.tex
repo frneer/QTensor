@@ -8,16 +8,97 @@ La implementación de modelos de redes neuronales complejos y los algoritmos de 
 
 \texttt{TensorFlow} es una biblioteca de software de código abierto desarrollada por el equipo de Google Brain (ahora parte de la compania Google DeepMind), que se ha consolidado como una de las herramientas de facto para el aprendizaje automático tanto en la industria como en la academia. Proporciona un ecosistema completo para la creación, entrenamiento y despliegue de modelos de \textit{machine learning}.
 
-Para simplificar la construcción de arquitecturas de redes neuronales, se apoya en la biblioteca \texttt{Keras}, una API de alto nivel integrada dentro de \texttt{TensorFlow}, la cual ofrece una interfaz intuitiva y modular para definir modelos capa por capa, lo que acelera significativamente el ciclo de desarrollo y experimentación.
+\subsubsection{Keras API}
+Para simplificar la construcción de modelos de machine learning, se apoya en la biblioteca \texttt{Keras}, una API de alto nivel integrada dentro de \texttt{TensorFlow}, que ofrece una interfaz intuitiva y modular para definir modelos capa por capa, lo que acelera significativamente el ciclo de desarrollo y experimentación. Provee una amplia variedad de capas predefinidas, funciones de activación, optimizadores y herramientas de preprocesamiento de datos, facilitando la implementación de modelos complejos con un esfuerzo mínimo.
 
-\TODO{Extender un poco mas esta funcion con alguna funcionalidad especifica?}
+La definición de un modelo MLP de una sola capa oculta con \texttt{Keras} se puede definir como se muestra en el \ref{code:tensorflow_mlp}.
 
-\subsection{TensorFlow Model Optimization}
+\begin{lstlisting}[language=Python,label=code:tensorflow_mlp,caption=Definición de un modelo MLP en TensorFlow con Keras.]
+model = Sequential([
+    Flatten(input_shape=(28, 28), name="input"),
+    Dense(128, activation="relu", name="hidden"),
+    Dense(10, activation="softmax", name="output")
+])
 
-Para abordar específicamente la compresión y optimización de modelos, el ecosistema de \texttt{TensorFlow} cuenta con una biblioteca secundaria llamada \texttt{TensorFlow Model Optimization} (de ahora en adelante \texttt{TFMOT}).
+\end{lstlisting}
 
-\texttt{TFMOT} es un conjunto de herramientas diseñado para reducir la complejidad de los modelos de redes neuronales, facilitando su despliegue en dispositivos con recursos limitados.
+Luego entrenar el modelo a partir de un conjunto de datos existente \texttt{(x\_train, y\_train)} es tan sencillo como definir un algoritmo de optimización, una función de costo y alguna metrica de evaluación. Luego llamar a la función \texttt{fit}, como se muestra en el fragmento de código \ref{code:tensorflow_mlp_train}.
 
-\texttt{TFMOT} ofrece funcionalidades para diversas técnicas de compresión, entre las que destaca la cuantización. Provee mecanismos tanto para la Cuantización Post-Entrenamiento (PTQ) como para la Cuantización Durante el Entrenamiento (QAT).
+\begin{lstlisting}[language=Python,label=code:tensorflow_mlp_train,caption=Entrenamiento de un modelo MLP en TensorFlow con Keras.]
+model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+model.fit(x_train, y_train, epochs=5)
+\end{lstlisting}
 
-\TODO{Extender un poco mas esta funcion con alguna funcionalidad especifica?}
+\subsubsection{Grafo de ejecución}
+El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph}. Este grafo esta compuesto por dos tipos de nodos, tensores (\texttt{tf.Tensor} o \texttt{tf.Variable}) y operaciones (\texttt{tf.Operation}), como se muestra en la \reffig{tensorflow_graph} con un ejemplo de una convolución. Los tensores representan los datos que fluyen a través del grafo, mientras que las operaciones representan las transformaciones matemáticas que se aplican a estos datos. Esta arquitectura permite optimizaciones automáticas y facilita la ejecución en diferentes dispositivos, al ser el grafo una estructura de datos permite serializarlo y exportarlo a cualquier otra plataforma sin depender de Python.
+
+\defaultdiagram{tensorflow/graph}{Ejemplo de un \texttt{tf.Graph} de una sola capa}{tensorflow_graph}
+
+\subsubsection{TensorFlow Model Optimization}
+
+Para abordar específicamente la optimización de modelos, el ecosistema de \texttt{TensorFlow} cuenta con una biblioteca secundaria llamada \texttt{TensorFlow Model Optimization} (de ahora en adelante \texttt{TFMOT}). Esta esta basada en las interfaces de bajo nivel de \texttt{TensorFlow} (\texttt{TensorFlow Core}). \texttt{TFMOT} es un conjunto de herramientas diseñado para optimizar los modelos para su despliegue y distribución. Ofrece funcionalidades para diversas técnicas de compresión, como \textit{weight clustering}, \textit{weight pruning} y cuantización. Provee mecanismos tanto para PTQ como para QAT.
+
+En particular la funcionalidad de QAT esta implementada modificando el grafo computacional de \texttt{TensorFlow} para incluir operaciones de cuantización durante el entrenamiento, introduciendo un nodo de \textit{fake quantization} después de cada operación que se desea cuantizar. Esto simula el efecto de la cuantización en los pesos y activaciones durante el proceso de entrenamiento como se muestra en la \reffig{tensorflow_graph_q}, donde $q_w$, $q_b$ y $q_\phi$ representan las operaciones de cuantización para los pesos, sesgos y activaciones respectivamente.
+
+\defaultdiagram{tensorflow/graph_q}{Ejemplo de un \texttt{tf.Graph} de una sola capa con \textit{fake quantization}}{tensorflow_graph_q}
+
+Es posible elegir los cuantizadores utilizados, pero el soporte nativo de \texttt{TFMOT} incluye unicamente cuantizadores uniformes a enteros de 8 bits, tanto con signo como sin signo.
+.
+\subsubsection{Diferenciación automática y backpropagation}
+La diferenciación automática es una técnica computacional que permite calcular de manera eficiente las derivadas de funciones matemáticas complejas. En el contexto del aprendizaje profundo, es fundamental para entrenar redes neuronales mediante el algoritmo de \textit{backpropagation}, que ajusta los pesos del modelo para minimizar la función de pérdida. Este algoritmo se basa en la regla de la cadena para calcular derivadas parciales de manera eficiente, y \texttt{TensorFlow} implementa esta funcionalidad a través de \texttt{tf.autodiff}, e implementa el algoritmo de \textit{backpropagation} utilizando el grafo computacional.
+
+\texttt{TensorFlow} graba todas las operaciones ejecutadas a partir de la clase \texttt{tf.GradientTape}, y toda operación tiene asociada su regla de derivación. A partir de esta grabación se construye de manera automática un grafo de gradientes asociado al grafo directo, para computar la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo.
+
+\subsubsection{Gradientes personalizados}
+
+Una funcionalidad importante en el contexto de esta tesis es la capacidad de intervenir en la definicion automatica de los gradientes de estas operaciones. Esto es posible a traves de la funcionalidad de \textit{custom gradients}, que permite definir una operacion matematica y su derivada de manera independiente. Esto es util para definir operaciones que no tienen una derivada bien definida, o que tienen una derivada que no es adecuada para el entrenamiento.
+
+Un \texttt{decorador} en Python es una función o clase que envuelve otra función o clase (\textit{wrapper} en inglés) para modificar su comportamiento. En el caso de la definicion de gradientes personalizados, su implementación es mediante un \texttt{decorador}, \texttt{@tf.custom\_gradient} aplicado sobre una función que define una operación matemática en el grafo computacional.
+
+Por ejemplo, la multiplicación de dos tensores \texttt{a} y \texttt{b}, como se muestra en el fragmento de código \ref{code:custom_gradient}. La función \texttt{mul} define la operación de multiplicación y \texttt{TensorFlow} computa automáticamente los gradientes de esta operación. En este caso, los gradientes son $\frac{\partial y}{\partial a} = b$ y $\frac{\partial y}{\partial b} = a$.
+
+\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+# Operacion
+def mul(a, b):
+    return a * b
+
+# Valores de entrada
+a = tf.constant(3.0)
+b = tf.constant(4.0)
+
+# Observa la salida y las derivadas
+with tf.GradientTape(persistent=True) as tape1:
+    tape1.watch([a, b])
+    y_auto = mul(a, b)  # = 12.0
+
+da_auto = tape1.gradient(y_auto, a)  # = 4.0 (dy/da = b)
+db_auto = tape1.gradient(y_auto, b)  # = 3.0 (dy/db = a)
+\end{lstlisting}
+
+Ahora, es posible modificar la función \texttt{mul} para definir una operación con gradiente personalizado, como se muestra en el fragmento de código \ref{code:custom_gradient}. En este caso, la función \texttt{mul\_custom} define la operación de multiplicación y su gradiente personalizado. En este caso, los gradientes son $\frac{\partial y}{\partial a} = 2b$ y $\frac{\partial y}{\partial b} = 2a$.
+
+\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+# Operacion con gradiente personalizado
+@tf.custom_gradient
+def custom_mul(a, b):
+    y = a * b
+    def grad(dy):
+        da = 2 * b * dy
+        db = 2 * a * dy
+        return da, db
+    return y, grad
+
+# Valores de entrada
+a = tf.constant(3.0)
+b = tf.constant(4.0)
+
+# Observa la salida y las derivadas
+with tf.GradientTape(persistent=True) as tape2:
+    tape2.watch([a, b])
+    y_custom = custom_mul(a, b)  # = 12
+
+da_custom = tape2.gradient(y_custom, a)  # = 8.0 (dy/da = 2b)
+db_custom = tape2.gradient(y_custom, b)  # = 6.0 (dy/db = 2a)
+\end{lstlisting}
+
+Esta funcionalidad será una de las claves para poder implementar las derivadas de los cuantizadores desarrollados en la sección \ref{sec:gradientes}.

@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+    tensor/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    operation/.style={circle, draw, fill=white, minimum size=4em},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 1cm and 1cm}
+    % Nodes
+    \node (layer) [operation] at (0, 0) {$\times$};
+    \node (input) [tensor, left=of layer] {$x$};
+    \node (weight_quant) [operation, below=of layer] {$q_w$};
+    \node (weight) [tensor, below=of weight_quant] {$w$};
+    \node (accum) [operation, right=of layer] {$+$};
+    \node (bias_quant) [operation, below=of accum] {$q_b$};
+    \node (bias) [tensor, below=of bias_quant] {$b$};
+    \node (activation) [operation, right=of accum] {$\phi$};
+    \node (activation_quant) [operation, right=of activation] {$q_\phi$};
+    \node (output) [tensor, right=of activation_quant] {$y$};
+
+    \draw [arrow] (input) -- (layer);
+    \draw [arrow] (weight) -- (weight_quant);
+    \draw [arrow] (weight_quant) -- (layer);
+    \draw [arrow] (layer) -- (accum);
+    \draw [arrow] (bias) -- (bias_quant);
+    \draw [arrow] (bias_quant) -- (accum);
+    \draw [arrow] (accum) -- (activation);
+    \draw [arrow] (activation) -- (activation_quant);
+    \draw [arrow] (activation_quant) -- (output);
+
+
+\end{tikzpicture}

@@ -1,0 +1,89 @@
+\subsubsection{Cuantizador uniforme}
+\label{sec:uniform}
+
+El cuantizador uniforme consiste en una serie de $n\left(b\right)$ niveles equiespaciados de paso $\Delta\left(\alpha, b\right) = \frac{r\left(\alpha\right)}{n\left(b\right)}$, donde $n\left(b\right) = 2^b$, siendo $b$ el número de bits utilizados para la cuantización y $r\left(\alpha\right)$ el rango del cuantizador. En el caso signado el rango sera $r(\alpha) = 2 \alpha$, cubriendo $[-\alpha, \alpha]$, y en el caso no signado sera $r(\alpha) = \alpha$ cubriendo $[0, \alpha]$, se utilizara la notación del intervalo del rango $r = [m, M]$, siendo $m$ el mínimo y $M$ el máximo del rango.
+
+Los niveles de cuantización se pueden expresar como:
+
+\begin{equation}
+    \label{eq:uniform_quantizer_level_value}
+    l_i\left(\alpha\right) = m + i \cdot \Delta\left(\alpha, b\right) \text{, con } i = 0, 1, \ldots, n\left(b\right) - 1
+\end{equation}
+
+La función de cuantización uniforme puede escribirse como en la \refeq{uniform_quantizer}. El gráfico de la misma se muestra en la \reffig{uniform_signed}.
+
+\begin{equation}
+    \label{eq:uniform_quantizer}
+    q_u(x; \alpha) =
+    \begin{cases}
+        l_{0} & \text{si $x \leq m$} \\
+        \Delta \cdot \lfloor \frac{x}{\Delta} \rfloor & \text{si } m < x < M \\
+        l_{n\left(b\right) - 1}\left(\alpha\right) & \text{si } x \geq M
+    \end{cases}
+\end{equation}
+
+\defaultfigure{quantizers/uniform/q.png}{Función de cuantización uniforme signada.}{uniform_signed}
+
+El cuantizador uniforme es sencillo de implementar tanto en hardware como en software, debido a tener niveles equiespaciados. También es computacionalmente eficiente, ya que la cuantización se puede realizar mediante operaciones aritméticas simples como divisiones y redondeos. Sin embargo, existen diversos escenarios en los cuales la cuantización uniforme no es la más adecuada. Cuando los datos tienen una distribución no uniforme la cuantización uniforme puede no capturar adecuadamente la variabilidad de los datos, lo que lleva a una pérdida significativa de información, y niveles en desuso. Otro caso es cuando la aplicación requiere una alta precisión en ciertas regiones del rango de valores, la cuantización uniforme puede no proporcionar la resolución necesaria en esas áreas críticas. Un caso donde esto suele ser el caso es en la distribución de los pesos de las redes neuronales.
+
+\subsubsection{Cuantizador no uniforme}
+
+El cuantizador no uniforme consiste en una serie de niveles $l$ cuyos limites estan determinados por los umbrales $t$, pero en este caso no existen restricciones sobre el posicionamiento de los umbrales y niveles, y tampoco existe el concepto de bits. Al igual que en el caso del cuantizador uniforme, se fija el rango a traves del parámetro $\alpha$, el cuantizador puede ser signado, con rango $r\left(\alpha\right) = [-\alpha, \alpha]$, o no signado, con rango $r\left(\alpha\right) = [0, \alpha]$.
+
+La función de cuantización no uniforme puede escribirse como en la \refeq{non_uniform_quantizer}, donde $n$ es la cantidad de niveles, $t$ son los umbrales y $l$ los niveles. El gráfico de la función de cuantización no uniforme se muestra en la \reffig{non_uniform_signed_q}.
+
+\begin{equation}
+    \label{eq:non_uniform_quantizer}
+    q_{nu}\left(x; \alpha, t, l\right) =
+    \begin{cases}
+        l_{0} & \text{si $x \leq m$} \\
+        l_{i} & \text{si } t_i < x < t_{i+1}, i = 0, 1, \ldots, n-2 \\
+        l_{n-1} & \text{si } x \geq M
+    \end{cases}
+\end{equation}
+
+\defaultfigure{quantizers/non_uniform/q.png}{Función de cuantización no uniforme signada.}{non_uniform_signed_q}
+
+El cuantizador no uniforme es más versatil que el uniforme, ya que permite adaptar los niveles de cuantización a la distribución de los datos, lo que mejora la precisión de la cuantización y reduce la pérdida de información. Sin embargo, su implementación puede ser más compleja, especialmente en hardware de punto fijo, al tener valores incompatibles con aritmética de punto fijo.
+
+\TODO{Ver si hay que desarrollar xq es malo para punto fijo}
+
+\subsubsection{Cuantizador flexible}
+\label{sec:flex}
+
+El cuantizador flexible busca combinar las ventajas de los cuantizadores uniforme y no uniforme. Teniendo la eficiencia de implementacion del uniforme, y la versatilidad del no uniforme para adaptarse a diferentes distribuciones de datos. Consiste en cuantizar uniformemente los niveles de un cuantizador no uniforme.
+
+El cuantizador flexible consiste en un cojunto de $n$ niveles, con valores $l$ cuyos limites estan determinados por los umbrales $t$. Al igual que en el caso del cuantizador uniforme, se fija el rango a traves del parametro $\alpha$, el cuantizador puede ser signado, con rango $[-\alpha, \alpha]$, o no signado, con rango $[0, \alpha]$.
+
+La principal diferencia con el uniforme es que los niveles $n$ no dependen de la cantidad de bits utilizados, sino que tanto $l$ como $t$ son parámetros del cuantizador. En otras palabras, desacopla los niveles de cuantización de la cantidad de bits.
+
+Para optimizar la implementación en la biblioteca, se definen $n$ niveles, y $n+1$ umbrales, esto puede resaltar poco intuitivo, pero hace que la implementación sea más sencilla en un futuro. Sin embargo, los umbrales $t_0$ y $t_n$ no se utilizan, ya que no son necesarios para la cuantización, son fijos y estarán fijados a los límites del rango. $t_0 = m$ y $t_n = M$.
+
+% Nota: version vieja de la ecuacion x si me arrepiento
+% \begin{equation}
+%     \label{eq:flexible_quantizer}
+%     q_f\left(x; \alpha, t, l\right) = \sum_{i=0}^{n-1} q_u\left({l_i; \alpha}\right) \cdot \mathbbm{1}_{\left[t_i, t_{i+1}\right]}\left(x\right)
+% \end{equation}
+
+\begin{equation}
+    \label{eq:flexible_quantizer}
+    q_{f}\left(x; \alpha, t, l\right) =
+    \begin{cases}
+        q_{u}\left(l_{0}; \alpha\right)& \text{si $x \leq m$} \\
+        q_{u}\left(l_{i}; \alpha\right) & \text{si } t_i < x < t_{i+1}, i = 0, 1, \ldots, n-2 \\
+        q_{u}\left(l_{n-1}; \alpha\right) & \text{si } x \geq M
+    \end{cases}
+\end{equation}
+
+Con $q_u$ siendo la funcion de cuantizacion uniforme definida en \refeq{uniform_quantizer}. El gráfico de la función de cuantización flexible se muestra en la \reffig{flexible_signed_q}.
+
+% \defaultfigure{quantizers/flex/q.png}{Quantización flexible signada.}{flexible_signed}
+
+\defaultfigure{quantizers/flex/q_q.png}{Función de cuantización flexible signada}{flexible_signed_q}
+
+En la \reffig{flexible_signed_q} se puede observar en amarillo los niveles previos a la aplicación del cuantizador uniforme, y en azul los niveles finales luego de aplicar el cuantizador uniforme.
+
+
+\subsubsection{Comparación entre cuantizadores}
+
+\TODO{Agregar tabla comparandolos?}

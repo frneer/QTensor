@@ -29,9 +29,6 @@ La cuantización de redes neuronales consiste en representar los parámetros de 
 
 La función de cuantización mapea un valor continuo a un conjunto discreto de niveles. Y queda definida por dos series de parámetros: los niveles de cuantización y los umbrales de cuantización. Los niveles de cuantización son los valores discretos a los que se mapean los valores continuos, mientras que los umbrales de cuantización definen los límites entre estos niveles.
 
-
-
-
 \subsection{Tipos de cuantización}
 
 Existen múltiples características a definir la Configuración de cuantización de una red neuronal.
@@ -50,10 +47,7 @@ El concepto general es el de representar un rango continuo de valores en un conj
 \subsection{Funciones de cuantización}
 \label{sec:funciones_de_cuantizacion}
 
-\subsubsection{Cuantización uniforme}
-\subsubsection{Cuantización no uniforme}
-\TODO{Motivacion hardware de la cuantizacion flexible, pros, cons de cada una}
-\subsubsection{Cuantización flexible}
+\input{sections/02_introduccion_especifica/04_cuantizadores}
 
 \subsection{Estrategias de cuantización}
 El proceso de cuantización efectivamente reduce el tamaño del modelo, reduciendo la cantidad de memoria requerida y acelerando la inferencia. Sin embargo, al reducir la precisión numérica, se introduce un error de cuantización que suele afectar el desempeño del modelo. Por lo tanto, es crucial evaluar el impacto de la cuantización en las métricas de evaluación y encontrar un equilibrio adecuado entre compresión y rendimiento.
@@ -83,10 +77,12 @@ El proceso de PTQ generalmente implica los siguientes pasos:
 
 El proceso de calibración es crucial en PTQ, ya que los parámetros de cuantización dependen de la distribución de los datos. Una calibración no representativa puede llevar a una pérdida significativa de precisión, especialmente en modelos más complejos o cuando se utiliza una cuantización agresiva (por ejemplo, INT4).
 
+\TODO{Mostrar plots como en tesis del colo de la distribucion}
+
 \subsubsection{Estrategia QAT}
 La cuantización durante el entrenamiento es una técnica más avanzada que busca mitigar el impacto negativo de la cuantización en la precisión del modelo. Esta tecnica genera una mejor adaptación del modelo a la cuantización, resultando en una menor pérdida de precisión en comparación con PTQ, especialmente en casos de cuantización agresiva. Como contrapartida, el proceso de entrenamiento es más costoso, tanto en terminos de tiempo como de recursos, ya que se requiere un re-entrenamiento o ajuste fino (\textit{fine-tunning} en inglés).
 
-La idea principal de QAT es simular el efecto de la cuantización durante el proceso de entrenamiento, permitiendo que los pesos y activaciones se ajusten a la representación cuantizada. Esto se logra mediante una emulación de la cuantización, llamada quantizacion false (\textit{fake-quantization} en inglés) en la pasada hacia adelante (\textit{forward-pass}) del entrenamiento, mientras que en la pasada hacia atrás (\textit{backward-pass}) se utilizan los pesos originales en punto flotante para calcular los gradientes y actualizar los pesos.
+La idea principal de QAT es simular el efecto de la cuantización durante el proceso de entrenamiento, permitiendo que los pesos y activaciones se ajusten a la representación cuantizada. Esto se logra mediante una emulación de la cuantización (\textit{fake-quantization} en inglés) en la pasada hacia adelante (\textit{forward-pass}) del entrenamiento, mientras que en la pasada hacia atrás (\textit{backward-pass}) se utilizan los pesos originales en punto flotante para calcular los gradientes y actualizar los pesos.
 
 Es decir, se modifica el proceso de entrenamiento tradicional (explicado en la seccion \ref{sec:entrenamiento_redes_neuronales}) para incluir la cuantización en la inferencia, permitiendo que el modelo aprenda a adaptarse a la representación cuantizada. En la \reffig{training} se muestra un diagrama del proceso de entrenamiento tradicional.
 

@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+    tensor/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    operation/.style={circle, draw, fill=white, minimum size=4em},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 1cm and 1cm}
+    % Nodes
+    \node (layer) [operation] at (0, 0) {$\times$};
+    \node (input) [tensor, left=of layer] {$x$};
+    \node (weight) [tensor, below=of layer] {$w$};
+    \node (accum) [operation, right=of layer] {$+$};
+    \node (bias) [tensor, below=of accum] {$b$};
+    \node (activation) [operation, right=of accum] {$\phi$};
+    \node (output) [tensor, right=of activation] {$y$};
+
+    \draw [arrow] (input) -- (layer);
+    \draw [arrow] (weight) -- (layer);
+    \draw [arrow] (layer) -- (accum);
+    \draw [arrow] (bias) -- (accum);
+    \draw [arrow] (accum) -- (activation);
+    \draw [arrow] (activation) -- (output);
+
+
+
+\end{tikzpicture}

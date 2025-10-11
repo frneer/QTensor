@@ -1,2 +1,9 @@
 \section{Ensayos y pruebas}
 \label{sec:ensayos_y_pruebas}
+
+El objetivo de los ensayos realizados es mostrar un ejemplo completo de la utilización de la librería \texttt{QTensor} para cuantizar un modelo de \texttt{TensorFlow}, entrenarlo y evaluar su desempeño en un conjunto de datos real.
+
+En particular, se busco demostrar las ventajas del cuantizador flexible en cuestiones de precisión y tamaño del modelo, comparando el desempeño de modelos cuantizados con diferentes esquemas de cuantización. Como se busca una comparacion entre dos esquemas, es necesario partir de un modelo entrenado de la misma manera. Para esto se utilizo la definición de un \texttt{Pipeline} para entrenar el modelo base, y luego se cuantizo este modelo con diferentes esquemas de cuantización.
+
+\subsection{Pipeline utilizado}
+\subsection{Dataset CIFAR-10}
