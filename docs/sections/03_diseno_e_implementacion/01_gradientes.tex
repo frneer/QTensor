@@ -1,5 +1,5 @@
 \section{Gradientes de los cuantizadores}
-\TODO{Analizar donde puede ir esta seccion, quizas en el momento que se necesite antes de describir las implementaciones?}
+% \ TODO{Analizar donde puede ir esta seccion, quizas en el momento que se necesite antes de describir las implementaciones?}
 \label{sec:gradientes}
 
 Para realizar QAT es necesario definir los gradientes de las funciones de cuantización con respecto a las entradas. Pero ademas, al requerir que los cuantizadores tengan parámetros entrenables, es necesario definir los gradientes con respecto a estos parámetros. En esta sección se describen los gradientes definidos para los cuantizadores desarrollados en la sección \ref{sec:quantizers}.
@@ -71,7 +71,7 @@ La derivada con respecto a $\alpha$, $\frac{\partial q_f}{\partial \alpha}$, tam
 La derivada con respecto a los niveles $\frac{\partial q_f}{\partial l_i}$ se puede deducir proyectando sobre el nivel $l_i$ para un $x$ fijo. Si $x$ cae dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$, es decir, si $x$ es cuantizado al nivel $l_i$, entonces la derivada es 1, el cambio de la salida es igual al cambio del nivel, siempre y cuando $x$ esté dentro del rango de los umbrales. En caso contrario, la derivada es 0. Como se muestra en la \refeq{flexible_quantizer_dq_dl}.
 
 % \defaultfigure{quantizers/flex/dq_dl.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los niveles $l_i$.}{flexible_signed_dq_dl}
-\defaultdiagram{gradients/dq_dl}{Derivada de la cuantización flexible signada con respecto a los niveles $l_i$.}{flexible_signed_dq_dl}
+\defaultdiagram{gradients/dq_dl}{Derivada de la cuantización flexible signada con respecto a los niveles $l_i$.}{flexible_signed_dq_dl}{1}
 
 \begin{equation}
 \label{eq:flexible_quantizer_dq_dl}
@@ -82,7 +82,7 @@ La derivada con respecto a los umbrales  $\frac{\partial q}{\partial t_i}$ se ap
 
 Si se proyecta sobre $t_i$, para un $x$ fijo, se tiene un dominio que esta limitado por los umbrales circundantes $t_{i-1}$ y $t_{i+1}$, y un rango limitado por los niveles adyacentes $l_{i-1}$ y $l_i$. Entonces, se puede definir una pendiente local como la razón entre el cambio en el rango y el cambio en el dominio, como se muestra en la \reffig{flexible_signed_dq_dt}.
 
-\defaultdiagram{gradients/dq_dt}{Derivada de la cuantización flexible signada con respecto a los umbrales $t_i$.}{flexible_signed_dq_dt}
+\defaultdiagram{gradients/dq_dt}{Derivada de la cuantización flexible signada con respecto a los umbrales $t_i$.}{flexible_signed_dq_dt}{1}
 
 El gradiente para un umbral interno $t_i$ (es decir, para $i=1,\ldots,n-1$) se define como:
 
@@ -92,7 +92,7 @@ El gradiente para un umbral interno $t_i$ (es decir, para $i=1,\ldots,n-1$) se d
 \end{equation}
 
 En la \reffig{flexible_signed_dq_dt} se muestra la aproximación de la derivada con respecto a los umbrales $t_i$.
-% \TODO{Reemplazar con figura siguiendo el estilo de las otras.}
+% % \ TODO{Reemplazar con figura siguiendo el estilo de las otras.}
 
 % \defaultfigure{quantizers/flex/dq_dt.png}{Aproximación de la derivada de la cuantización flexible signada con respecto a los umbrales $t_i$.}{flexible_signed_dq_dt}
 

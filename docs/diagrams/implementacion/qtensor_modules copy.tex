@@ -1,0 +1,62 @@
+\begin{tikzpicture}[
+    node distance=1cm and 1.5cm,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw,
+        text width=4cm,
+        minimum height=1.2cm,
+        align=center,
+        font=\small
+    },
+    subgraph_label/.style={
+        anchor=south west,
+        font=\bf\small
+    }
+]
+
+% Node Definitions
+\node[block, fill=green!20] (run) {run.py};
+\node[block, fill=blue!20, below=of run] (qmodel) {configs/qmodel.py};
+\node[block, fill=red!20, right=of qmodel] (quantizers) {quantizers/};
+\node[block, fill=orange!20, left=of qmodel] (examples) {examples/models/ \newline examples/datasets/};
+\node[block, fill=purple!20, below=of examples] (analysis) {data\_collection/ \newline data\_analysis/};
+\node[block, fill=gray!20, below=of qmodel] (generate_config) {GenerateConfig};
+\node[block, fill=gray!30, below=of generate_config] (tfmot) {TFMOT API};
+
+% Arrows
+\draw[-{Stealth[length=2mm]}] (run) -- (qmodel) node[midway, right, font=\tiny] {Aplica};
+\draw[-{Stealth[length=2mm]}] (run) -- (quantizers) node[midway, above, font=\tiny] {Usa};
+\draw[-{Stealth[length=2mm]}] (run) -- (examples) node[midway, above, font=\tiny] {Importa};
+\draw[-{Stealth[length=2mm]}] (run) -- (analysis) node[midway, right, font=\tiny] {Usa};
+\draw[-{Stealth[length=2mm]}] (qmodel) -- (generate_config) node[midway, right, font=\tiny] {Crea};
+\draw[-{Stealth[length=2mm]}] (generate_config) -- (tfmot) node[midway, right, font=\tiny] {Llama a};
+
+% Subgraph Boxes
+\begin{scope}[on background layer]
+    \node[
+        draw,
+        dashed,
+        fit=(run)(examples)(analysis),
+        inner sep=0.5cm
+    ] (sub1) {};
+    \node[subgraph_label] at (sub1.north west) {Orquestación y Ejemplos};
+
+    \node[
+        draw,
+        dashed,
+        fit=(qmodel)(generate_config),
+        inner sep=0.5cm
+    ] (sub2) {};
+    \node[subgraph_label] at (sub2.north west) {Configuración};
+
+    \node[
+        draw,
+        dashed,
+        fit=(quantizers),
+        inner sep=0.5cm
+    ] (sub3) {};
+    \node[subgraph_label] at (sub3.north west) {Algoritmos};
+\end{scope}
+
+\end{tikzpicture}

@@ -7,16 +7,18 @@
     \end{figure}
 }
 
-
-\newcommand{\defaultdiagram}[3]{
+\newcommand{\defaultdiagram}[4]{
+    % #1: diagram file name (without path)
+    % #2: caption
+    % #3: label
+    % #4: scale (e.g., 1, 0.8, etc.)
     \begin{figure}[H]
         \centering
-        \input{diagrams/#1}
+        \scalebox{#4}{\input{diagrams/#1}}
         \caption{#2}
         \label{fig:#3}
     \end{figure}
 }
-
 
 \newcommand{\doublefigure}[6]{
     % Takes 6 arguments:

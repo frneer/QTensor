@@ -7,3 +7,87 @@ En particular, se busco demostrar las ventajas del cuantizador flexible en cuest
 
 \subsection{Pipeline utilizado}
 \subsection{Dataset CIFAR-10}
+
+El conjunto de datos utilizado es el conjunto de datos CIFAR-10\cite{krizhevsky2009learning}, que consiste en 60.000 imágenes de 32x32 píxeles en color, divididas en 10 clases diferentes (avión, automóvil, pájaro, gato, ciervo, perro, rana, caballo, barco y camión). El conjunto de datos está dividido en 50.000 imágenes de entrenamiento y 10.000 imágenes de prueba.
+
+En la figura \ref{fig:cifar10} se pueden ver algunos ejemplos del conjunto de datos CIFAR-10.
+
+\defaultfigure{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}
+
+\subsection{Modelo utilizado}
+El modelo utilizado es una red neuronal convolucional simple, con dos capas convolucionales seguidas de capas de pooling, y dos capas densas al final. La arquitectura del modelo es la \ref{fig:model_architecture}.
+
+% \begin{figure}[H]
+%     \centering
+%     \input{diagrams/neural_nets/model_architecture}
+%     \caption{Arquitectura del modelo utilizado.}
+%     \label{fig:model_architecture}
+% \end{figure}
+
+% \ TODO{Terminar diagrama}
+% \defaultdiagram{neural_nets/model}{Arquitectura del modelo utilizado.}{model_architecture}
+% \begin{lstlisting}[language=Python]
+%         new_model = models.Sequential(
+%             [
+%                 layers.Conv2D(
+%                     64,
+%                     (3, 3),
+%                     padding="same",
+%                     activation="relu",
+%                     input_shape=input_shape[1:],
+%                 ),
+%                 layers.MaxPooling2D((2, 2)),
+%                 layers.Conv2D(128, (3, 3), padding="same", activation="relu"),
+%                 layers.MaxPooling2D((2, 2)),
+%                 layers.Flatten(),
+%                 layers.Dense(256, activation="relu"),
+%                 layers.Dropout(0.5),
+%                 layers.Dense(categories, activation="softmax"),
+%                 ],
+%                 name=model_name,
+%                 )
+%             \end{lstlisting}
+
+\subsection{Esquemas de cuantización}
+No se hizo una busqueda exhaustiva de esquemas de cuantización, sino que se seleccionaron dos esquemas que se consideraron representativos de las diferentes opciones disponibles en la librería \texttt{QTensor}.
+
+Los \textit{biases} se cuantizaron todos con el mismo esquema, de cuantizador uniforme simétrico, de 8 bits.
+
+Las activaciones se cuantizaron con un cuantizador uniforme asimétrico de 16 bits, las activaciones son los valores que más varían el desempeño del modelo, por lo que se decidió utilizar un esquema de cuantización más preciso para estas.
+
+La cuantización de los pesos se hizo con dos cuantizadores diferentes, para comparar el desempeño de estos. Un grupo de modelos se cuantizo con un cuantizador uniforme simétrico con una matriz de bits {2, 4, 6 ...} y otro grupo de modelos se cuantizo con un cuantizador flexible simétrico con una matriz de bits {2, 4, 6 ...}.
+
+
+% The table environment code
+\begin{table}[H]
+\centering
+\caption{Comparison of Uniform vs. Flexible Quantization Layouts}
+\label{tab:quant_layouts_final}
+\begin{tabular}{ll cc cc}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{Layout 1: Full Uniform}} & \multicolumn{2}{c}{\textbf{Layout 2: Flexible Kernel}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\multicolumn{1}{c}{\textbf{Layer}} & \multicolumn{1}{c}{\textbf{Component}} & \textbf{Type} & \textbf{Parameters} & \textbf{Type} & \textbf{Parameters} \\
+\midrule
+\texttt{conv2d} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
+& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
+& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\midrule
+\texttt{conv2d\_1} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
+& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
+& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\midrule
+\texttt{dense} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
+& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
+& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\midrule
+\texttt{dense\_1} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
+& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
+& Activation & Uniform & $W=16$ & \textbf{None (Passthrough)} & \textbf{N/A} \\
+\bottomrule
+\multicolumn{6}{l}{\textit{$W$: bit-width. $L$: number of quantization levels.}} \\
+\multicolumn{6}{l}{\textit{*Set A for $L$ is $\{2, 3, 4, 5, 6, 7, 8, 10, 16, 20, 25, 30\}$.}} \\
+\multicolumn{6}{l}{\textit{*Set D for $W$ is $\{1, 2, 3, 4, 5, 6, 8, 10, 16, 24\}$.}} \\
+\end{tabular}
+\end{table}
+% \ TODO{Terminar de definir bien esto... no en ingles}

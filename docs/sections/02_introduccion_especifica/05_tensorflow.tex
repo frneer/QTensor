@@ -32,7 +32,7 @@ model.fit(x_train, y_train, epochs=5)
 \subsubsection{Grafo de ejecución}
 El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph}. Este grafo esta compuesto por dos tipos de nodos, tensores (\texttt{tf.Tensor} o \texttt{tf.Variable}) y operaciones (\texttt{tf.Operation}), como se muestra en la \reffig{tensorflow_graph} con un ejemplo de una convolución. Los tensores representan los datos que fluyen a través del grafo, mientras que las operaciones representan las transformaciones matemáticas que se aplican a estos datos. Esta arquitectura permite optimizaciones automáticas y facilita la ejecución en diferentes dispositivos, al ser el grafo una estructura de datos permite serializarlo y exportarlo a cualquier otra plataforma sin depender de Python.
 
-\defaultdiagram{tensorflow/graph}{Ejemplo de un \texttt{tf.Graph} de una sola capa}{tensorflow_graph}
+\defaultdiagram{tensorflow/graph}{Ejemplo de un \texttt{tf.Graph} de una sola capa}{tensorflow_graph}{1}
 
 \subsubsection{TensorFlow Model Optimization}
 
@@ -40,7 +40,7 @@ Para abordar específicamente la optimización de modelos, el ecosistema de \tex
 
 En particular la funcionalidad de QAT esta implementada modificando el grafo computacional de \texttt{TensorFlow} para incluir operaciones de cuantización durante el entrenamiento, introduciendo un nodo de \textit{fake quantization} después de cada operación que se desea cuantizar. Esto simula el efecto de la cuantización en los pesos y activaciones durante el proceso de entrenamiento como se muestra en la \reffig{tensorflow_graph_q}, donde $q_w$, $q_b$ y $q_\phi$ representan las operaciones de cuantización para los pesos, sesgos y activaciones respectivamente.
 
-\defaultdiagram{tensorflow/graph_q}{Ejemplo de un \texttt{tf.Graph} de una sola capa con \textit{fake quantization}}{tensorflow_graph_q}
+\defaultdiagram{tensorflow/graph_q}{Ejemplo de un \texttt{tf.Graph} de una sola capa con \textit{fake quantization}}{tensorflow_graph_q}{1}
 
 Es posible elegir los cuantizadores utilizados, pero el soporte nativo de \texttt{TFMOT} incluye unicamente cuantizadores uniformes a enteros de 8 bits, tanto con signo como sin signo.
 .

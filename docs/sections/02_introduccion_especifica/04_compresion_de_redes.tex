@@ -54,10 +54,10 @@ El proceso de cuantización efectivamente reduce el tamaño del modelo, reducien
 
 Existen dos principales estrategias para implementar la cuantización en redes neuronales: la cuantización post-entrenamiento (PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (QAT, por sus siglas del inglés \textit{Quantization Aware Training}). La \ref{fig:qat} y la \ref{fig:ptq} ilustran estas dos estrategias.
 
-\defaultdiagram{cuantizacion/ptq}{Cuantización post-entrenamiento (PTQ)}{ptq}
-\defaultdiagram{cuantizacion/qat}{Cuantización durante el entrenamiento (QAT)}{qat}
+\defaultdiagram{cuantizacion/ptq}{Cuantización post-entrenamiento (PTQ)}{ptq}{1}
+\defaultdiagram{cuantizacion/qat}{Cuantización durante el entrenamiento (QAT)}{qat}{1}
 
-\TODO{Revisar diagramas.}
+% \ TODO{Revisar diagramas.}
 
 PTQ consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizarla. Sin entrenamiento (\textit{fine-tunning} posterior). Por otro lado, QAT (\texttt{QAT}) consiste en entrenar la red neuronal emulando la cuantización en la inferencia durante el entrenamiento, lo que permite que los pesos se entrenen adaptandose a la cuantización, generalmente logrando una mejor perfomance al momento de ser cuantizada, pero a costa de un mayor tiempo de entrenamiento.
 
@@ -77,7 +77,7 @@ El proceso de PTQ generalmente implica los siguientes pasos:
 
 El proceso de calibración es crucial en PTQ, ya que los parámetros de cuantización dependen de la distribución de los datos. Una calibración no representativa puede llevar a una pérdida significativa de precisión, especialmente en modelos más complejos o cuando se utiliza una cuantización agresiva (por ejemplo, INT4).
 
-\TODO{Mostrar plots como en tesis del colo de la distribucion}
+% \ TODO{Mostrar plots como en tesis del colo de la distribucion}
 
 \subsubsection{Estrategia QAT}
 La cuantización durante el entrenamiento es una técnica más avanzada que busca mitigar el impacto negativo de la cuantización en la precisión del modelo. Esta tecnica genera una mejor adaptación del modelo a la cuantización, resultando en una menor pérdida de precisión en comparación con PTQ, especialmente en casos de cuantización agresiva. Como contrapartida, el proceso de entrenamiento es más costoso, tanto en terminos de tiempo como de recursos, ya que se requiere un re-entrenamiento o ajuste fino (\textit{fine-tunning} en inglés).
@@ -86,17 +86,17 @@ La idea principal de QAT es simular el efecto de la cuantización durante el pro
 
 Es decir, se modifica el proceso de entrenamiento tradicional (explicado en la seccion \ref{sec:entrenamiento_redes_neuronales}) para incluir la cuantización en la inferencia, permitiendo que el modelo aprenda a adaptarse a la representación cuantizada. En la \reffig{training} se muestra un diagrama del proceso de entrenamiento tradicional.
 
-\defaultdiagram{cuantizacion/training}{Entrenamiento simple}{training}
+\defaultdiagram{cuantizacion/training}{Entrenamiento simple}{training}{1}
 
-En la \reffig{qat} se ilustra el proceso de entrenamiento con cuantización durante el entrenamiento, donde se observa la inclusión de \textit{fake-quantization}, que consiste en aplicar una función de cuantización ($q$) a los pesos $w$ al realizar el forward-pass. Es importante resaltar que los pesos cuantizados $q(w)$ se calculan únicamente para la inferencia y que para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Debido a que si se utilizaran los pesos cuantizados, es altamente probable caer en problemas de convergencia. [\TODO{Citar bibliografia}]
+En la \reffig{qat} se ilustra el proceso de entrenamiento con cuantización durante el entrenamiento, donde se observa la inclusión de \textit{fake-quantization}, que consiste en aplicar una función de cuantización ($q$) a los pesos $w$ al realizar el forward-pass. Es importante resaltar que los pesos cuantizados $q(w)$ se calculan únicamente para la inferencia y que para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Debido a que si se utilizaran los pesos cuantizados, es altamente probable caer en problemas de convergencia. % \ TODO{{Citar bibliografia}]
 
-\defaultdiagram{cuantizacion/training_qat}{Entrenamiento con cuantización}{qat}
+\defaultdiagram{cuantizacion/training_qat}{Entrenamiento con cuantización}{qat}{1}
 
 En la \reffig{qat_algorithm} también se añade la representación del gradiente de la función de cuantización ($\nabla_q$), pero las funciones detalladas en la sección \ref{sec:funciones_de_cuantizacion} no son diferenciables y son nulas en la mayoría de su dominio. Por lo tanto, no es posible calcular el gradiente de manera directa utilizando el algoritmo de backpropagation.
 
-Para solucionar este problema, existen diversas técnicas, las cuales consisten en aproximar la función de cuantización $q$ con una función diferenciable $\hat{q}$. La función mas sencilla y utilizada es el \textit{Straight-Through Estimator} (STE) [\TODO{Citar bibliografia}], que consiste en aproximar la función de cuantización con una línea recta en la región activa, de manera que su gradiente sea $1$ en esa región y 0 en el resto del dominio, de aquí el nombre de \textit{straight-through}, ya que en la pasada hacia atrás, el gradiente no sufre modificaciones debido a la cuantización, sino que se propaga directamente. Por ejemplo, en la \reffig{q_ste} se muestra la función de cuantización uniforme (en verde) y su aproximación mediante STE (en rojo).
+Para solucionar este problema, existen diversas técnicas, las cuales consisten en aproximar la función de cuantización $q$ con una función diferenciable $\hat{q}$. La función mas sencilla y utilizada es el \textit{Straight-Through Estimator} (STE) % \ TODO{{Citar bibliografia}], que consiste en aproximar la función de cuantización con una línea recta en la región activa, de manera que su gradiente sea $1$ en esa región y 0 en el resto del dominio, de aquí el nombre de \textit{straight-through}, ya que en la pasada hacia atrás, el gradiente no sufre modificaciones debido a la cuantización, sino que se propaga directamente. Por ejemplo, en la \reffig{q_ste} se muestra la función de cuantización uniforme (en verde) y su aproximación mediante STE (en rojo).
 
-\defaultdiagram{cuantizacion/uniform_quantizer_with_ste}{Función de cuantización uniforme y su aproximación mediante STE}{q_ste}
+\defaultdiagram{cuantizacion/uniform_quantizer_with_ste}{Función de cuantización uniforme y su aproximación mediante STE}{q_ste}{1}
 
 En este caso, se tiene la derivada de la función aproximada, como se muestra en la \refeq{ste_idea}.
 
@@ -112,4 +112,4 @@ En este caso, se tiene la derivada de la función aproximada, como se muestra en
 
 En la \reffig{qat_algorithm} se muestra un diagrama detallado de un ejemplo del proceso de entrenamiento con cuantización consciente durante el entrenamiento.
 
-\defaultdiagram{cuantizacion/training_qat_example}{Ejemplo de entrenamiento con cuantización durante el entrenamiento}{qat_algorithm}
+\defaultdiagram{cuantizacion/training_qat_example}{Ejemplo de entrenamiento con cuantización durante el entrenamiento}{qat_algorithm}{1}

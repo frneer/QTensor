@@ -1,0 +1,25 @@
+\begin{tikzpicture}[
+    lib/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em, minimum width=10em},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 0.5cm and 0.5cm}
+    % Nodes
+    % --- Node Definitions (same as yours) ---
+    \node (qtensor) [lib, fill=green!40, text=black] at (0, 0) {QTensor};
+    \node (tfmot) [lib, fill=blue!40, below=of qtensor, text=black] {TFMOT};
+    \node (keras) [lib, fill=purple!40, below=of tfmot, text=black] {Keras};
+    \node (tf) [lib, fill=orange!40, below=of keras, text=black] {Tensorflow Core};
+
+    % --- Arrow Connections ---
+    % Main dependency path
+    \draw[-{Stealth[length=3mm]}, thick] (qtensor) -- (tfmot);
+    \draw[-{Stealth[length=3mm]}, thick] (tfmot)   -- (keras);
+    \draw[-{Stealth[length=3mm]}, thick] (keras)   -- (tf);
+
+    % Add the direct dependency from QTensor to Keras
+    % This line draws an arrow from the left of QTensor, goes left,
+    % then turns down to meet the left of Keras.
+    \draw[-{Stealth[length=3mm]}, thick] (qtensor.west) -- ++(-0.75,0) |- (keras.west);
+
+\end{tikzpicture}

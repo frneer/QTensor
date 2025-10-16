@@ -1,0 +1,29 @@
+\begin{tikzpicture}[
+    module/.style={
+        rectangle,
+        draw,
+        text width=8em,
+        text centered,
+        rounded corners,
+        minimum height=2em,
+        font=\sffamily
+    },
+    arrow/.style={-Stealth, thick}
+]
+
+% Node Definitions
+\node[module, fill=green!20] (stage) {stages};
+\node[module, fill=blue!20, below left=of stage, node distance=2cm and 1cm] (configs) {configs};
+\node[module, fill=blue!20, below right=of stage, node distance=2cm and 1cm] (utils) {utils};
+\node[module, fill=red!20, below=of stage, yshift=-3.5cm] (quantizers) {quantizers};
+\node[module, fill=gray!20, left=of quantizers, node distance=3cm] (tfmot) {TFMOT \& Keras};
+
+% Arrow Connections
+\draw[arrow] (stage.west) -| (configs.north);
+\draw[arrow] (stage.east) -| (utils.north);
+\draw[arrow] (configs.east) -| (quantizers.north);
+\draw[arrow] (utils.south) |- (quantizers.east);
+\draw[arrow] (configs.south) -- (tfmot.north);
+\draw[arrow] (quantizers.west) -- (tfmot.east);
+
+\end{tikzpicture}

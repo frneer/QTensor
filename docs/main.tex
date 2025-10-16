@@ -33,18 +33,23 @@
 \usepackage{amsfonts}
 \usepackage{bbm}
 
+\usepackage{booktabs}
+
 % Tikz
 \usepackage{tikz}
 \usetikzlibrary{
+    3d,
     arrows,
     arrows.meta,
     backgrounds,
     calc,
     decorations.markings,
+    decorations.text,
     fit,
     positioning,
     quotes,
     shapes,
+    shapes.arrows,
     shapes.geometric,
 }
 
@@ -59,6 +64,9 @@
 
 % multicol
 \usepackage{multicol}
+\usepackage{multirow}
+
+\usepackage{longtable}
 
 % Redefinición de caracteres problemáticos en marcadores
 \hypersetup{
@@ -201,9 +209,8 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 \input{sections/03_diseno_e_implementacion/main}
 \chapter{Ensayos y resultados}
 \input{sections/04_ensayos_y_resultados/main}
-% \chapter{Conclusiones}
-% \section{Trabajos Futuros}
-
+\chapter{Conclusiones}
+\input{sections/05_conclusiones/main}
 %----------------------------------------------------------------------------------------
 % Apéndices
 %----------------------------------------------------------------------------------------
@@ -211,7 +218,10 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 \appendix
 
 % Incluir apéndices desde archivos separados si es necesario
-%\include{Appendices/AppendixA}
+\chapter{Reporte de cobertura de código}
+\input{appendix/coverage}
+\chapter{Codificación de Huffman}
+\input{appendix/huffman}
 
 %----------------------------------------------------------------------------------------
 % Bibliografía

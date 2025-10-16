@@ -1,6 +1,14 @@
 \section{Implementación de la biblioteca}
 \label{sec:implementacion}
 
+\subsection{Requerimientos Funcionales}
+
+El objetivo de la librería es proporcionar una herramienta que permita realizar QAT con parámetros entrenables, que posibilite la experimentación con diferentes esquemas de cuantización, y que facilite la evaluación de los mismos.
+
+Los requerimientos funcionales de la librería se definieron en base a los objetivos planteados en la sección \ref{sec:objetivos}. Los mismos se detallan en la tabla \ref{tab:rf_detailed}, donde se especifica el objetivo al que pertenecen, el numero del requisito y una descripción detallada del mismo.
+
+\input{sections/03_diseno_e_implementacion/02_tab_requisitos_funcionales.tex}
+
 \subsection{Atributos de calidad}
 \label{sec:atributos_calidad}
 
@@ -42,9 +50,19 @@ Para desarrollar la libreria, se eligio trabajar con un repositorio de Git, con 
 
 Para la implementación de la biblioteca se utilizó el framework de testing \texttt{unittest} de Python. Este framework permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática. Las pruebas se definen en archivos separados, y se pueden ejecutar de manera individual o en conjunto.
 
-En particular, se usara la metrica de cobertura de código para evaluar la calidad del código. Esta métrica permite medir el porcentaje de código que se ha ejecutado durante las pruebas, y se puede utilizar para identificar áreas del código que no están siendo probadas. Particularmente, se utilizó la herramienta \href{https://coverage.readthedocs.io/}{\texttt{coverage.py}} para medir la cobertura de código, y se generaron informes en formato HTML para visualizar los resultados.
+En particular, se usara la metrica de cobertura de código para evaluar la calidad del código. Esta métrica permite medir el porcentaje de código que se ha ejecutado durante las pruebas, y se puede utilizar para identificar áreas del código que no están siendo probadas. Particularmente, se utilizó la herramienta \href{https://coverage.readthedocs.io/}{\texttt{coverage.py}} para medir la cobertura de código, y se generaron informes en formato HTML para visualizar los resultados, los mismos se muestran en el apéndice \ref{appendix:coverage}.
 
 Se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está siendo probado adecuadamente.
+
+\subsubsection{Desarrollo con contenedores}
+Para asegurar la reproducibilidad del entorno de desarrollo y evitar problemas de compatibilidad entre diferentes versiones de librerías, se utilizó \texttt{Docker} \cite{docker} para crear un contenedor con todas las dependencias necesarias para el desarrollo y ejecución de la librería. El contenedor se define en un archivo \texttt{Dockerfile}, que especifica la imagen base, las dependencias a instalar y los comandos a ejecutar para configurar el entorno. A su vez se utilizó \texttt{docker-compose} \cite{docker_compose} para facilitar la gestión del contenedor y permitir la ejecución de comandos específicos dentro del mismo.
+
+En particular, la librería se beneficia ampliamente de la utilización de una GPU para acelerar el entrenamiento de los modelos, por lo que se utilizó la imagen oficial de \texttt{Tensorflow} con soporte para GPU como base del contenedor utilizando nvidia container toolkit\cite{nvidia_container_toolkit}.
+
+\subsubsection{Pipeline CI}
+Para asegurar la calidad del código y la funcionalidad de la biblioteca, se implementó un pipeline de integración continua (CI) utilizando \texttt{GitHub Actions} \cite{github_actions}. Este pipeline se ejecuta automáticamente en \textit{pull requests} disparado por cualquier actualización en la rama de desarrollo. Y también es ejecutado al realizar un \textit{push} a la rama principal (\texttt{main}) para asegurar que la rama principal siempre esté en un estado funcional, y detectar condiciones de carrera al momento de fusionar ramas.
+
+Este pipeline construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración. Si alguna de estas etapas falla, el pipeline marca el \textit{pull request} o el \textit{push} como fallido, y bloquea la fusión de la rama hasta que se resuelvan los problemas.
 
 \subsection{Analisis de las capacidades y limitaciones de \texttt{TFMOT}}
 
@@ -79,7 +97,26 @@ Como se muestra en el fragmento de codigo \ref{code:tfmot_quantization_custom_la
 
 Los cuantizadores existentes en la biblioteca tampoco tienen parámetros entrenables, son fijos, lo cual genera que la adaptación sea solo de los parámetros del modelo, y no de los parámetros del cuantizador, lo cual es una característica deseable en nuestra implementación.
 
-\subsection{Implementación de los cuantizadores}
+\subsection{Descripción de la librería \texttt{QTensor}}
+
+La librería \texttt{QTensor} fue diseñada como una capa de abstracción y extensión sobre \texttt{TFMOT}. Esto permite extender las funcionalidades existentes de \texttt{TFMOT} acercando la librería a los atributos de calidad definidos en la sección \ref{sec:atributos_calidad}. En particular, se se ha mejorado la ergonomía para definir esquemas de cuantización complejos, y permitir definir cuantizadores con parámetros entrenables y gradientes personalizados. También incluye un modulo para evaluar el rendimiento de los modelos cuantizados, y un modulo para gestionar flujos de trabajo de entrenamiento y cuantización.
+
+En la \reffig{qtensor_modules} se muestra como es la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{Tensorflow}.
+
+\defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Interacción entre QTensor, TFMOT, Keras y Tensorflow.}{qtensor_modules}{1}
+
+El diseño de \texttt{QTensor} es modular, es decir, se compone de varios módulos, cada uno con una funcionalidad específica. En la \reffig{qtensor_overview} se muestra la estructura general de la librería y sus módulos principales.
+
+\defaultdiagram{implementacion/qtensor_modules}{Estructura general de la librería QTensor.}{qtensor_overview}{1}
+
+\begin{itemize}
+    \item \texttt{quantizers}: módulo que contiene la implementación de los cuantizadores personalizados con parámetros entrenables y gradientes personalizados.
+    \item \texttt{configs}: módulo que contiene abstracciones para definir configuraciones de cuantización como diccionarios de Python.
+    \item \texttt{utils}: módulo que contiene la implementación de herramientas para evaluar el rendimiento de los modelos cuantizados.
+    \item \texttt{stages}: módulo que contiene la implementación de las etapas del flujo de trabajo de entrenamiento y cuantización.
+\end{itemize}
+
+\subsection{Implementación de los cuantizadores (módulo \texttt{quantizers})}
 
 \subsubsection{Clase \texttt{Quantizer}}
 
@@ -154,7 +191,7 @@ La implementación de la función de cuantización uniforme definida en la \refe
 
 Donde las variables que no estan definidas explicitamente en este fragmento se definen siguiendo la notación de la \ref{sec:uniform}.
 
-\TODO{Considerar agregar el histograma input/output de la funcion de cuantizacion}
+% \ TODO{Considerar agregar el histograma input/output de la funcion de cuantizacion}
 
 Para implementar los gradientes se utilizan las definiciones de la sección \ref{sec:uniform_quantizer_gradient}, y se utilizan en la función \texttt{grad} dentro del método \texttt{quantize}.
 
@@ -179,7 +216,7 @@ El gradiente de la función de cuantización uniforme con respecto al parámetro
 
 Es importante notar la utilización de \texttt{tf.reduce\_sum} en la implementación del gradiente con respecto a $\alpha$. Esto se debe a que $\alpha$ es un escalar, y la función de cuantización se aplica elemento a elemento sobre el tensor de entrada $x$. Por lo tanto, para calcular el gradiente total con respecto a $\alpha$, es necesario sumar los gradientes parciales de cada elemento del tensor de entrada.
 
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
+% \ TODO{Mostrar entrenamiento, gif copado y evolucion comun}
 
 \subsubsection{Cuantizador flexible}
 
@@ -250,9 +287,9 @@ El gradiente de la función de cuantización flexible con respecto a los umbrale
 
 En este caso también se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ pues la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los umbrales $t$. Para esto, se utiliza \texttt{tf.where} para crear una máscara que seleccione solo aquellos valores de $x$ que caen dentro del rango definido por los umbrales $t_{i-1}$ y $t_{i+1}$, luego se utiliza \texttt{tf.reduce\_sum} para sumar los gradientes correspondientes a estos valores, y finalmente se utiliza \texttt{tf.tensor\_scatter\_nd\_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
+% \ TODO{Mostrar entrenamiento, gif copado y evolucion comun}
 
-\subsection{Implementación de la descripción de esquemas de cuantización}
+\subsection{Implementación de la descripción de esquemas de cuantización (módulo \texttt{configs})}
 
 \subsubsection{Clase \texttt{QuantizeConfig}}
 
@@ -336,7 +373,7 @@ De esta manera, la definición de nuevas configuraciones de cuantización, y la 
 
 Este aporte es clave, ya que permite con una unica clase, definir cualquier configuración de cuantización a partir de un diccionario, lo cual facilita la definición de nuevas configuraciones, y la experimentación con diferentes esquemas de cuantización.
 
-\subsubsection{Módulo \texttt{qmodel}}
+\subsubsection{Submódulo \texttt{qmodel}}
 \label{sec:qmodel}
 
 Previamente, la cuantización de un modelo completo con diferentes configuraciones de cuantización para cada capa.
@@ -412,34 +449,92 @@ apply_quantization(model, qconfig)
 De esta manera no solo se desacopla la definición del esquema de cuantización de la definición del modelo, sino que también se simplifica la interacción del usuario con la librería, permitiendo definir esquemas de cuantización complejos de manera sencilla y rápida. También se esconde la complejidad de la librería \texttt{TFMOT}, permitiendo a los usuarios enfocarse en la definición del esquema de cuantización y el modelo, sin preocuparse por los detalles de implementación de la cuantización.
 
 
-\subsection{Implementación de computos de complejidad espacial}
-
+\subsection{Implementación de computos de complejidad espacial (módulo \texttt{utils})}
+% \ TODO{Falta agregar activations al codigo...}
 Una utilidad relevante para este trabajo es poder calcular la complejidad espacial de un modelo cuantizado, para esto se implementaron las funciones necesarias para calcular la complejidad espacial de modelos sin cuantizar y cuantizados, tanto para el esquema de cuantización uniforme como para el esquema de cuantización flexible.
 
 Para calcular la complejidad espacial de un modelo cuantizado, se itera sobre las capas del modelo, y se calcula la complejidad espacial de cada capa, sumando los resultados. La complejidad espacial de una capa se calcula como la suma del tamaño de los pesos y las activaciones.
 
-
 \subsubsection{Complejidad para el modelo sin cuantizar}
-
 Para un modelo sin cuantizar se calcula la complejidad espacial como la suma del tamaño de los pesos.
 
-\begin[lstlisting][language=Python,label=code:complexity_unquantized,caption=Cálculo de la complejidad espacial de un modelo sin cuantizar.]
+\begin{lstlisting}[language=Python,label=code:complexity_unquantized,caption=Cálculo de la complejidad espacial de un modelo sin cuantizar.]
 def compute_space_complexity(model: tf.keras.Layer) -> int:
   return sum(
       np.prod(w.shape) * w.dtype.size for w in model.weights
   ) + sum(
       np.prod(a.shape) * a.dtype.size for a in model.activations
   )
+\end{lstlisting}
 \subsubsection{Complejidad para el cuantizador uniforme}
 
 \subsubsection{Complejidad para el cuantizador flexible}
 
-Huffmann
+En el caso de la cuantización flexible, se considerara que la implementación utiliza la codificación de Huffman. Lo cual reduce el espacio necesario para almacenar los parámetros. Por lo tanto, la complejidad espacial de los parámetros del cuantizador se calculara como el valor nominal de la codificación de Huffman. Los detalles de la codificación de Huffman se encuentran en el apéndice \ref{appendix:huffman}.
 
-\subsection{Implementación del modulo de flujo de trabajo}
+\begin{lstlisting}[language=Python,label=code:complexity_flexible,caption=Cálculo de la complejidad espacial de un modelo cuantizado con el esquema flexible.]
+def compute_huffman_nominal_complexity(qweights):
+    N = qweights.shape.num_elements()
+    counter = Counter(qweights.numpy().flatten())
+    total = sum(counter.values())
+    probabilities = np.array([freq / total for freq in counter.values()])
+    entropy = -np.sum(probabilities * np.log2(probabilities))
+    return N * entropy
+\end{lstlisting}
+
+\subsection{Implementación del modulo de flujo de trabajo (módulo \texttt{stages})}
+
+Un flujo típico de trabajo utilizado durante el desarrollo de este trabajo, y que se busca facilitar con la implementación de este módulo, consta de los siguientes pasos:
+
+\begin{enumerate}
+    \item Definir el modelo a cuantizar.
+    \item Pre-entrenar el modelo.
+    \item Evaluar el modelo pre-entrenado.
+    \item Cuantizar el modelo con un esquema de cuantización.
+    \item Entrenar el modelo cuantizado.
+    \item Evaluar el modelo cuantizado.
+\end{enumerate}
+
+Es común querer probar diferentes esquemas de cuantización sobre un mismo modelo, y comparar los resultados obtenidos. Para comparar entre diferentes esquemas de cuantización, es necesario partir desde el mismo modelo pre-entrenado. Otro punto a considerar es que algunos de estos pasos son computacionalmente costosos, como el pre-entrenamiento y el entrenamiento del modelo cuantizado. A su vez, si se quiere extraer información adicional, como otras métricas de evaluación, distribuciones de pesos, activaciones, etc. Es necesario volver a ejecutar estos pasos.
+
+Por ejemplo, en la \reffig{typical_workflow} se muestra un experimento ejecutado donde cada etapa ya fue ejecutada previamente.
+
+\defaultdiagram{stages/pipeline_first_run}{Diagrama de un flujo de trabajo típico.}{typical_workflow}{0.7}
+
+Ahora, si se quiere probar un nuevo esquema de cuantización, es necesario volver a ejecutar todos los pasos del flujo de trabajo, se invalida todo el trabajo previo. Esto se muestra en la \reffig{typical_workflow_rerun}.
+
+\defaultdiagram{stages/pipeline_first_run_invalidated}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización.}{typical_workflow_rerun}{0.7}
+
+La solución a este problema es guardar los resultados intermedios de cada paso del flujo de trabajo, para poder reutilizarlos en futuras ejecuciones. Esto permite ahorrar tiempo y recursos computacionales, al no tener que volver a ejecutar todos los pasos del flujo de trabajo cada vez que se quiere probar un nuevo esquema de cuantización o extraer información adicional.
+
+Cada paso queda definido principalmente por el modelo inicial del cual se parte (su entrada), una función que define el proceso a ejecutar, y los parámetros de esta función. A esto se le suma la semilla para la generación de números aleatorios, para asegurar que los resultados sean reproducibles.
+
+Al quedar definido cada paso por estos elementos, es posible identificar de manera única cada paso del flujo de trabajo. Esto se realizo generando un hash único a partir de estos elementos, y utilizando este hash para guardar los resultados intermedios de cada paso del flujo de trabajo. Permitiendo invalidar solo los pasos que dependen de un paso que ha cambiado, y reutilizar los resultados intermedios de los pasos que no han cambiado como se muestra en la \reffig{typical_workflow_rerun_optimized} donde ahora el ejemplo anterior se puede ejecutar sin necesidad de volver a ejecutar el pre-entrenamiento.
+
+\defaultdiagram{stages/pipeline_hashed}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización, reutilizando resultados intermedios.}{typical_workflow_rerun_optimized}{0.7}
+
+La \texttt{dataclass} \texttt{StageMetadata} define los siguientes atributos:
+
+\begin{enumerate}
+    \item \texttt{name}: Nombre del paso del flujo de trabajo.
+    \item \texttt{seed}: Semilla para la generación de números aleatorios.
+    \item \texttt{function}: Función que define el proceso a ejecutar en este paso.
+    \item \texttt{parameters}: Parámetros a pasar a la función.
+    \item \texttt{previous\_hash}: Hash del paso anterior, para definir el modelo original del cual se parte.
+\end{enumerate}
+
+Esta clase permite generar un hash único a partir de estos atributos, utilizando la función \texttt{to\_hash}.
 
 \subsubsection{Clase \texttt{Stage}}
 
-Clase \texttt{StageMetadata}
+La clase \texttt{Stage} representa un paso del flujo de trabajo. Esta clase permite ejecutar el proceso definido por la función y los parámetros, y guardar los resultados intermedios en disco. La clase \texttt{Stage} se compone con la clase \texttt{StageMetadata} y define el método \texttt{run}, cuyo diagrama de flujo se muestra en la figura \ref{fig:stage_flow}.
+
+\defaultdiagram{stages/stage}{Diagrama de la clase Stage.}{stage_flow}{0.7}
+
+Es importante destacar que para guardar y cargar los modelos deben ser serializables y deserializables. Para esto, se utiliz\'o la funcionalidad de Keras para guardar y cargar modelos en formato \texttt{keras}. Todo objeto desarrollado por la librería que forme parte del modelo como la configuracion (\texttt{GenerateConfig}) o los cuantizadores personalizados (\texttt{UniformQuantizer}, \texttt{FlexQuantizer}) implementan el método \texttt{get\_config} y el método de clase \texttt{from\_config}, para poder ser serializados y deserializados correctamente.
 
 \subsubsection{Clase \texttt{Pipeline}}
+
+La clase \texttt{Pipeline} es un orquestador de etapas. Esta clase permite definir un flujo de trabajo a partir de una lista de etapas, y ejecutar cada una de estas etapas en orden. La clase \texttt{Pipeline} se encarga de gestionar la ejecución de cada etapa, pasando los resultados intermedios entre las etapas, y guardando los resultados intermedios en disco.
+
+Implementa el método \texttt{run}, que ejecuta cada una de las etapas del flujo de trabajo. Y también permite serializar y deserializar el flujo de trabajo, para poder guardar y cargar flujos de trabajo completos.

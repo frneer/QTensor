@@ -1,0 +1,110 @@
+\begin{tikzpicture}[
+    x={(1,0)}, y={(0,1)}, z={({cos(60)},{sin(60)})},
+    font=\sffamily\small,
+    scale=1.2,
+    every node/.style={transform shape},
+    layer_dist/.style={xshift=2.5cm},
+    arrow_style/.style={-Stealth, thick},
+    layer_label/.style={text width=2cm, align=center, font=\sffamily\footnotesize, yshift=-0.5cm}
+]
+
+% Define styles for different layers
+\tikzset{
+    pics/conv/.style args={#1 filters at #2x#3}{
+        code={
+            \def\depth{0.2 + #1/128}
+            \def\ysize{0.1 * #2}
+            \def\xsize{0.1 * #3}
+            \draw[ultra thin, fill=orange!80] (0,0,0) -- ++(0,\ysize,0) -- ++(\xsize,0,0) -- ++(0,-\ysize,0) -- cycle;
+            \draw[ultra thin, fill=orange!80] (0,\ysize,0) -- ++(0,0,\depth) -- ++(\xsize,0,0) -- ++(0,0,-\depth) -- cycle;
+            \draw[ultra thin, fill=orange!60!black] (\xsize,0,0) -- ++(0,0,\depth) -- ++(0,\ysize,0) -- ++(0,0,-\depth) -- cycle;
+            \node[font=\sffamily\tiny, text=white] at (\xsize/2, \ysize/2, \depth+0.01) {#1};
+            \node[font=\sffamily\tiny, text=black, below] at (\xsize/2, 0, 0) {Conv2D};
+        }
+    },
+    pics/pool/.style args={#1x#2}{
+        code={
+            \def\depth{0.2}
+            \def\ysize{0.1 * #1}
+            \def\xsize{0.1 * #2}
+            \draw[ultra thin, fill=cyan!70] (0,0,0) -- ++(0,\ysize,0) -- ++(\xsize,0,0) -- ++(0,-\ysize,0) -- cycle;
+            \draw[ultra thin, fill=cyan!70] (0,\ysize,0) -- ++(0,0,\depth) -- ++(\xsize,0,0) -- ++(0,0,-\depth) -- cycle;
+            \draw[ultra thin, fill=cyan!50!black] (\xsize,0,0) -- ++(0,0,\depth) -- ++(0,\ysize,0) -- ++(0,0,-\depth) -- cycle;
+            \node[font=\sffamily\tiny, text=black, below] at (\xsize/2, 0, 0) {MaxPool};
+        }
+    },
+    pics/flatten/.style={
+        code={
+            \draw[thick, fill=gray!40] (0,0) rectangle (0.2, 2.5);
+            \node[font=\sffamily\tiny, text=black, below, yshift=-0.2cm] at (0.1, 0) {Flatten};
+        }
+    },
+    pics/dense/.style args={#1 units}{
+        code={
+            \def\height{#1/128 * 2}
+            \draw[thick, fill=teal!60] (0,0) rectangle (0.2, \height);
+            \node[font=\sffamily\tiny, text=white] at (0.1, \height/2) {#1};
+            \node[font=\sffamily\tiny, text=black, below, yshift=-0.2cm] at (0.1, 0) {Dense};
+        }
+    },
+    pics/dropout/.style={
+        code={
+            \node[draw, thick, red!70!black, dashed, minimum height=2cm, minimum width=0.2cm] {};
+            \node[font=\sffamily\tiny, text=black, below, yshift=-0.2cm] at (0, -1) {Dropout};
+        }
+    }
+}
+
+% Input Image
+\node (input_label) at (-2, 1.6) [layer_label] {Input Image\\32x32x3};
+\draw pic (input) at (-1,0,0) {pool=32x32};
+
+% Layer 1: Conv2D(64, (3,3))
+\node (conv1) [layer_dist, right of=input] {};
+\draw pic (conv1_pic) at (conv1) {conv=64 filters at 32x32};
+\node [below of=conv1, yshift=-1.5cm, layer_label] {64 filters\\(3x3), ReLU};
+
+% Layer 2: MaxPooling2D((2,2))
+\node (pool1) [layer_dist, right of=conv1] {};
+\draw pic (pool1_pic) at (pool1) {pool=16x16};
+\node [below of=pool1, yshift=-1.5cm, layer_label] {(2x2)};
+
+% Layer 3: Conv2D(128, (3,3))
+\node (conv2) [layer_dist, right of=pool1] {};
+\draw pic (conv2_pic) at (conv2) {conv=128 filters at 16x16};
+\node [below of=conv2, yshift=-1.5cm, layer_label] {128 filters\\(3x3), ReLU};
+
+% Layer 4: MaxPooling2D((2,2))
+\node (pool2) [layer_dist, right of=conv2] {};
+\draw pic (pool2_pic) at (pool2) {pool=8x8};
+\node [below of=pool2, yshift=-1.5cm, layer_label] {(2x2)};
+
+% Layer 5: Flatten
+\node (flatten) [layer_dist, right of=pool2, yshift=1.25cm] {};
+\draw pic (flatten_pic) at (flatten) {flatten};
+
+% Layer 6: Dense(256)
+\node (dense1) [layer_dist, right of=flatten] {};
+\draw pic (dense1_pic) at (dense1) {dense=256 units};
+\node [below of=dense1, yshift=-1.5cm, layer_label] {256 units\\ReLU};
+
+% Layer 7: Dropout(0.5)
+\node (dropout) [layer_dist, right of=dense1] {};
+\draw pic (dropout_pic) at (dropout) {dropout};
+
+% Layer 8: Dense(10)
+\node (dense2) [layer_dist, right of=dropout] {};
+\draw pic (dense2_pic) at (dense2) {dense=10 units};
+\node [below of=dense2, yshift=-1.5cm, layer_label] {10 units\\Softmax};
+
+% Arrows
+\draw[arrow_style] (input_label) -- (conv1);
+\draw[arrow_style] (conv1) -- (pool1);
+\draw[arrow_style] (pool1) -- (conv2);
+\draw[arrow_style] (conv2) -- (pool2);
+\draw[arrow_style] (pool2) -- (flatten);
+\draw[arrow_style] (flatten) -- (dense1);
+\draw[arrow_style] (dense1) -- (dropout);
+\draw[arrow_style] (dropout) -- (dense2);
+
+\end{tikzpicture}

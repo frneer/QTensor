@@ -1,0 +1,75 @@
+
+\tikzset{pics/fake box/.style args={% #1=color, #2=x dimension, #3=y dimension, #4=z dimension
+#1 with dimensions #2 and #3 and #4 with text #5}{
+code={
+\draw[ultra thin,fill=#1]  (0,0,0) coordinate(-front-bottom-left) to
+++ (0,#3,0) coordinate(-front-top-right) --++
+(#2,0,0) coordinate(-front-top-right) --++ (0,-#3,0)
+coordinate(-front-bottom-right) -- cycle;
+\draw[ultra thin,fill=#1] (0,#3,0)  --++
+ (0,0,#4) coordinate(-back-top-left) --++ (#2,0,0)
+ coordinate(-back-top-right) --++ (0,0,-#4)  -- cycle;
+\draw[ultra thin,fill=#1] (#2,0,0) --++ (0,0,#4) coordinate(-back-bottom-right)
+--++ (0,#3,0) --++ (0,0,-#4) -- cycle;
+\path[decorate,decoration={text effects along path,text={#5}}] (
+    #2/2,{2.5+(#3-2)/2},0) -- (#2/2,0,0);
+% \path[decorate,decoration={text effects along path,text={#5}}] (#2/2,{2+(#3-2)/2},0) -- (#2/2,0,0);
+% Add text below the box
+% \node at (#2/2,-0.5,0) {#5};
+}
+}}
+\tikzset{pics/empty fake box/.style args={% #1=color, #2=x dimension, #3=y dimension, #4=z dimension
+#1 with dimensions #2 and #3 and #4 with text #5}{
+code={
+\draw[ultra thin,fill=#1]  (0,0,0) coordinate(-front-bottom-left) to
+++ (0,#3,0) coordinate(-front-top-right) --++
+(#2,0,0) coordinate(-front-top-right) --++ (0,-#3,0)
+coordinate(-front-bottom-right) -- cycle;
+\draw[ultra thin,fill=#1] (0,#3,0)  --++
+ (0,0,#4) coordinate(-back-top-left) --++ (#2,0,0)
+ coordinate(-back-top-right) --++ (0,0,-#4)  -- cycle;
+\draw[ultra thin,fill=#1] (#2,0,0) --++ (0,0,#4) coordinate(-back-bottom-right)
+--++ (0,#3,0) --++ (0,0,-#4) -- cycle;
+% \node at (#2/2,-0.5,0) {#5};
+}
+}}
+
+
+\tikzset{pics/legend box/.style args={% #1=color, #2=x dimension, #3=y dimension, #4=z dimension
+#1 with dimensions #2 and #3 and #4 with text #5}{
+code={
+\draw[ultra thin,fill=#1]  (0,0,0) coordinate(-front-bottom-left) to
+++ (0,#3,0) coordinate(-front-top-right) --++
+(#2,0,0) coordinate(-front-top-right) --++ (0,-#3,0)
+coordinate(-front-bottom-right) -- cycle;
+\draw[ultra thin,fill=#1] (0,#3,0)  --++
+ (0,0,#4) coordinate(-back-top-left) --++ (#2,0,0)
+ coordinate(-back-top-right) --++ (0,0,-#4)  -- cycle;
+\draw[ultra thin,fill=#1] (#2,0,0) --++ (0,0,#4) coordinate(-back-bottom-right)
+--++ (0,#3,0) --++ (0,0,-#4) -- cycle;
+\path[decorate,decoration={text effects along path,text={#5}}] (#1,0,0) -- (5,0,0);
+% \path[decorate,decoration={text effects along path,text={#5}}] (#2/2,{2+(#3-2)/2},0) -- (#2/2,0,0);
+% Add text below the box
+% \node at (#2/2,-0.5,0) {#5};
+}
+}}
+
+\begin{tikzpicture}[x={(1,0)},y={(0,1)},z={({cos(60)},{sin(60)})},
+font=\sffamily\small,scale=2]
+    \draw pic at (0,0,0){fake box=gray!90!black with dimensions 1 and 4 and 2 with text {32x32x3}};
+    \draw pic (conv_1) at (0.5,0,0){fake box=orange!90!black with dimensions 1 and 4 and 2 with text {64 - 3x3}};
+    % \node at (0,-0.5,0) {64 filters\\(3x3), ReLU};
+    % \node at (0,1,0) {64 filters\\(3x3), ReLU};
+    % \draw pic (conv_2) at (3,0,0){fake box=orange!90!black with dimensions 1 and 2 and 1};
+    % \draw pic (maxpool_2) at (5,0,0){fake box=cyan!70 with dimensions 0.5 and 1 and 0.2};
+    % \draw pic (flatten) at (6,0,0){empty fake box=gray!40 with dimensions 0.2 and 2.5 and 0.1};
+    % \draw pic (dense_1) at (7,0,0){fake box=orange!90!black with dimensions 0.5 and 2 and 0.5};
+    % \draw pic (dropout) at (8,0,0){empty fake box=gray!40 with dimensions 0.2 and 2.5 and 0.1};
+    % \draw pic (dense_2) at (9,0,0){fake box=orange!90!black with dimensions 0.5 and 2 and 0.5};
+
+    % Add legend
+    % Orange is Conv2D+ReLU
+    \draw pic at (3.0,-3,0){legend box=orange!90!black with dimensions 2 and 0.5 and 0.1 with text {ASDASD}};
+
+
+\end{tikzpicture}

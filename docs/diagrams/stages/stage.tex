@@ -1,0 +1,42 @@
+
+\begin{tikzpicture}
+
+\tikzset{
+    process/.style   = {rectangle, draw, text centered, minimum height=1cm, minimum width=3cm},
+    io/.style={circle, draw, text centered},
+    decision/.style  = {diamond, draw, text centered, aspect=2},
+    arrow/.style={-latex, thick},
+};
+
+\tikzset{node distance = 1cm and 2cm};
+\node (start) [io] {Input model};
+\node (is_model_saved) [decision, below=of start] {Model saved?};
+
+\node (run) [process, below=of is_model_saved] {\texttt{run()}};
+\node (save_model) [process, below=of run] {Save model};
+\node (load_model) [process, right=of is_model_saved] {Load model};
+
+% Evaluation
+\node (is_result_saved) [decision, below=of save_model] {Results saved?};
+\node (evaluate) [process, below=of is_result_saved] {Evaluate};
+\node (save_results) [process, below=of evaluate] {Save results};
+
+\node (end_model) [io, below=of save_results] {generated model};
+
+% Arrows
+\draw [arrow] (start) -- (is_model_saved);
+\draw [arrow] (is_model_saved) -- node[xshift=0.5cm] {No} (run);
+\draw [arrow] (run) -- (save_model);
+
+\draw [arrow] (is_model_saved) -- node[yshift=0.3cm] {Yes} (load_model);
+\draw [arrow] (load_model) |- (is_result_saved.east);
+\draw [arrow] (save_model) -- (is_result_saved);
+
+\draw [arrow] (is_result_saved) -- node[xshift=0.5cm] {No} (evaluate);
+\draw [arrow] (evaluate) -- (save_results);
+\draw [arrow] (save_results) -- (end_model);
+
+\draw [arrow] (is_result_saved.west) node[xshift=-0.5cm,yshift=-0.3cm] {Yes} |-  (end_model.west);
+
+
+\end{tikzpicture}

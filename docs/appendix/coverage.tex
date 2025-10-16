@@ -1,0 +1,56 @@
+\label{appendix:coverage}
+A continuación se detallan los resultados de la cobertura de pruebas de la biblioteca, desglosados por archivo, clase y función.
+\section{Cobertura por Archivo}
+\begin{table}[H]
+\centering
+\caption{Resumen de la cobertura de pruebas por archivo.}
+\label{tab:coverage_file}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Archivo} & \textbf{Stmts} & \textbf{Faltan} & \textbf{Excl} & \textbf{Cobertura} \\
+\midrule
+\texttt{src/configs/generate\_config.py} & 67 & 4 & 0 & 94\% \\
+\texttt{src/configs/qmodel.py} & 30 & 1 & 0 & 97\% \\
+\texttt{src/configs/serialization/serialization.py} & 8 & 0 & 0 & 100\% \\
+\texttt{src/quantizers/common.py} & 12 & 2 & 0 & 83\% \\
+\texttt{src/quantizers/constraints/constraints.py} & 34 & 3 & 0 & 91\% \\
+\texttt{src/quantizers/flex\_quantizer.py} & 61 & 0 & 0 & 100\% \\
+\texttt{src/quantizers/uniform\_quantizer.py} & 52 & 1 & 0 & 98\% \\
+\texttt{src/utils/huffman.py} & 9 & 0 & 0 & 100\% \\
+\texttt{src/utils/metrics.py} & 40 & 2 & 0 & 95\% \\
+\midrule
+\textbf{Total} & \textbf{313} & \textbf{13} & \textbf{0} & \textbf{96\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Cobertura por Clase}
+\begin{table}[H]
+\centering
+\caption{Resumen de la cobertura de pruebas por clase.}
+\label{tab:coverage_class}
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Archivo} & \textbf{Clase} & \textbf{Stmts} & \textbf{Faltan} & \textbf{Excl} & \textbf{Cobertura} \\
+\midrule
+\texttt{.../generate\_config.py} & \texttt{GenerateConfig} & 32 & 4 & 0 & 88\% \\
+\texttt{.../generate\_config.py} & \texttt{(sin clase)} & 35 & 0 & 0 & 100\% \\
+\texttt{.../qmodel.py} & \texttt{(sin clase)} & 30 & 1 & 0 & 97\% \\
+\texttt{.../serialization.py} & \texttt{(sin clase)} & 8 & 0 & 0 & 100\% \\
+\texttt{.../common.py} & \texttt{(sin clase)} & 12 & 2 & 0 & 83\% \\
+\texttt{.../constraints.py} & \texttt{PositiveConstraint} & 1 & 1 & 0 & 0\% \\
+\texttt{.../constraints.py} & \texttt{LevelConstraint} & 11 & 1 & 0 & 91\% \\
+\texttt{.../constraints.py} & \texttt{ThresholdConstraint} & 9 & 1 & 0 & 89\% \\
+\texttt{.../constraints.py} & \texttt{(sin clase)} & 13 & 0 & 0 & 100\% \\
+\texttt{.../flex\_quantizer.py} & \texttt{FlexQuantizer} & 46 & 0 & 0 & 100\% \\
+\texttt{.../flex\_quantizer.py} & \texttt{(sin clase)} & 15 & 0 & 0 & 100\% \\
+\texttt{.../uniform\_quantizer.py} & \texttt{UniformQuantizer} & 33 & 0 & 0 & 100\% \\
+\texttt{.../uniform\_quantizer.py} & \texttt{...PositiveConstraint} & 1 & 1 & 0 & 0\% \\
+\texttt{.../uniform\_quantizer.py} & \texttt{(sin clase)} & 18 & 0 & 0 & 100\% \\
+\texttt{.../huffman.py} & \texttt{(sin clase)} & 9 & 0 & 0 & 100\% \\
+\texttt{.../metrics.py} & \texttt{(sin clase)} & 40 & 2 & 0 & 95\% \\
+\midrule
+\textbf{Total} & & \textbf{313} & \textbf{13} & \textbf{0} & \textbf{96\%} \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+    stage/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 1cm and 1cm}
+    % Nodes
+    \node (create_model) [stage, fill=green!20, text=black] at (0, 0) {$1$};
+    \node (pre-train) [stage, fill=green!20, right=of create_model, text=black] {$2$};
+    \node (evaluate) [stage, fill=green!20, right=of pre-train, text=black] {$3$};
+    \node (quantize) [stage, fill=red!20, right=of evaluate, text=black] {$4$};
+    \node (train_qat) [stage, fill=red!20, right=of quantize, text=black] {$5$};
+    \node (final_evaluate) [stage, fill=red!20, right=of train_qat, text=black] {$6$};
+
+    \draw [arrow] (create_model) -- (pre-train);
+    \draw [arrow] (pre-train) -- (evaluate);
+    \draw [arrow] (evaluate) -- (quantize);
+    \draw [arrow] (quantize) -- (train_qat);
+    \draw [arrow] (train_qat) -- (final_evaluate);
+
+\end{tikzpicture}

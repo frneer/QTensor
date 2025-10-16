@@ -1,0 +1,43 @@
+En este capítulo se presentan las conclusiones del trabajo realizado, así como las posibles líneas de trabajo futuro que se podrían seguir a partir de este proyecto.
+
+\section{Biblioteca \texttt{QTensor}}
+
+% \ TODO{Comparar resultados contra los requisitos}
+% \ TODO{Mostar como lo desarrollado cumple con los requisitos funcionales y no funcionales}
+
+Se ha desarrollado una biblioteca de cuantización de modelos de \texttt{TensorFlow} que permite:
+
+\begin{itemize}
+    \item Cuantizar modelos de \texttt{TensorFlow} de manera sencilla mediante la definición de esquemas como diccionarios de Python. Lo que simplifica la experimentación con diferentes esquemas de cuantización.
+    \item Realizar cuantización durante el entrenamiento del modelo, con soporte para cuantizadores con parámetros entrenables.
+    \item Cuantizar modelos con cuantizadores personalizados, lo que permite adaptar la cuantización a las necesidades específicas de cada modelo o aplicación.
+    \item Evaluar el desempeño de los modelos cuantizados en términos de precisión y tamaño del modelo, lo que facilita la comparación entre diferentes esquemas de cuantización.
+    \item Soporte para cualquier modelo de \texttt{TensorFlow}, incluyendo modelos secuenciales y funcionales con arquitecturas complejas.
+    \item Definir un procedimiento de entrenamiento completo mediante la definición de un \texttt{Pipeline}, que incluye la carga y preprocesamiento de datos, la definición del modelo, el esquema de cuantización, el optimizador, la función de pérdida y las métricas de evaluación.
+\end{itemize}
+
+En particular, se incluye la implementación de los siguientes cuantizadores con parámetros entrenables:
+
+\begin{itemize}
+    \item Cuantizador uniforme simétrico y asimétrico.
+    \item Cuantizador flexible simétrico y asimétrico.
+\end{itemize}
+
+\section{Ensayos y resultados}
+
+En el capítulo \ref{sec:ensayos_y_pruebas} se demuestra el potencial de la biblioteca \texttt{QTensor} y del esquema de cuantización flexible, en particular para su implementación en hardware embebido. Donde se muestra una perfomance (X \% superior en cuanto al trade-off precisión/tamaño del modelo) respecto a un esquema de cuantización uniforme.
+% \ TODO{Agregar resultados cuantitativos}
+
+Sin ningun tipo de exploración exhaustiva de los esquemas de cuantización, se ha podido observar que el esquema de cuantización flexible permite obtener modelos cuantizados con un mejor desempeño que el esquema de cuantización uniforme, tanto en términos de precisión como de tamaño del modelo.
+
+\section{Trabajo futuro}
+
+Existen varias líneas de trabajo futuro que se podrían seguir a partir de este proyecto:
+
+\begin{itemize}
+    \item Realizar experimentos con una exploración más exhaustiva de los esquemas de cuantización, para encontrar los esquemas que mejor se adapten a cada modelo y aplicación.
+    \item Migrar la biblioteca \texttt{QTensor} para que sea compatible con \texttt{PyTorch}, pues se ha convertido en el nuevo estándar de facto en la comunidad de aprendizaje automático.
+    \item Incluir métricas de complejidad computacional y consumo energético en la evaluación de los modelos cuantizados, para tener una visión más completa del desempeño de los modelos en diferentes escenarios.
+    \item Implementar una restricción para el parametro alpha donde $ \alpha = 2^k $ con $ k \in \mathbb{Z} $, para facilitar la implementación en hardware embebido.
+    \item Agregar soporte para especificaciones de esquemas de cuantización por canal en el caso de capas convolucionales.
+\end{itemize}
