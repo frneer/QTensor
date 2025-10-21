@@ -33,7 +33,7 @@ def main():
     plt.axvline(x=alpha, color="red", linestyle="--", alpha=0.5)
     plt.axhline(y=alpha, color="red", linestyle="--", alpha=0.5)
 
-    # Generate the quantization funcion q(x; alpha)
+    # Generate the quantization función q(x; alpha)
     plt.step(
         input_levels,
         levels,

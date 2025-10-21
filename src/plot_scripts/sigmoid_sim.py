@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# --- 1. Definición de funciones ---
+# --- 1. Definición de funciónes ---
 
 
 def sigmoid(z):

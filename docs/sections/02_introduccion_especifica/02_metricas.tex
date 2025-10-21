@@ -10,17 +10,17 @@ En el contexto de modelos de \textit{machine learning}, las métricas de evaluac
 Algunas métricas comunes para problemas de regresión son:
 
 \begin{itemize}
-    \item Error Cuadrático Medio (MSE, por sus siglas del inglés \textit{Mean Squared Error}): Calcula la media de los cuadrados de las diferencias entre las predicciones y los valores reales
+    \item Error cuadrático medio (MSE, por sus siglas del inglés \textit{Mean Squared Error}): Calcula la media de los cuadrados de las diferencias entre las predicciones y los valores reales. \cite{botchkarev2019performance}
     \begin{equation}
         \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
     \end{equation}
 
-    \item Error Absoluto Medio (MAE, por sus siglas del inglés \textit{Mean Absolute Error}): Calcula la media de las diferencias absolutas entre las predicciones y los valores reales.
+    \item Error absoluto medio (MAE, por sus siglas del inglés \textit{Mean Absolute Error}): Calcula la media de las diferencias absolutas entre las predicciones y los valores reales. \cite{willmott2005advantages}
     \begin{equation}
         \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
     \end{equation}
 
-    \item Coeficiente de Determinación ($R^2$): Mide la proporción de la varianza en los datos que es explicada por el modelo. Un valor de $R^2$ cercano a 1 indica un buen ajuste.
+    \item Coeficiente de determinación ($R^2$): Mide la proporción de la varianza en los datos que es explicada por el modelo. Un valor de $R^2$ cercano a 1 indica un buen ajuste. \cite{alexander2016rsquared}
     \begin{equation}
         R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
     \end{equation}
@@ -28,7 +28,7 @@ Algunas métricas comunes para problemas de regresión son:
 
 \subsection{Métricas para problemas de clasificación}
 \label{sec:metricas_clasificacion}
-Para el caso de los problemas de clasificación, se suelen definir métricas a partir de los conceptos de \textit{verdaderos positivos} (TP, por sus siglas del inglés \textit{True Positives}), que corresponden al número de instancias positivas correctamente clasificadas como positivas; \textit{falsos positivos} (FP, por sus siglas del inglés \textit{False Positives}), que representan el número de instancias negativas incorrectamente clasificadas como positivas; \textit{verdaderos negativos} (TN, por sus siglas del inglés \textit{True Negatives}), que son el número de instancias negativas correctamente clasificadas como negativas; y \textit{falsos negativos} (FN, por sus siglas del inglés \textit{False Negatives}), que indican el número de instancias positivas incorrectamente clasificadas como negativas. En la \ref{tab:confusion_matrix} se muestra una matriz de confusión que resume estos conceptos para un problema de clasificación binaria.
+Para el caso de los problemas de clasificación, se suelen utilizar métricas definidas a partir de los siguientes conceptos: \textit{verdaderos positivos} (TP, por sus siglas del inglés \textit{True Positives}), que corresponden al número de instancias positivas correctamente clasificadas como positivas; \textit{falsos positivos} (FP, por sus siglas del inglés \textit{False Positives}), que representan el número de instancias negativas incorrectamente clasificadas como positivas; \textit{verdaderos negativos} (TN, por sus siglas del inglés \textit{True Negatives}), que son el número de instancias negativas correctamente clasificadas como negativas; y \textit{falsos negativos} (FN, por sus siglas del inglés \textit{False Negatives}), que indican el número de instancias positivas incorrectamente clasificadas como negativas. En la \ref{tab:confusion_matrix} se muestra una matriz de confusión \cite{sokolova2009systematic} que resume estos conceptos para un problema de clasificación binaria.
 
 \begin{table}[H]
     \centering
@@ -49,21 +49,21 @@ Para el caso de los problemas de clasificación, se suelen definir métricas a p
     \item Exactitud (\textit{accuracy} en inglés): Mide la proporción de predicciones correctas sobre el total de predicciones. Se computa como se muestra en la \refeq{accuracy} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:accuracy}
-        \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+        \text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
     \end{equation}
     \item Precisión (\textit{precision} en inglés): Mide la proporción de predicciones positivas correctas sobre el total de predicciones positivas. Se computa como se muestra en la \refeq{precision} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:precision}
-        \text{Precision} = \frac{TP}{TP + FP}
+        \text{precision} = \frac{TP}{TP + FP}
     \end{equation}
     \item Sensibilidad (\textit{recall} en inglés): Mide la proporción de verdaderos positivos sobre el total de positivos reales. Se computa como se muestra en la \refeq{recall} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:recall}
-        \text{Recall} = \frac{TP}{TP + FN}
+        \text{recall} = \frac{TP}{TP + FN}
     \end{equation}
     \item Puntaje F1 (\textit{F1-score} en inglés): Es la media armónica entre la precisión y la sensibilidad, proporcionando un balance entre ambas métricas. Se computa como se muestra en la \refeq{f1_score} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:f1_score}
-        \text{F1-score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+        \text{F1-score} = 2 \cdot \frac{\text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}
     \end{equation}
 \end{itemize}

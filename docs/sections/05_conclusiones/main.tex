@@ -1,9 +1,13 @@
+\TODO{Este capitulo esta en desarrollo}
+\TODO{No corregir en profundidad aun}
+
 En este capítulo se presentan las conclusiones del trabajo realizado, así como las posibles líneas de trabajo futuro que se podrían seguir a partir de este proyecto.
 
 \section{Biblioteca \texttt{QTensor}}
 
-% \ TODO{Comparar resultados contra los requisitos}
-% \ TODO{Mostar como lo desarrollado cumple con los requisitos funcionales y no funcionales}
+\TODO{Comparar resultados contra los requisitos}
+\TODO{Mostar como lo desarrollado cumple}
+\TODO{con los requisitos funciónales y no funciónales}
 
 Se ha desarrollado una biblioteca de cuantización de modelos de \texttt{TensorFlow} que permite:
 
@@ -12,7 +16,7 @@ Se ha desarrollado una biblioteca de cuantización de modelos de \texttt{TensorF
     \item Realizar cuantización durante el entrenamiento del modelo, con soporte para cuantizadores con parámetros entrenables.
     \item Cuantizar modelos con cuantizadores personalizados, lo que permite adaptar la cuantización a las necesidades específicas de cada modelo o aplicación.
     \item Evaluar el desempeño de los modelos cuantizados en términos de precisión y tamaño del modelo, lo que facilita la comparación entre diferentes esquemas de cuantización.
-    \item Soporte para cualquier modelo de \texttt{TensorFlow}, incluyendo modelos secuenciales y funcionales con arquitecturas complejas.
+    \item Soporte para cualquier modelo de \texttt{TensorFlow}, incluyendo modelos secuenciales y funciónales con arquitecturas complejas.
     \item Definir un procedimiento de entrenamiento completo mediante la definición de un \texttt{Pipeline}, que incluye la carga y preprocesamiento de datos, la definición del modelo, el esquema de cuantización, el optimizador, la función de pérdida y las métricas de evaluación.
 \end{itemize}
 
@@ -26,7 +30,7 @@ En particular, se incluye la implementación de los siguientes cuantizadores con
 \section{Ensayos y resultados}
 
 En el capítulo \ref{sec:ensayos_y_pruebas} se demuestra el potencial de la biblioteca \texttt{QTensor} y del esquema de cuantización flexible, en particular para su implementación en hardware embebido. Donde se muestra una perfomance (X \% superior en cuanto al trade-off precisión/tamaño del modelo) respecto a un esquema de cuantización uniforme.
-% \ TODO{Agregar resultados cuantitativos}
+\TODO{Agregar resultados cuantitativos}
 
 Sin ningun tipo de exploración exhaustiva de los esquemas de cuantización, se ha podido observar que el esquema de cuantización flexible permite obtener modelos cuantizados con un mejor desempeño que el esquema de cuantización uniforme, tanto en términos de precisión como de tamaño del modelo.
 

@@ -7,7 +7,7 @@ from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 
 
-# --- 1. Definición de funciones (sin cambios) ---
+# --- 1. Definición de funciónes (sin cambios) ---
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 

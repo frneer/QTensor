@@ -1,7 +1,7 @@
 \section{Ensayos y pruebas}
 \label{sec:ensayos_y_pruebas}
 
-El objetivo de los ensayos realizados es mostrar un ejemplo completo de la utilización de la librería \texttt{QTensor} para cuantizar un modelo de \texttt{TensorFlow}, entrenarlo y evaluar su desempeño en un conjunto de datos real.
+El objetivo de los ensayos realizados es mostrar un ejemplo completo de la utilización de la biblioteca \texttt{QTensor} para cuantizar un modelo de \texttt{TensorFlow}, entrenarlo y evaluar su desempeño en un conjunto de datos real.
 
 En particular, se busco demostrar las ventajas del cuantizador flexible en cuestiones de precisión y tamaño del modelo, comparando el desempeño de modelos cuantizados con diferentes esquemas de cuantización. Como se busca una comparacion entre dos esquemas, es necesario partir de un modelo entrenado de la misma manera. Para esto se utilizo la definición de un \texttt{Pipeline} para entrenar el modelo base, y luego se cuantizo este modelo con diferentes esquemas de cuantización.
 
@@ -24,7 +24,7 @@ El modelo utilizado es una red neuronal convolucional simple, con dos capas conv
 %     \label{fig:model_architecture}
 % \end{figure}
 
-% \ TODO{Terminar diagrama}
+\TODO{Terminar diagrama}
 % \defaultdiagram{neural_nets/model}{Arquitectura del modelo utilizado.}{model_architecture}
 % \begin{lstlisting}[language=Python]
 %         new_model = models.Sequential(
@@ -49,7 +49,7 @@ El modelo utilizado es una red neuronal convolucional simple, con dos capas conv
 %             \end{lstlisting}
 
 \subsection{Esquemas de cuantización}
-No se hizo una busqueda exhaustiva de esquemas de cuantización, sino que se seleccionaron dos esquemas que se consideraron representativos de las diferentes opciones disponibles en la librería \texttt{QTensor}.
+No se hizo una busqueda exhaustiva de esquemas de cuantización, sino que se seleccionaron dos esquemas que se consideraron representativos de las diferentes opciones disponibles en la biblioteca \texttt{QTensor}.
 
 Los \textit{biases} se cuantizaron todos con el mismo esquema, de cuantizador uniforme simétrico, de 8 bits.
 
@@ -90,4 +90,4 @@ La cuantización de los pesos se hizo con dos cuantizadores diferentes, para com
 \multicolumn{6}{l}{\textit{*Set D for $W$ is $\{1, 2, 3, 4, 5, 6, 8, 10, 16, 24\}$.}} \\
 \end{tabular}
 \end{table}
-% \ TODO{Terminar de definir bien esto... no en ingles}
+\TODO{Terminar de definir bien esto... no en ingles}

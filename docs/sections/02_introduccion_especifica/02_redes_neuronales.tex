@@ -1,12 +1,12 @@
 \section{Redes Neuronales}
 \label{sec:redes_neuronales}
 
-Una red neuronal es un modelo matemático inspirado en la estructura y funcionamiento del cerebro humano. La unidad básica de una red neuronal esta representada por el modelo de perceptron \cite{rosenblatt1958perceptron}, el cual simula el comportamiento de una neurona biológica.
+Una red neuronal es un modelo matemático inspirado en la estructura y funciónamiento del cerebro humano. La unidad básica de una red neuronal esta representada por el modelo de perceptron \cite{rosenblatt1958perceptron}, el cual simula el comportamiento de una neurona biológica.
 
 \subsection{Perceptrón}
 \label{sec:perceptron}
 
-El perceptron es una unidad de procesamiento que recibe múltiples entradas $\mathbf{x} = [x_1, x_2, \ldots, x_n]$, y produce una salida $y_j$ como resultado de una combinación lineal de las entradas ponderadas por sus respectivos pesos $\mathbf{w} = [w_{1_j}, w_{2_j}, \ldots, w_{n_j}]$, a las cuales se les añade un sesgo $b_j$, procesada a traves de una funcion de activacion no lineal $\varphi$, que introduce la capacidad de modelar relaciones complejas en los datos. La \refeq{perceptron} describe matemáticamente el funcionamiento de un perceptron y la figura \ref{fig:perceptron} ilustra su estructura.
+El perceptron es una unidad de procesamiento que recibe múltiples entradas $\mathbf{x} = [x_1, x_2, \ldots, x_n]$, y produce una salida $y_j$ como resultado de una combinación lineal de las entradas ponderadas por sus respectivos pesos $\mathbf{w} = [w_{1_j}, w_{2_j}, \ldots, w_{n_j}]$, a las cuales se les añade un sesgo $b_j$, procesada a traves de una función de activacion no lineal $\varphi$, que introduce la capacidad de modelar relaciones complejas en los datos. La \refeq{perceptron} describe matemáticamente el funciónamiento de un perceptron y la figura \ref{fig:perceptron} ilustra su estructura.
 
 \begin{equation}
     \label{eq:perceptron}
@@ -20,22 +20,22 @@ El perceptron es una unidad de procesamiento que recibe múltiples entradas $\ma
 
 Este modelo de perceptrón es limitado, ya que solo puede resolver problemas linealmente separables. Para superar esta limitación, surge el modelo de perceptrón multicapa (MLP, por sus siglas en inglés), que consiste en múltiples capas de perceptrones conectados entre sí. Estas redes pueden modelar relaciones no lineales complejas y son capaces de aprender representaciones jerárquicas de los datos \cite{cybenko1989approximation}.
 
-Este modelo esta compuesto por tres etapas, una capa de entrada, una o mas capas ocultas y una capa de salida. Cada capa esta compuesta por un conjunto de neuronas (o perceptrones) que reciben entradas de la capa anterior y envían sus salidas a la capa siguiente. La \reffig{mlp} ilustra la estructura de un perceptrón multicapa.
+Este modelo esta compuesto por tres etapas, una capa de entrada, una o mas capas ocultas y una capa de salida. Cada capa esta compuesta por un conjunto de neuronas (perceptrones) que reciben entradas de la capa anterior y envían sus salidas a la capa siguiente. La \reffig{mlp} ilustra la estructura de un perceptrón multicapa.
 
 \input{diagrams/mlp}
 
-Las salidas de este modelo pueden representarse como la composición de funciones no lineales, donde cada función representa una capa de la red. La \refeq{mlp} describe matemáticamente el funcionamiento de un perceptrón multicapa con $k$ capas, donde $\mathbf{w}_l$ y $\mathbf{b}_l$ son los pesos y sesgos de la capa $l$, y $\varphi_l$ es la función de activación aplicada en esa capa.
+Las salidas de este modelo pueden representarse como la composición de funciónes no lineales, donde cada función representa una capa de la red. La \refeq{mlp} describe matemáticamente el funciónamiento de un perceptrón multicapa con $k$ capas, donde $\mathbf{w}_l$ y $\mathbf{b}_l$ son los pesos y sesgos de la capa $l$, y $\varphi_l$ es la función de activación aplicada en esa capa.
 
 \begin{equation}
     \label{eq:mlp}
     \mathbf{\hat{y}} = \varphi_k\left(\mathbf{w}_k \cdot \varphi_{k-1}\left(\mathbf{w}_{k-1} \cdots \varphi_1\left(\mathbf{w}_1 \cdot \mathbf{x} + \mathbf{b}_1\right) + \mathbf{b}_{k-1}\right) + \mathbf{b}_k\right)
 \end{equation}
 
-Para optimizar los parámetros de la red neuronal, se define una función de costo $L(\mathbf{y}, \hat{\mathbf{y}})$ que mida el error entre las salidas reales $\mathbf{y}$ y las salidas predichas por la red $\hat{\mathbf{y}}$, ya sea el caso de un problema de clasificación o regresión. Para minimizar esta función de costo, se utiliza un algoritmo de optimización iterativo, como el descenso por gradiente, pero como puede observarse en la \refeq{mlp}, la función de salida de la red es una composición de múltiples funciones no lineales, lo que dificulta el cálculo directo del gradiente de la función de costo con respecto a los pesos y sesgos de la red.
+Para optimizar los parámetros de la red neuronal, se define una función de costo $L(\mathbf{y}, \hat{\mathbf{y}})$ que mide el error entre las salidas reales $\mathbf{y}$ y las salidas producidas por la red $\hat{\mathbf{y}}$, ya sea el caso de un problema de clasificación o regresión. Para minimizar esta función de costo, se utiliza un algoritmo de optimización iterativo, como el descenso por gradiente, pero como puede observarse en la \refeq{mlp}, la función de salida de la red es una composición de múltiples funciónes no lineales, lo que dificulta el cálculo directo del gradiente de la función de costo con respecto a los pesos y sesgos de la red.
 
 \subsection{Entrenamiento de redes neuronales}
 \label{sec:entrenamiento_redes_neuronales}
-El algoritmo de optimización o entrenamiento utilizado depende del problema específico y de la arquitectura de la red. Por ejemplo, uno de ellos es el algoritmo de gradiente descendiente estocástico (SGD, por sus siglas en inglés), otro ampliamente utilizado es el algoritmo conocido como ADAM (por sus siglas del inglés \textit{Adaptive Moment Estimation}). Pero, cualquiera sea el algoritmo utilizado de optimización, para calcular el gradiente de la función de costo con respecto a los pesos y sesgos de la red, se utiliza el algoritmo de retropropagación (o \textit{backpropagation} en inglés), que consiste en calcular los gradientes propagando desde la salida hacia la entrada de la red, utilizando la regla de la cadena para descomponer el gradiente en términos de los gradientes de cada capa \cite{rumelhart1986learning}. De esta manera se logra calcular eficientemente los gradientes necesarios para actualizar los parámetros de la red en cada iteración del algoritmo de optimización.
+El algoritmo específico de optimización utilizado depende del problema específico y de la arquitectura de la red. Por ejemplo, uno de ellos es el algoritmo de gradiente descendiente estocástico (SGD, por sus siglas en inglés), otro ampliamente utilizado es el algoritmo conocido como ADAM (por sus siglas del inglés \textit{Adaptive Moment Estimation}). Pero, cualquiera sea el algoritmo utilizado de optimización, para calcular el gradiente de la función de costo con respecto a los parámetros de la red, se utiliza el algoritmo de retropropagación (\textit{backpropagation} en inglés), que consiste en calcular los gradientes propagando desde la salida hacia la entrada de la red, utilizando la regla de la cadena para descomponer el gradiente en términos de los gradientes de cada capa \cite{rumelhart1986learning}. De esta manera se logra calcular eficientemente los gradientes necesarios para actualizar los parámetros de la red en cada iteración del algoritmo de optimización.
 
 El conjunto de entrenamiento generalmente se divide en tres subconjuntos: el conjunto de entrenamiento, el conjunto de validación y el conjunto de prueba. El conjunto de entrenamiento ($\mathcal{D}_{\mathrm{train}}$) se utiliza para ajustar los pesos de la red, el conjunto de validación ($\mathcal{D}_{\mathrm{val}}$) se utiliza para prevenir un sobreajuste de los pesos a los datos de entrenamiento, y el conjunto de prueba ($\mathcal{D}_{\mathrm{test}}$) se utiliza para evaluar el desempeño final del modelo.
 
@@ -44,23 +44,28 @@ El proceso de entrenamiento de una red neuronal generalmente se realiza en múlt
 El algoritmo de entrenamiento consta de los siguientes pasos:
 
 \begin{enumerate}
-    \item Pasada hacia adelante (o \textit{forward pass} en inglés): Se calcula la salida de la red para una entrada dada.
+    \item Pasada hacia adelante (\textit{forward pass} en inglés): Se calcula la salida de la red para una entrada dada.
     \item Cálculo del error: Se calcula el error entre la salida de la red y la salida esperada.
-    \item Pasada hacia atrás (o \textit{backward pass} en inglés): El error se propaga hacia atrás a través de la red. Usando la regla de la cadena, se calculan los gradientes de la función de costo con respecto a cada peso. Aquí es donde se aplica el algoritmo de retropropagación.
+    \item Pasada hacia atrás (\textit{backward pass} en inglés): El error se propaga hacia atrás a través de la red. Usando la regla de la cadena, se calculan los gradientes de la función de costo con respecto a cada peso. Aquí es donde se aplica el algoritmo de retropropagación.
     \item Actualización de pesos: Los pesos se actualizan en la dirección opuesta al gradiente, minimizando el error. La magnitud del paso de esta actualización es controlada por la tasa de aprendizaje $\eta$.
 \end{enumerate}
 
-Este proceso se repite iterativamente hasta obtener un valor aceptable de la función de pérdida optimizada.
 
-En cada época, la actualización de los pesos se realiza mediante la siguiente ecuación para cada peso $w_{i_j}$, con $\eta$, una constante, llamada la \textit{tasa de aprendizaje} (o \textit{learning rate}), que determina el paso que se da en la dirección del gradiente.
+Este proceso se repite iterativamente hasta obtener un valor aceptable de la función de pérdida optimizada, el valor aceptable depende principalmente del problema a resolver, y en este trabajo no se profundizara en este aspecto.
+
+En la \reffig{simple_training_loop} se muestra un diagrama del ciclo (\textit{loop}) de entrenamiento de una red neuronal.
+
+\defaultdiagram{training/simple_training_loop}{\textit{Loop} de entrenamiento de una red neuronal.}{simple_training_loop}{1}
+
+En cada época, la actualización de los pesos se realiza mediante la siguiente ecuación para cada peso $w_{i_j}$, con $\eta$, una constante, llamada tasa de aprendizaje (\textit{learning rate}), que determina el paso que se da en la dirección del gradiente.
 \begin{equation}
     \mathbf{w} = \mathbf{w} - \eta \frac{\partial L}{\partial \mathbf{w}}
 \end{equation}
 
-Un resumen del loop de entrenamiento se muestra en el algoritmo \ref{alg:training_loop}.
+Un resumen del ciclo de entrenamiento se muestra en el algoritmo \ref{alg:training_loop}.
 
 \begin{algorithm}[H]
-  \caption[Loop de entrenamiento]{Loop de entrenamiento}
+  \caption[Ciclo de entrenamiento]{Ciclo de entrenamiento}
   \label{alg:training_loop}
   \KwIn{Conjunto de entrenamiento $\mathcal{D}_{\mathrm{train}}$, conjunto de validación $\mathcal{D}_{\mathrm{val}}$, parámetros $\theta$, modelo $f(\cdot;\theta)$,  número de épocas $E$, tasa de aprendizaje $\eta$}
   \KwOut{Parámetros entrenados $\theta$}
@@ -82,7 +87,7 @@ Un resumen del loop de entrenamiento se muestra en el algoritmo \ref{alg:trainin
   }
 \end{algorithm}
 
-Si se piensa en los ejemplos de las secciones \ref{sec:regresion_lineal} y \ref{sec:regresion_logistica}, es posible modelar el sistema mediante una red neuronal. Y encontrar los parámetros óptimos mediante el algoritmo de entrenamiento descripto en esta sección.
+Si se piensa en los ejemplos de las secciones \ref{sec:regresion_lineal} y \ref{sec:regresion_logistica}, es posible modelar los sistema mediante una red neuronal. Y encontrar los parámetros óptimos mediante el algoritmo de entrenamiento descripto en esta sección.
 
 En la \reffig{regression_vs_mlp} se muestra una comparativa entre el modelo de regresión lineal y un perceptrón multicapa (MLP por sus siglas en inglés, \textit{Multilayer Perceptron}) con una capa oculta, ambos entrenados con el mismo conjunto de datos.
 
@@ -126,4 +131,4 @@ En la \ref{tab:regression_vs_mlp} se muestra una comparativa entre ambos modelos
     \label{tab:regression_vs_mlp}
 \end{table}
 
-Si bien, como queda demostrado en esta sección, las redes neuronales son modelos muy potentes, su complejidad puede ser una desventaja. Una de las limitaciones de las redes neuronales es que requieren una gran cantidad de datos de entrenamiento para ajustar los pesos de las conexiones, y en algunos casos pueden sufrir de sobreajuste, es decir, ajustar demasiado los pesos a los datos de entrenamiento y no generalizar bien a datos no vistos, lo cual resultara en un mal desempeño en la predicción de nuevos datos. Ademas, cuanto mas complejo el sistema a modelar, se requiere una red neuronal mas compleja, con mas capas y neuronas, lo cual aumenta la cantidad de parámetros a ajustar y la cantidad de operaciones a realizar.
+Si bien, como queda demostrado en esta sección, las redes neuronales son modelos muy potentes, su complejidad puede ser una desventaja. Una gran limitación de las redes neuronales es que requieren una gran cantidad de datos de entrenamiento para ajustar los pesos de las conexiones, y en algunos casos pueden sufrir de sobreajuste, es decir, ajustar demasiado los pesos a los datos de entrenamiento y no generalizar bien a datos que no hayan sido parte del conjunto de entrenamiento, lo cual resultará en un mal desempeño en la predicción de nuevos datos (esto se llama sobreajuste). Además, cuanto más complejo el sistema a modelar, se requiere una red neuronal más compleja, con más capas y neuronas, lo cual aumenta la cantidad de parámetros a ajustar y la cantidad de operaciones a realizar.

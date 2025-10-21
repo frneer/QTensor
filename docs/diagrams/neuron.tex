@@ -3,14 +3,14 @@
     \begin{tikzpicture}
         % Input Nodes
         \node[circle, draw, minimum size=1cm] (x1) at (-3, -1) {$x_1$};
-        \node[circle, draw, minimum size=1cm] (x2) at (-3, -2) {$x_2$};
+        \node[circle, draw, minimum size=1cm] (x2) at (-3, -2.1) {$x_2$};
         \node (dots1) at (-3, -3) {$\vdots$};
         \node[circle, draw, minimum size=1cm] (xn) at (-3, -4) {$x_n$};
         % \node[above of=x1, node distance=1cm] {Entrada};
 
         % Neuron Weights
         \node[circle, draw, minimum size=1cm] (w1) at (0, -1) {$w_{1j}$};
-        \node[circle, draw, minimum size=1cm] (w2) at (0, -2) {$w_{2j}$};
+        \node[circle, draw, minimum size=1cm] (w2) at (0, -2.1) {$w_{2j}$};
         \node (dots2) at (0, -3) {$\vdots$};
         \node[circle, draw, minimum size=1cm] (wn) at (0, -4) {$w_{nj}$};
         % \node[above of=w1, node distance=1cm] {Pesos};
@@ -26,7 +26,7 @@
 
         % Activation Function
         \node[rectangle, draw, minimum width=1.5cm, minimum height=1cm] (act) at (6, -2.5) {$\varphi$};
-        % \node[above of=act, node distance=1.2cm] {Funcion de Activación};
+        % \node[above of=act, node distance=1.2cm] {función de Activación};
         \node[right of=act, node distance=1.5cm] (salida) {$y_j$};
         % \node[below of=salida, node distance=1.2cm] {Activación};
 

@@ -1,7 +1,7 @@
 \section{Modelado de sistemas}
 \label{sec:modelado_de_sistemas}
 
-El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$, como se muestra en la \reffig{system}.
+El modelado de los sistemas y relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funciónal entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$, como se muestra en la \reffig{system}.
 
 \begin{figure}[H]
     \centering
@@ -16,7 +16,7 @@ El modelado de los sistemas y relaciones entre variables es una tarea fundamenta
     \label{fig:system}
 \end{figure}
 
-Al desconocer la función $f$, se busca aproximarla mediante un modelo $\hat{f}$ con parámetros $\theta$, que permita estimar la salida $\hat{y}$ a partir de la entrada $x$, como se muestra en la \refeq{system_approximation} y la \reffig{system_model}.
+Para modelar el sistema cuya relación es $y = f$, se busca aproximarla mediante un modelo $\hat{f}$ con parámetros $\theta$, que permita estimar la salida $\hat{y}$ a partir de la entrada $x$, como se muestra en la \refeq{system_approximation} y la \reffig{system_model}.
 
 \begin{equation}
     \label{eq:system_approximation}
@@ -36,9 +36,9 @@ Al desconocer la función $f$, se busca aproximarla mediante un modelo $\hat{f}$
     \label{fig:system_model}
 \end{figure}
 
-Para obtener los parámetros del modelo $\theta$, se define una función de costo $L$ que mide el error entre la salida real $y$ y la salida estimada $\hat{y}$. Luego, se buscan los parámetros $\theta$ que minimicen la función de costo $L(y, \hat{y})$.
+Para obtener los parámetros del modelo $\theta$, se define un problema de optimización. Se define una función de costo $L$ que mide el error entre la salida real $y$ y la salida estimada $\hat{y}$. Luego, se buscan los parámetros $\theta$ que minimicen la función de costo $L(y, \hat{y})$.
 
-En general se puede distinguir en dos tipos de problemas de modelado: regresión y clasificación. La diferencia esta en el tipo del espacio de salida $y$. En los problemas de regresión, la variable de salida es continua, mientras que en los problemas de clasificación, la variable de salida es discreta y representa categorías o clases.
+En general se puede distinguir en dos tipos de problemas de modelado: regresión y clasificación. La diferencia está en el tipo del espacio de salida $y$. En los problemas de regresión, la variable de salida es continua, mientras que en los problemas de clasificación, la variable de salida es discreta y representa categorías o clases.
 
 El proceso de encontrar los parámetros óptimos $\theta$ se denomina entrenamiento. Existen casos donde se tienen soluciones cerradas que pueden ser calculadas analíticamente, pero en la mayoría de los casos, se utilizan métodos numéricos iterativos para aproximar la solución óptima. Sin embargo, en general, las soluciones cerradas no suelen ser el caso común en las aplicaciones prácticas \cite{e23081012}.
 
@@ -47,7 +47,7 @@ Para ajustar los parámetros del modelo se requiere un conjunto de datos de entr
 \subsection{Gradiente descendiente}
 \label{sec:gradiente_descendiente}
 
-El metodo iterativo más común para ajustar los parámetros es el \textbf{descenso por gradiente}, que consiste en actualizar los parámetros en la dirección contraria al gradiente de la función de costo ($\nabla_{\theta} L(y, \hat{y})$), es decir, en la dirección que reduce el error \cite{9603742}. La actualización de los parámetros se realiza como se muestra en la ecuación \ref{eq:gradient_descent}.
+El metodo iterativo más utilizado para ajustar los parámetros es el descenso por gradiente, que consiste en actualizar los parámetros en la dirección contraria al gradiente de la función de costo ($\nabla_{\theta} L(y, \hat{y})$), es decir, en la dirección que reduce el error \cite{9603742}. La actualización de los parámetros se realiza como se muestra en la ecuación \ref{eq:gradient_descent}.
 
 \begin{equation}
     \label{eq:gradient_descent}
@@ -56,7 +56,7 @@ El metodo iterativo más común para ajustar los parámetros es el \textbf{desce
 
 Donde $\eta$ es la tasa de aprendizaje, que determina el tamaño del paso en cada iteración.
 
-Una variante de este algoritmo es el descenso por gradiente estocástico (de ahora en adelante \textit{SGD}, por sus siglas en inglés), que utiliza un subconjunto aleatorio de los datos de entrenamiento en cada iteración para calcular el gradiente como puede observarse en la \ref{eq:sgd}.. Esto reduce el costo computacional y puede ayudar a escapar de mínimos locales, aunque introduce más ruido en el proceso de optimización, puede acelerar la convergencia \cite{robbins1951stochastic}.
+Una variante de este algoritmo es el descenso por gradiente estocástico (de ahora en adelante \textit{SGD}, por sus siglas en inglés), que utiliza un subconjunto aleatorio de los datos de entrenamiento en cada iteración para calcular el gradiente como puede observarse en la \refeq{sgd}. Esto reduce el costo computacional y puede ayudar a escapar de mínimos locales, aunque introduce más ruido en el proceso de optimización, puede acelerar la convergencia \cite{robbins1951stochastic}.
 
 \begin{equation}
     \label{eq:sgd}
@@ -69,34 +69,34 @@ El modelo de regresión lineal es uno de los modelos más simples y ampliamente 
 
 \begin{equation}
     \label{eq:linear_regression}
-    \hat{y} = \beta_0 + \beta_1 x
+    \hat{y} = \theta_0 + \theta_1 x
 \end{equation}
 
-El objetivo es ajustar los parámetros $\beta_0$, $\beta_1$ que minimicen alguna métrica de error, definida por una función de costo $L$. En el caso de la regresión lineal, la función de costo utilizada comunmente es el error cuadrático medio (o MSE por sus siglas en inglés \textit{Mean Squared Error}). Si se extrapola este modelo a un problema multi-variable, la \refeq{linear_regression} se puede expresar como se muestra en la \refeq{linear_regression_multivariable}.
+El objetivo es ajustar los parámetros $\theta_0$, $\theta_1$ que minimicen alguna métrica de error, definida por una función de costo $L$. En el caso de la regresión lineal, la función de costo utilizada comunmente es el error cuadrático medio (o MSE por sus siglas en inglés \textit{Mean Squared Error}). Si se extrapola este modelo a un problema multi-variable, la \refeq{linear_regression} se puede expresar como se muestra en la \refeq{linear_regression_multivariable}.
 
 \begin{equation}
     \label{eq:linear_regression_multivariable}
-    \hat{y} = \beta_0 + \sum_{j=1}^{m} \beta_j x_j
+    \hat{y} = \theta_0 + \sum_{j=1}^{m} \theta_j x_j
 \end{equation}
 
-Se busca encontrar los valores de $\beta_0$, $\beta_1$, ..., $\beta_m$ que minimicen la función de costo definida en la \refeq{mse}, a partir de un conjunto de datos de tamaño $n$, donde $\mathbf{y}$ es el vector de salidas reales, $\hat{\mathbf{y}}$ es el vector de salidas estimadas por el modelo para las entradas correspondientes $\mathbf{X}$.
+Se busca encontrar los valores de $\theta_0$, $\theta_1$, ..., $\theta_m$ que minimicen la función de costo definida en la \refeq{mse}, a partir de un conjunto de datos de tamaño $n$, donde $\mathbf{y}$ es el vector de salidas reales, $\hat{\mathbf{y}}$ es el vector de salidas estimadas por el modelo para las entradas correspondientes $\mathbf{X}$.
 
 \begin{equation}
     \label{eq:mse}
     L(\mathbf{y}, \hat{\mathbf{y}}) = \frac{1}{n} \sum_{i=1}^{n} \left(y_i - \hat{y}_i\right)^2
 \end{equation}
 
-En este caso es posible deducir analíticamente los valores de $\mathbf{\beta}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros y se iguala a cero. Al realizar esto se obtiene la fórmula conocida como OLS, (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos de manera directa, como se muestra en la \refeq{ols}.
+En este caso es posible deducir analíticamente los valores de $\mathbf{\theta}$ que minimizan la función de costo. Para esto, se deriva la función de costo con respecto a los parámetros $\frac{\partial L(\mathbf{y}, \hat{\mathbf{y}})}{\partial \mathbf{\theta}}$, y se iguala a cero y se iguala a cero. Al realizar esto se obtiene la fórmula conocida como OLS, (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos de manera directa, como se muestra en la \refeq{ols}.
 
 \begin{equation}
     \label{eq:ols}
-        \beta = \left(X^T X\right)^{-1} X^T y
+        \theta = \left(X^T X\right)^{-1} X^T y
 \end{equation}
 
-Con
+Donde $\mathbf{X}$ es la matriz de características, $\mathbf{\theta}$ es el vector de parámetros, y $\mathbf{y}$ es el vector de salidas reales, como se muestra en la \refeq{ols_matrices}.
 
 \begin{equation}
-    \label{eq:ols}
+    \label{eq:ols_matrices}
       X =
         \begin{bmatrix}
         1 & x_{1,1} & x_{2,1} & \dots & x_{n,1} \\
@@ -105,9 +105,9 @@ Con
         1 & x_{1,m} & x_{2,m} & \dots & x_{n,m}
         \end{bmatrix}
       \quad \quad
-      \beta =
+      \theta =
         \begin{bmatrix}
-          \beta_0 \\ \beta_1 \\ \beta_2 \\ \dots \\ \beta_n
+          \theta_0 \\ \theta_1 \\ \theta_2 \\ \dots \\ \theta_n
         \end{bmatrix}
       \quad \quad
       y = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_m \end{bmatrix}
@@ -128,25 +128,25 @@ El modelo de regresión logística es utilizado para problemas de clasificación
 
 \begin{equation}
     \label{eq:logistic_regression}
-    \hat{y} = \mathbb{P}\left(y=1 | x\right)  = \frac{1}{1 + e^{-\left(\beta_0 + \sum_{j=1}^{n} \beta_j x_j\right)}}
+    \hat{y} = \mathbb{P}\left(y=1 | x\right)  = \frac{1}{1 + e^{-\left(\theta_0 + \sum_{j=1}^{n} \theta_j x_j\right)}}
 \end{equation}
 
 El valor de salida $\hat{y}$ está en el rango (0, 1) y representa la probabilidad de que la observación pertenezca a la clase 1. Para clasificar una observación, se utiliza un umbral (comúnmente 0.5), donde si $\hat{y} \geq 0.5$, se asigna a la clase 1, y si $\hat{y} < 0.5$, se asigna a la clase 0. Como se muestra en la \reffig{logistic_regression}.
 
 \defaultfigure{regression/logistic_regression.png}{Regresión Logística}{logistic_regression}
 
-En este modelo, la forma de encontrar los parámetros $\beta_0$, $\beta_1$, ..., $\beta_n$, es mediante la maximización de la verosimilitud. La función de verosimilitud mide qué tan probable es observar los datos dados los parámetros del modelo, y se define como se muestra en la \refeq{likelihood} para una muestra de tamaño $m$.
+En este modelo, la forma de encontrar los parámetros $\theta_0$, $\theta_1$, ..., $\theta_n$, es mediante la maximización de la verosimilitud. La función de verosimilitud mide qué tan probable es observar los datos dados los parámetros del modelo, y se define como se muestra en la \refeq{likelihood} para una muestra de tamaño $m$.
 
 \begin{equation}
     \label{eq:likelihood}
-      L(\beta) = \prod_{i=1}^{m} \mathbb{P}(y_i | x_i)
+      L(\theta) = \prod_{i=1}^{m} \mathbb{P}(y_i | x_i)
 \end{equation}
 
 donde $\mathbb{P}(y_i | x_i)$ es la probabilidad de observar la clase $y_i$ dado el vector de características $x_i$. Para facilitar el cálculo, se suele trabajar con el logaritmo de la función de verosimilitud, conocido como log-verosimilitud, que convierte el producto en una suma, como se muestra en la \refeq{log_likelihood}.
 
 \begin{equation}
     \label{eq:log_likelihood}
-      \ell(\beta) = \sum_{i=1}^{m} \left[ y_i \log(\mathbb{P}(y_i | x_i)) + (1 - y_i) \log(1 - \mathbb{P}(y_i | x_i)) \right]
+      \ell(\theta) = \sum_{i=1}^{m} \left[ y_i \log(\mathbb{P}(y_i | x_i)) + (1 - y_i) \log(1 - \mathbb{P}(y_i | x_i)) \right]
 \end{equation}
 
 En este caso, no existe una solución cerrada para encontrar los parámetros que maximicen la log-verosimilitud, por lo que se utilizan métodos numéricos iterativos como el descenso por gradiente para encontrar los parámetros óptimos que maximicen la función de verosimilitud.
