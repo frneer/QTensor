@@ -4,60 +4,86 @@ En este capítulo se presenta el contexto, la motivación y los objetivos del pr
 \section{Motivación}
 \label{sec:motivacion}
 
-La inteligencia artificial (de ahora en adelante, IA) es un campo de estudio que busca desarrollar sistemas capaces de realizar tareas que normalmente requieren inteligencia humana, como la toma decisiones, el reconocimiento de audio, imágenes, y el procesamiento del lenguaje natural.
+La inteligencia artificial (IA) es un campo de estudio que
+busca el desarrollo de sistemas capaces de realizar tareas que normalmente requieren
+inteligencia humana, como la toma de decisiones, el reconocimiento de audio e imágenes,
+y el procesamiento del lenguaje natural.
 
-La IA tiene aplicaciones en un amplio rango de áreas, incluyendo la medicina, la automoción, la robótica, la educación y el entretenimiento. Esta cada vez mas presente en la cotidianidad de la mayoría de la población especialmente con el surgimiento y popularización de los modelos de lenguaje natural o \textit{LLMs} \cite{IBM_LLM} (del inglés, \textit{Large Language Models}) como las series GPT de OpenAI \cite{chatgpt}, Gemini de Google \cite{gemini} y Llama de Meta \cite{llama2}.
+La IA tiene aplicaciones en una amplia variedad de áreas, incluyendo la medicina,
+la automoción, la robótica, la educación y el entretenimiento.
+Está cada vez más presente en la cotidianidad de la mayoría de la población,
+especialmente con el surgimiento y popularización de los modelos de lenguaje natural
+ o \textit{LLMs} \cite{IBM_LLM} (del inglés, \textit{Large Language Models})
+ como las series GPT de OpenAI \cite{chatgpt}, Gemini de Google \cite{gemini} y Llama de Meta \cite{llama2}.
 
-El aprendizaje automático (de ahora en adelante ML, por sus siglas en inglés \textit{Machine Learning}) es una subárea de la IA que se centra en el desarrollo de algoritmos y que permiten a modelos aprender de los datos y mejorar su rendimiento en tareas específicas sin ser programadas explícitamente para ello.
+El aprendizaje automático (de ahora en adelante ML, por sus siglas en inglés \textit{Machine Learning})
+es una subárea de la IA centrada en el desarrollo de algoritmos que permiten a los modelos aprender
+a partir de los datos y mejorar su rendimiento en tareas específicas sin haber sido programados explícitamente para ello.
 
-En el contexto del aprendizaje automático surgen las redes neuronales artificales, los cuales son modelos inspirados en el funciónamiento del cerebro humano. Estos modelos son entrenados mediante algoritmos iterativos de optimización utilizando el algoritmo de retropropagación (mas conocido por su nombre en inglés, \textit{backpropagation}). %\cite{backpropagation}.
+En este contexto surgen las redes neuronales artificiales, modelos
+inspirados en el funcionamiento del cerebro humano \cite{Principe1997}. Estos modelos se entrenan mediante algoritmos iterativos
+de optimización, utilizando el algoritmo de retropropagación (más conocido por su nombre en inglés, \textit{backpropagation}) \cite{backpropagation}.
 
-El entrenamiento de estos modelos se realiza utilizando un conjunto de datos, en un proceso que requiere alta precisión numérica y suele realizarse en punto flotante. Una vez entrenado el modelo puede utilizarse para obtener las predicciones en un proceso denominado inferencia.
+El entrenamiento se realiza con un conjunto de datos, en un proceso que requiere
+alta precisión numérica y que, generalmente, utiliza representación en punto flotante \cite{Goodfellow2016}.
+Una vez entrenado, el modelo puede emplearse para obtener las predicciones en un proceso conocido como inferencia.
 
-La evolución y las mejoras en el campo de las redes neuronales son directamente proporcionales al escalamiento tanto de los datos de entrenamiento como de la complejidad del modelo. Y por ende, la cantidad de parámetros necesarios y los tamaños de los modelos han crecido de manera exponencial \cite{DBLP:journals/corr/abs-2001-08361}. Esta realidad es inconveniente si se lo apareja con la creciente demanda de utilizar estos modelos en múltiples industrias y la vida cotidiana donde celulares y dispositivos embebidos son los principales medios de interacción con los usuarios.
+La evolución y las mejoras en el campo de las redes neuronales están directamente relacionadas
+con el incremento de la complejidad de los modelos y del volumen de datos utilizados para su entrenamiento.
+En consecuencia, la cantidad de parámetros necesarios y el tamaño de los modelos han crecido de manera exponencial \cite{DBLP:journals/corr/abs-2001-08361}.
+Esta tendencia se vuelve problemática cuando se considera la creciente demanda en el uso de estos modelos en múltiples industrias
+y aplicaciones cotidianas, donde los teléfonos móviles y sistemas embebidos son los principales medios de interacción con los usuarios \cite{Lane2017}.
 
-La compresión de redes neuronales es un campo de estudio que ha tomado relevancia en los últimos años \cite{DBLP:journals/corr/abs-2010-03954}. En un contexto donde las arquitecturas de los modelos de redes neuronales son cada vez más complejas y presentan un claro incremento en la cantidad de parámetros, surge la necesidad de reducir el tamaño de las mismas para su implementación. Esta necesidad es particularmente crítica en dispositivos con recursos limitados, como teléfonos móviles y sistemas embebidos que utilizan computo de punto fijo, pero también es relevante en la búsqueda de soluciones computacionales más eficientes en general. Por ejemplo, en el caso de redes LLMs, las cuales requieren una gran cantidad de memoria y operaciones de punto flotante (de ahora en adelante FLOPs, por su siglas del inglés \textit{Floating-point Operations}) para su inferencia, la compresión se vuelve esencial para su uso práctico, permitiendo, por ejemplo, respuestas más rápidas al interactuar con el usuario.
+La compresión de redes neuronales es un campo de estudio que ha tomado relevancia en los últimos años \cite{DBLP:journals/corr/abs-2010-03954}.
+Frente a arquitecturas cada vez más complejas, con un número creciente de parámetros, surge la necesidad de reducir el tamaño de los modelos para facilitar su implementación.
+Esta necesidad es particularmente crítica en dispositivos con recursos limitados, como teléfonos móviles
+y sistemas embebidos que utilizan cómputo de punto fijo \cite{Gupta2015}. Además, es relevante en la búsqueda de soluciones computacionales más eficientes en general.
+Por ejemplo, en el caso de los LLMs, que requieren grandes cantidades de memoria y operaciones de punto flotante (en adelante, FLOPs, por sus siglas en inglés \texttt{Floating-point Operations}) para realizar inferencias, la compresión resulta esencial para su uso práctico, permitiendo una interacción más ágil con el usuario.
 
-La precisión utilizada durante el entrenamiento es normalmente de punto flotante, realizada en GPUs o TPUs, las cuales son costosas y consumen mucha energía. En algunos casos, para la inferencia, especialmente en dispositivos con recursos limitados, se prefiere utilizar formatos de menor precisión, como punto fijo o enteros, para reducir el consumo de memoria y energía. La compresión de redes neuronales permite adaptar los modelos para que funciónen eficientemente en estos entornos.
+Durante el entrenamiento, la precisión utilizada suele ser de punto flotante y se lleva a cabo
+en GPUs (\textit{Graphics Processing Units}) o TPUs (\textit{Tensor Processing Units}), que implican un alto costo económico y energético \cite{Strubell2019}. En algunos casos, para la inferencia, especialmente en dispositivos con recursos limitados se prefiere utilizar formatos de menor precisión, como punto fijo o enteros, para reducir el consumo de memoria y energía \cite{Jacob2018}.
 
-El principal objetivo de la compresión es obtener una reducción en la cantidad de memoria requerida para almacenar el modelo, el ancho de banda necesario para la transmisión de los datos y en el número de FLOPs necesarias para realizar una inferencia, sin sacrificar de manera significativa el desempeño.
+La compresión de redes neuronales permite adaptar los modelos para que funcionen eficientemente en estos entornos. Su objetivo principal es reducir la cantidad de memoria requerida para almacenar el modelo, el ancho de banda requerido para la transmisión de los datos y en la cantidad de FLOP necesarias para realizar una inferencia, sin sacrificar de manera significativa
+el desempeño.
 
-Existen diversas técnicas de compresión relevantes para comprimir redes neuronales, como por ejemplo, la poda y la cuantización. Estas tecnicas seran detalladas en la sección \ref{sec:compresion_de_redes}. Este trabajo se enfoca en una de las técnicas: la cuantización, que consiste en reducir la resolución numérica utilizada para representar los parámetros de la red.
+Existen diversas técnicas de compresión relevantes para comprimir redes neuronales, como la poda y la cuantización.
+Estas técnicas serán detalladas en la sección \ref{sec:compresion_de_redes}. El foco de este trabajo se centra en una de ellas:
+la cuantización, que consiste en reducir la resolución numérica con la que se representan los parámetros de la red.
 
 \section{Estado del arte}
 \label{sec:estado_arte}
 
-La cuantización provee mejoras significativas, en potencia, memoria y velocidad de computo. Pero, tiene un costo, pues también deteriora el desempeño de la red, por ende es crucial definir cuidadosamente como realizar la cuantización. Diversos trabajos han evidenciado que esta perdida en la precision de la red debido a la cuantización se puede acotar seleccionando adecuadamente los esquemas, funciónes y parámetros de cuantización \cite{Jin2019Rethinking} \cite{chen2019layerwise}.
+La cuantización provee mejoras significativas en potencia, memoria y velocidad de cómputo. Sin embargo, también deteriora el desempeño de la red y, por ende, es crucial definir cuidadosamente cómo realizar la cuantización. Diversos trabajos han evidenciado que esta pérdida en la precisión de la red, debida a la cuantización, se puede acotar si se seleccionan adecuadamente los esquemas, funciones y parámetros de cuantización \cite{Jin2019Rethinking} \cite{chen2019layerwise}.
 
-Cuantizaciones uniformes de 8 bits, pueden lograr una reduccion de tamaño de modelo de 4x, sin afectar significativamente la precisión del modelo. A partir de estas investigaciones, el hardware tambien se ha adaptado para soportar operaciones en formatos de menor precisión, lo que ha impulsado la estandarizacion del mismo para la cuantización en 8 bits.
 
-La definicion de la cuantización de una red neuronal, se define por su esquema de cuantización. Un esquema de cuantización involucra la definicion del tipo de cuantizador (su función) a utilizar para cada tensor de la red (pesos, bias, activaciones, etc), y para cada capa. Un cuantizador queda definido por una función de cuantización y sus parámetros (rango, resolución, etc).
+Para comprender este proceso en mayor detalle, la cuantización de una red neuronal se define por su esquema de cuantización. Dicho esquema define el tipo de cuantizador (es decir, su función) que se aplicará a cada tensor de la red (como pesos, sesgos y activaciones) en cada una de sus capas. Un cuantizador, a su vez, queda definido por una función de cuantización $q(x; \theta)$ y sus parámetros $\theta$ (por ejemplo, el rango, resolución, etc).
 
-Existen diferentes funciónes de cuantización, entre las que se encuentran la cuantización uniforme y no uniforme. Una función de cuantización mapea un rango continuo de valores a un conjunto discreto de niveles. Se tiene una serie de intervalos en el dominio de los valores originales, y a cada intervalo se le asigna un valor discreto en el rango cuantizado.
+Existen diferentes funciones de cuantización, entre las que se encuentran la cuantización uniforme y no uniforme. Una función de cuantización mapea un rango continuo de valores a un conjunto discreto de niveles, donde a cada intervalo en el dominio de los valores originales se le asigna un valor discreto en el rango cuantizado.
 
-La cuantización uniforme es la más común y utiliza intervalos del mismo tamaño y niveles equidistantes, esta cuantización es completamente compatible con aritmetica de punto fijo. Por otro lado, la cuantización no uniforme permite una mayor flexibilidad al utilizar intervalos de tamaño variable, de esta manera se puede elegir tener rangos con mayor resolución en las zonas donde los datos son más densos, y rangos con menor resolución en las zonas donde los datos son más dispersos. Esto puede ser beneficioso para ciertos tipos de datos o distribuciones, ya que permite una representación más eficiente y precisa de los valores y a su vez lograr una mayor tasa de compresión. Sin embargo, la cuantización no uniforme es más compleja de implementar y puede no ser compatible con hardware que utiliza aritmética de punto fijo. \TODO{CITA}
+La cuantización uniforme es la más común y utiliza intervalos del mismo tamaño y niveles equidistantes, esta cuantización es completamente compatible con aritmética de punto fijo. Por otro lado, la cuantización no uniforme permite una mayor flexibilidad, ya que utiliza intervalos de tamaño variable. De esta manera, se pueden elegir rangos con mayor resolución en las zonas donde los datos son más densos y rangos con menor resolución donde los datos son más dispersos. Esto resulta beneficioso para ciertas distribuciones de datos, pues permite una representación más eficiente y precisa de los valores. Como resultado, se puede lograr una mayor tasa de compresión, sin comprometer la calidad. Sin embargo, la cuantización no uniforme es más compleja de implementar y puede no ser compatible con hardware que utiliza aritmética de punto fijo \cite{Banner2018}.
 
-Actualmente, el esquema más común es un esquema en el cual se define un cuantizador para todo el modelo de forma homogénea, con funciónes de cuantizacion uniforme y parametros fijos, predefinidos.
+Actualmente, el esquema más común es aquel en el cual se define un cuantizador para todo el modelo de forma homogénea (global), con funciones de cuantización uniforme y parámetros fijos predefinidos \cite{Krishnamoorthi2018}.
 
-En la cuantización de redes neuronales, existen dos principales estrategias de aplicación de la cuantización, que son independientes del esquema de cuantización utilizado. La cuantización post-entrenamiento (de ahora en adelante PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (de ahora en adelante QAT, de sus siglas en inglés \textit{Quantization Aware Training}).
+Independientemente del esquema elegido, en la cuantización de redes neuronales existen dos estrategias principales para su aplicación: la cuantización post-entrenamiento (de ahora en adelante PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (de ahora en adelante QAT, de sus siglas en inglés \textit{Quantization Aware Training}).
 
-PTQ consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizarla definiendo los parametros de los cuantizadores a partir de la distribuciones de los mismos. Esta técnica es sencilla de implementar, pero puede llevar a una pérdida significativa de exactitud.
+PTQ consiste en entrenar una red neuronal en punto flotante y, una vez entrenada, cuantizarla. Para ello, se definen los parámetros de los cuantizadores a partir de las distribuciones de los tensores. Esta técnica es sencilla de implementar, pero puede llevar a una pérdida significativa de exactitud \cite{Nagel2020}.
 
-QAT consiste en entrenar la red neuronal emulando la cuantización en la inferencia, lo cual permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. QAT puede, además, incluir el entrenamiento de los propios parámetros de cuantización, como el rango y la resolución. Esto permite optimizar aún más el rendimiento del modelo cuantizado al entrenamiento de los pesos estar influenciados por la cuantización final del modelo. Esta técnica es más compleja de implementar, pero suele llevar a una mejor preservación de la exactitud del modelo. \TODO{CITA}
+QAT consiste en entrenar la red neuronal con una emulación de la cuantización en la inferencia, lo cual permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. QAT puede, además, incluir el entrenamiento de los propios parámetros de cuantización, como el rango y la resolución. Esto permite una optimización más profunda, ya que el entrenamiento de los pesos del modelo se ve influenciado directamente por el efecto de la cuantización final. Esta técnica es más compleja de implementar, pero suele llevar a una mejor preservación de la exactitud del modelo \cite{Jacob2018}.
 
-En este trabajo se implementará un cuantizador flexible \cite{electronics13101923} el cual combina la función de cuantización uniforme y no uniforme, obteniendo el nivel de compresión que permite la cuantización no uniforme, pero con las ventajas de la cuantización uniforme, como su compatibilidad con dispositivos que utilizan punto fijo. También se implementará la posibilidad de definir diferentes esquemas de cuantización para diferentes capas, permitiendo una mayor flexibilidad y adaptabilidad a las características de los datos y la arquitectura del modelo. Finalmente, estos cuantizadores seran de parametros adaptables, es decir, los parámetros de cuantización son entrenados durante QAT, permitiendo que el modelo se adapte a la cuantización durante el entrenamiento.
+En este trabajo se implementó un cuantizador flexible \cite{electronics13101923}, el cual combina las funciones de cuantización uniforme y no uniforme. Esto permite obtener el nivel de compresión de la cuantización no uniforme, pero con las ventajas de la cuantización uniforme, como su compatibilidad con dispositivos que utilizan punto fijo. Además, la implementación realizada en este trabajo permite definir diferentes esquemas de cuantización para distintas capas, lo que brindó mayor flexibilidad y adaptabilidad a las características de los datos y la arquitectura del modelo.
+
+Finalmente, estos cuantizadores se diseñaron con parámetros adaptables. Es decir, los parámetros de cuantización se entrenaron durante el proceso de QAT, lo que permitió que el modelo se adaptara a la cuantización de manera óptima durante el entrenamiento.
 
 % https://www.ibm.com/think/topics/quantization-aware-training#f01
 \section{Objetivos}
 \label{sec:objetivos}
 
-El objetivo principal de esta tesis es el diseño, implementación y evaluación de una biblioteca de software desarrollada en Python, compatible con el framework \texttt{Keras} \cite{keras}, que permita el entrenamiento de redes neuronales y los cuantizadores de parámetros adaptables utilizando la metodología de cuantización durante el entrenamiento (QAT). La biblioteca deberá permitir inyectar de manera sencilla diversos esquemas de cuantización y ser fácilmente aplicable a cualquier arquitectura de red previamente definida.
-
+El objetivo principal de esta tesis es el diseño, implementación y evaluación de una biblioteca de software, \texttt{QTensor}, construida sobre \texttt{TensorFlow} \cite{tensorflow} y \texttt{Keras} \cite{keras}, que simplifique la investigación y aplicación de técnicas de QAT con cuantizadores de parámetros adaptables.
 Para alcanzar este fin, se plantean los siguientes objetivos específicos:
 
 \begin{itemize}
-    \item Diseñar e implementar una biblioteca que permita entrenar redes neuronales con cuantización durante el entrenamiento basada en \texttt{TensorFlow} \cite{tensorflow} y \texttt{Keras} \cite{keras}.
-    \item Implementar un esquema de cuantización uniforme.
-    \item Implementar un esquema de cuantización flexible.
-    \item Desarrollar al menos un ejemplo con arquitecturas de redes neuronales y datasets del estado del arte para evaluar el rendimiento de la biblioteca.
+    \item Diseñar e implementar una biblioteca que permita entrenar redes neuronales con cuantización durante el entrenamiento basada en \texttt{TensorFlow}  y \texttt{Keras}.
+    \item Implementar un esquema de cuantización uniforme con parámetros adaptables.
+    \item Implementar un esquema de cuantización flexible con parámetros adaptables.
+    \item Evaluar y comparar cuantitativamente el desempeño de los esquemas implementados. Esta evaluación se centrará en la relación de compromiso entre la precisión del modelo y la complejidad espacial sobre arquitecturas y conjuntos de datos de referencia.
 \end{itemize}
