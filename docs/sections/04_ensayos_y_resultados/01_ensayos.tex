@@ -1,93 +1,118 @@
-\section{Ensayos y pruebas}
-\label{sec:ensayos_y_pruebas}
+\section{Ensayos}
+\label{sec:ensayos}
+El objetivo de los ensayos realizados fue proporcionar un ejemplo completo del uso de la biblioteca \texttt{QTensor}. Específicamente, se cuantizó un modelo de \texttt{TensorFlow} mediante QAT con cuantizadores personalizados de parámetros adaptables, se entrenó y se evaluó su desempeño en un conjunto de datos real.
 
-El objetivo de los ensayos realizados es mostrar un ejemplo completo de la utilización de la biblioteca \texttt{QTensor} para cuantizar un modelo de \texttt{TensorFlow}, entrenarlo y evaluar su desempeño en un conjunto de datos real.
+El experimento consistió en definir un modelo, entrenarlo en el conjunto de datos CIFAR-10, cuantizarlo mediante dos esquemas diferentes (uno con cuantización uniforme y otro con cuantización flexible) y comparar el desempeño de los modelos cuantizados en términos de precisión y tamaño del modelo.
 
-En particular, se busco demostrar las ventajas del cuantizador flexible en cuestiones de precisión y tamaño del modelo, comparando el desempeño de modelos cuantizados con diferentes esquemas de cuantización. Como se busca una comparacion entre dos esquemas, es necesario partir de un modelo entrenado de la misma manera. Para esto se utilizo la definición de un \texttt{Pipeline} para entrenar el modelo base, y luego se cuantizo este modelo con diferentes esquemas de cuantización.
+Se evidenció que el cuantizador flexible permite alcanzar tasas de compresión agresivas sin comprometer el desempeño del modelo.
 
-\subsection{Pipeline utilizado}
 \subsection{Dataset CIFAR-10}
-
-El conjunto de datos utilizado es el conjunto de datos CIFAR-10\cite{krizhevsky2009learning}, que consiste en 60.000 imágenes de 32x32 píxeles en color, divididas en 10 clases diferentes (avión, automóvil, pájaro, gato, ciervo, perro, rana, caballo, barco y camión). El conjunto de datos está dividido en 50.000 imágenes de entrenamiento y 10.000 imágenes de prueba.
-
-En la figura \ref{fig:cifar10} se pueden ver algunos ejemplos del conjunto de datos CIFAR-10.
+Para estos ensayos, el conjunto de datos utilizado es el CIFAR-10\cite{krizhevsky2009learning}, que consiste en $60000$ imágenes de $32\times32$ píxeles en color, divididas en $10$ clases diferentes (avión, automóvil, pájaro, gato, ciervo, perro, rana, caballo, barco y camión). El conjunto de datos está dividido en $50000$ imágenes de entrenamiento y $10000$ imágenes de prueba. En la figura \ref{fig:cifar10} se muestran las clases y algunos ejemplos de ellas pertenecientes a CIFAR-10.
 
 \defaultfigure{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}
 
+CIFAR-10 es un conjunto de datos ampliamente utilizado en la comunidad de aprendizaje automático para tareas de clasificación de imágenes. Su tamaño moderado y la diversidad de clases lo hacen ideal para evaluar el desempeño de modelos de redes neuronales. Además, permite validar técnicas de cuantización como las implementadas en \texttt{QTensor} sin incurrir en costos computacionales excesivos.
+
 \subsection{Modelo utilizado}
-El modelo utilizado es una red neuronal convolucional simple, con dos capas convolucionales seguidas de capas de pooling, y dos capas densas al final. La arquitectura del modelo es la \ref{fig:model_architecture}.
+El modelo utilizado posee una arquitectura basada en LeNet-5 \cite{LeCun1998}, con dos capas convolucionales con filtros de tamaño $3\times3$ seguidas de capas de submuestreo (\textit{max-pooling} en inglés) de tamaño $2\times2$. Posteriormente, tras un aplanado (\textit{flatten}), el modelo se completa con una capa densa de $256$ unidades con activación ReLU, seguida de una capa de regularización \textit{dropout} con tasa $0.5$. Finalmente, una capa densa de salida con $10$ unidades (una por clase) y activación \textit{softmax} completó la arquitectura. El modelo contó con un total de $2175626$ parámetros entrenables.
 
-% \begin{figure}[H]
-%     \centering
-%     \input{diagrams/neural_nets/model_architecture}
-%     \caption{Arquitectura del modelo utilizado.}
-%     \label{fig:model_architecture}
-% \end{figure}
+A continuación se describen las funciones de cada tipo de capa en la arquitectura:
 
-\TODO{Terminar diagrama}
-% \defaultdiagram{neural_nets/model}{Arquitectura del modelo utilizado.}{model_architecture}
-% \begin{lstlisting}[language=Python]
-%         new_model = models.Sequential(
-%             [
-%                 layers.Conv2D(
-%                     64,
-%                     (3, 3),
-%                     padding="same",
-%                     activation="relu",
-%                     input_shape=input_shape[1:],
-%                 ),
-%                 layers.MaxPooling2D((2, 2)),
-%                 layers.Conv2D(128, (3, 3), padding="same", activation="relu"),
-%                 layers.MaxPooling2D((2, 2)),
-%                 layers.Flatten(),
-%                 layers.Dense(256, activation="relu"),
-%                 layers.Dropout(0.5),
-%                 layers.Dense(categories, activation="softmax"),
-%                 ],
-%                 name=model_name,
-%                 )
-%             \end{lstlisting}
+\begin{itemize}
+    \item Capas convolucionales (Conv2D): Extraen características espaciales de las imágenes mediante la aplicación de filtros deslizantes. Cada filtro realiza productos punto entre sus pesos y regiones locales de la entrada, generando mapas de características que capturan patrones como bordes, texturas y formas. La convolución preserva la estructura espacial de los datos, lo que es fundamental para el procesamiento de imágenes. \cite{Krizhevsky2012}
+
+    \item Capas de submuestreo (MaxPool2D): Reducen progresivamente la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo dentro de cada región o ventana. Esta operación proporciona invarianza a pequeñas traslaciones y deformaciones, reduce el costo computacional y ayuda a controlar el sobreajuste al disminuir el número de parámetros en las capas subsiguientes. \cite{LeCun1998}
+
+    \item Capa de aplanado (Flatten): Transforma la salida tridimensional de las capas convolucionales (alto $\times$ ancho $\times$ canales) en un vector unidimensional. Esta transformación es necesaria para conectar las capas convolucionales con las capas totalmente conectadas, que requieren entradas vectoriales. \cite{Goodfellow2016}
+
+    \item Capas densas (Dense): Implementan perceptrones multicapa, explicados en la sección \ref{sec:perceptron} donde cada neurona está conectada a todas las neuronas de la capa anterior. Cada neurona calcula una combinación lineal ponderada de todas sus entradas, suma un término de sesgo y aplica una función de activación no lineal. Estas capas son responsables de aprender representaciones abstractas de alto nivel y realizar la clasificación final.
+
+    \item Capa de regularización (Dropout): Durante el entrenamiento, desactiva aleatoriamente un porcentaje de neuronas (en este caso, $50\%$) en cada iteración. Esta técnica previene el sobreajuste al forzar a la red a aprender representaciones redundantes y robustas, lo que evita la dependencia excesiva de neuronas específicas. Durante la inferencia, todas las neuronas están activas pero sus salidas se escalan apropiadamente. \cite{Srivastava2014}
+\end{itemize}
+
+Las funciones de activación empleadas en el modelo son:
+
+\begin{itemize}
+    \item ReLU (Rectified Linear Unit): Es una función de activación no lineal definida como $f(x) = \max(0, x)$ que introduce no linealidad al modelo con eficiencia computacional. Activa una neurona solo cuando su entrada es positiva y elimina los valores negativos. Esta función mitiga el problema del gradiente desvaneciente y permite que las redes profundas aprendan representaciones jerárquicas complejas. Es la función de activación estándar en capas intermedias de redes convolucionales modernas. \cite{Nair2010}
+
+    \item Softmax: Es una función de activación aplicada en la capa de salida que transforma un vector de valores reales en una distribución de probabilidad sobre las clases. Calcula la exponencial de cada elemento y normaliza por la suma de todas las exponenciales, lo que garantiza que las salidas sumen 1 y puedan interpretarse como probabilidades. Matemáticamente se define como $\sigma(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$ donde $K$ es el número de clases. Esta función es fundamental en problemas de clasificación multiclase, lo que permite que el modelo exprese su confianza en cada clase posible. \cite{Bridle1990}
+\end{itemize}
+
+La arquitectura del modelo se describe en la tabla \ref{tab:model_architecture} y se muestra en la figura \reffig{fig:model_architecture}.
+
+\begin{table}[H]
+    \centering
+    \caption{Arquitectura del modelo utilizado.}
+    \begin{tabular}{l l r c r}
+        \toprule
+        Capa & Detalles & Forma de Salida & Activación & Parámetros \\
+        \midrule
+        Input & - & $32 \times 32 \times 3$ & - & $0$ \\
+        Conv2D (1) & $64$ filtros $3 \times 3$ & $32 \times 32 \times 64$ & ReLU & $1792$ \\
+        MaxPool2D (1) & Tamaño $2 \times 2$ & $16 \times 16 \times 64$ & - & $0$ \\
+        Conv2D (2) & $128$ filtros $3 \times 3$ & $16 \times 16 \times 128$ & ReLU & $73856$ \\
+        MaxPool2D (2) & Tamaño $2 \times 2$ & $8 \times 8 \times 128$ & - & $0$ \\
+        Flatten & - & $8192$ & - & $0$ \\
+        Dense (1) & $256$ unidades & $256$ & ReLU & $2097408$ \\
+        Dropout & Tasa $0.5$ & $256$ & - & $0$ \\
+        Dense (2) & $10$ unidades & $10$ & Softmax & $2570$ \\
+        \midrule
+        \textbf{Total} & & & & \textbf{$2175626$} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:model_architecture}
+\end{table}
+\defaultdiagram{neural_nets/new_model}{Arquitectura del modelo utilizado.}{model_architecture}{1}
 
 \subsection{Esquemas de cuantización}
-No se hizo una busqueda exhaustiva de esquemas de cuantización, sino que se seleccionaron dos esquemas que se consideraron representativos de las diferentes opciones disponibles en la biblioteca \texttt{QTensor}.
 
-Los \textit{biases} se cuantizaron todos con el mismo esquema, de cuantizador uniforme simétrico, de 8 bits.
+Con el modelo y el conjunto de datos definidos, el siguiente paso consiste en establecer los esquemas de cuantización que se aplicarán. Si bien no se realizó una búsqueda exhaustiva de los mejores parámetros de cuantización e hiperparámetros de entrenamiento, se seleccionaron dos esquemas representativos para proveer una comparación clara entre cuantización uniforme y flexible.
 
-Las activaciones se cuantizaron con un cuantizador uniforme asimétrico de 16 bits, las activaciones son los valores que más varían el desempeño del modelo, por lo que se decidió utilizar un esquema de cuantización más preciso para estas.
+Para todas las configuraciones evaluadas, se utilizó un esquema común en ciertos componentes. Los \textit{biases} se cuantizaron con un cuantizador uniforme signado de $8$ bits. Por su parte, las activaciones se cuantizaron con un cuantizador uniforme no signado de $16$ bits, ya que estos valores son los que más afectan el desempeño del modelo, lo que justifica el uso de mayor precisión.
 
-La cuantización de los pesos se hizo con dos cuantizadores diferentes, para comparar el desempeño de estos. Un grupo de modelos se cuantizo con un cuantizador uniforme simétrico con una matriz de bits {2, 4, 6 ...} y otro grupo de modelos se cuantizo con un cuantizador flexible simétrico con una matriz de bits {2, 4, 6 ...}.
+La diferencia principal entre los dos grupos de modelos radica en la cuantización de los pesos. Un primer grupo se cuantizó con un cuantizador uniforme signado, aplicando la misma configuración de bits a todos los pesos de una capa dada. Las configuraciones exploradas pertenecen al conjunto $\{1, 2, 3, 4, 5, 6, 8, 10, 16, 24\}$.
+
+El segundo grupo empleó un cuantizador flexible signado con dos estrategias diferenciadas según la capa. En las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), se permitieron configuraciones variables tanto de bits como de niveles de cuantización. En contraste, las capas de entrada y salida (\texttt{conv2d} y \texttt{dense\_1}) utilizaron configuraciones fijas de $8$ bits y $16$ niveles.
+
+Una característica distintiva del esquema flexible es que la activación de la última capa densa (\texttt{dense\_1}) no se cuantizó. Esta decisión preserva la salida de la función \textit{softmax} en su precisión original, lo cual es crítico dado que las probabilidades de clasificación son el componente más sensible del modelo. Los detalles específicos de ambos esquemas, incluyendo los conjuntos de valores permitidos para cada parámetro, se presentan en la tabla \ref{tab:quant_layouts_final}.
 
 
 % The table environment code
+{\footnotesize
 \begin{table}[H]
 \centering
-\caption{Comparison of Uniform vs. Flexible Quantization Layouts.}
+\caption{Comparación de esquemas de cuantización uniforme y flexible.}
 \label{tab:quant_layouts_final}
-\begin{tabular}{ll cc cc}
+\begin{tabular}{@{}ll cc cc@{}}
 \toprule
- & & \multicolumn{2}{c}{\textbf{Layout 1: Full Uniform}} & \multicolumn{2}{c}{\textbf{Layout 2: Flexible Kernel}} \\
+ & & \multicolumn{2}{c}{\textbf{Esquema 1: Uniforme}} & \multicolumn{2}{c}{\textbf{Esquema 2: Flexible}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-\multicolumn{1}{c}{\textbf{Layer}} & \multicolumn{1}{c}{\textbf{Component}} & \textbf{Type} & \textbf{Parameters} & \textbf{Type} & \textbf{Parameters} \\
+\textbf{Capa} & \textbf{Comp.} & \textbf{Tipo} & \textbf{Params.} & \textbf{Tipo} & \textbf{Params.} \\
 \midrule
-\texttt{conv2d} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
-& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
-& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\texttt{conv2d} & Kernel & Unif. & $W \in \text{D}^*$ & Flex. & $\begin{matrix} W = 8 \\ L = 16 \end{matrix}$ \\
+& Bias & Unif. & $W=8$ & Unif. & $W=8$ \\
+& Activ. & Unif. & $W=16$ & Unif. & $W=16$ \\
 \midrule
-\texttt{conv2d\_1} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
-& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
-& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\texttt{conv2d\_1} & Kernel & Unif. & $W \in \text{D}^*$ & Flex. & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{A}^* \end{matrix}$ \\
+& Bias & Unif. & $W=8$ & Unif. & $W=8$ \\
+& Activ. & Unif. & $W=16$ & Unif. & $W=16$ \\
 \midrule
-\texttt{dense} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
-& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
-& Activation & Uniform & $W=16$ & Uniform & $W=16$ \\
+\texttt{dense} & Kernel & Unif. & $W \in \text{D}^*$ & Flex. & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{A}^* \end{matrix}$ \\
+& Bias & Unif. & $W=8$ & Unif. & $W=8$ \\
+& Activ. & Unif. & $W=16$ & Unif. & $W=16$ \\
 \midrule
-\texttt{dense\_1} & Kernel & Uniform & $W \in \text{Set D}^*$ & \textbf{Flexible} & $\begin{matrix} W \in \{4, 6, 8\} \\ L \in \text{Set A}^* \end{matrix}$ \\
-& Bias & Uniform & $W=8$ & Uniform & $W=8$ \\
-& Activation & Uniform & $W=16$ & \textbf{None (Passthrough)} & \textbf{N/A} \\
+\texttt{dense\_1} & Kernel & Unif. & $W \in \text{D}^*$ & Flex. & $\begin{matrix} W = 8 \\ L = 16 \end{matrix}$ \\
+& Bias & Unif. & $W=8$ & Unif. & $W=8$ \\
+& Activ. & Unif. & $W=16$ & None & \textbf{N/A} \\
 \bottomrule
-\multicolumn{6}{l}{\textit{$W$: bit-width. $L$: number of quantization levels.}} \\
-\multicolumn{6}{l}{\textit{*Set A for $L$ is $\{2, 3, 4, 5, 6, 7, 8, 10, 16, 20, 25, 30\}$.}} \\
-\multicolumn{6}{l}{\textit{*Set D for $W$ is $\{1, 2, 3, 4, 5, 6, 8, 10, 16, 24\}$.}} \\
+\multicolumn{6}{l}{\textit{$W$: ancho de bits. $L$: niveles de cuantización.}} \\
+\multicolumn{6}{l}{\textit{*Conjunto A para $L$: $\{2, 3, 4, 6, 8, 10, 16\}$.}} \\
+\multicolumn{6}{l}{\textit{*Conjunto D para $W$: $\{1, 2, 3, 4, 5, 6, 8, 10, 16, 24\}$.}} \\
 \end{tabular}
 \end{table}
-\TODO{Terminar de definir bien esto... no en ingles}
+}
+
+
+\subsection{Pipeline utilizado}
+
+La descripción del pipeline utilizado para definir los pasos en este experimento es la que se muestra en el extracto de código \ref{lst:pipeline_experiment}.
