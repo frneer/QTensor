@@ -1,23 +1,27 @@
 \section{Compresión de redes neuronales}
 \label{sec:compresion_de_redes}
 
-La compresión de redes neuronales es un proceso que consiste en reducir el tamaño de los datos, en particular, de los parámetros de una red neuronal. La compresión busca reducir la complejidad del modelo, tanto en términos de memoria, del tamaño del modelo, y por otro lado, la de complejidad de las operaciones.
+La compresión de redes neuronales es un proceso que consiste en reducir el tamaño de los datos, en particular, de los parámetros de una red neuronal. Esta compresión busca disminuir la complejidad del modelo en dos dimensiones: por un lado, la complejidad espacial, relacionada con la memoria necesaria para almacenar el modelo; por otro lado, la complejidad temporal, asociada al costo computacional de las operaciones.
 
-La complejidad espacial se define como la cantidad de memoria necesaria para almacenar los parámetros del modelo. Al reducir el tamaño de cada uno de estos parámetros, se disminuye la cantidad total de memoria requerida para almacenarlo, lo que es especialmente beneficioso para dispositivos con recursos limitados.
+En este sentido, la complejidad espacial se define como la cantidad de memoria necesaria para almacenar los parámetros del modelo. Al reducir el tamaño de cada uno de estos parámetros, se disminuye la cantidad total de memoria requerida para almacenar el modelo. Esto resulta especialmente beneficioso para dispositivos con recursos limitados.
 
-La complejidad temporal se mide en términos de la cantidad de operaciones necesarias para realizar una inferencia con el modelo. Al reducir la cantidad de parámetros o la precisión de los mismos, se disminuye la complejidad de los cálculos necesarios y por ende, la cantidad de operaciones simples de procesador necesarias para realizar, lo que acelera el tiempo de inferencia y mejora la eficiencia energética del modelo.
+Por su parte, la complejidad temporal se mide en términos de la cantidad de operaciones necesarias para realizar una inferencia con el modelo. La reducción de la cantidad de parámetros o de su precisión disminuye la complejidad de los cálculos necesarios y, por ende, la cantidad de operaciones de procesador requeridas. Esto acelera el tiempo de inferencia y mejora la eficiencia energética del modelo.
 
-Este trabajo se enfoca en evaluar el impacto sobre la complejidad espacial. Dejando de lado la complejidad temporal, que si bien es un aspecto importante, la exploración de resultados cuantitativos de la misma está fuera del alcance de este trabajo.
+La compresión también mejora la eficiencia energética del modelo, ya que el acceso a memoria y la realización de operaciones computacionales son procesos que consumen energía. Al reducir la cantidad de datos que deben ser procesados y almacenados, se disminuye el consumo energético asociado a la inferencia del modelo. Esto es beneficioso tanto para sistemas con recursos limitados como para aplicaciones que buscan minimizar su huella energética, como la computación en la nube.
+
+\TODO{Revisar este párrafo luego de presentar los resultados, porque creo que vamos a probar con 4, 6 y 8 bits, ¿no?
+En ese caso esto no aplica, más allá de que no le demos tanta bola.}
+Dado el alcance de esta investigación, este trabajo se enfoca en evaluar el impacto sobre la complejidad espacial, dado que constituye el factor determinante para el despliegue de modelos en dispositivos con memoria limitada. La complejidad temporal, aunque importante, no se aborda en profundidad, ya que su exploración cuantitativa está fuera del alcance del mismo.
 
 \subsection{Técnicas de compresión}
 Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
 
 \begin{itemize}
-    \item Compartición de pesos (\textit{Weight Sharing} en inglés): Se agrupan los pesos de la red en un conjunto reducido de valores, permitiendo una representación más compacta sin afectar demasiado la capacidad de generalización.
-    \item Poda (\textit{Weight Pruning} en inglés): Se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, reduciendo la cantidad de parámetros sin afectar significativamente la precisión del modelo.
-    \item Cuantización (\textit{Quantization} en inglés): Se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia.
-    \item Descomposición tensorial (\textit{Tensor Decomposition} en inglés): Se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de operaciones necesarias durante la inferencia.
-    \item Destilación de conocimiento (\textit{Knowledge Distillation} en inglés): Se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), transfiriendo la información esencial en una forma más compacta.
+    \item Compartición de pesos (\textit{Weight Sharing} en inglés): se agrupan los pesos de la red en un conjunto reducido de valores, lo que permite una representación más compacta sin afectar demasiado la capacidad de generalización \cite{8253600}.
+    \item Poda (\textit{Weight Pruning} en inglés): se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, lo que reduce la cantidad de parámetros sin afectar significativamente la precisión del modelo \cite{8253600}.
+    \item Cuantización (\textit{Quantization} en inglés): se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia \cite{8253600}.
+    \item Descomposición tensorial (\textit{Tensor Decomposition} en inglés): se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de operaciones necesarias durante la inferencia \cite{8253600}.
+    \item Destilación de conocimiento (\textit{Knowledge Distillation} en inglés): se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), lo que transfiere la información esencial en una forma más compacta \cite{8253600}.
 \end{itemize}
 
 Cada técnica posee ventajas y desventajas y la elección de la técnica adecuada depende del caso de uso específico, el tipo de arquitectura del modelo y los requisitos de rendimiento \cite{DBLP:journals/corr/abs-2010-03954}.
@@ -25,79 +29,86 @@ Cada técnica posee ventajas y desventajas y la elección de la técnica adecuad
 \section{Cuantización}
 \label{sec:cuantizacion}
 
-La cuantización de redes neuronales consiste en representar los parámetros de la red con menor precisión numérica, convirtiendo valores representados en punto flotante de 32 bits (FP32 por sus siglas del inglés \textit{Floating Point 32-bit}) a formatos de menor precisión, como enteros de 8 o 4 bits (INT8 o INT4 por sus siglas del inglés \textit{Integer 8-bit} o \textit{Integer 4-bit} respectivamente).
+La cuantización de redes neuronales consiste en representar los parámetros de la red con menor precisión numérica, mediante la conversión de valores representados en punto flotante de 32 bits (FP32 por sus siglas en inglés, \textit{Floating Point 32-bit}) a formatos de menor precisión, como enteros de 8 o 4 bits (INT8 o INT4 por sus siglas en inglés, \textit{Integer 8-bit} e \textit{Integer 4-bit}, respectivamente).
 
-La función de cuantización mapea un valor continuo a un conjunto discreto de niveles. Y queda definida por dos series de parámetros: los niveles de cuantización y los umbrales de cuantización. Los niveles de cuantización son los valores discretos a los que se mapean los valores continuos, mientras que los umbrales de cuantización definen los límites entre estos niveles.
+La función de cuantización mapea un valor continuo a un conjunto discreto de niveles, y queda definida por dos series de parámetros: los niveles de cuantización y los umbrales de cuantización. Los niveles de cuantización son los valores discretos a los que se mapean los valores continuos, mientras que los umbrales de cuantización definen los límites entre estos niveles.
 
 \subsection{Características de funciones de cuantización}
 
 Existen múltiples características para definir el tipo de cuantización. Algunas de las características que definen una función de cuantización se presentan a continuación.
 
-La cuantización puede ser uniforme o no uniforme. En la cuantización uniforme, los niveles de cuantización están espaciados de manera uniforme (equiespaciados) a lo largo del rango de valores, mientras que en la cuantización no uniforme, los niveles pueden estar distribuidos de manera no uniforme, permitiendo una mejor representación de ciertos rangos de valores. En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador de 8 niveles.
+La cuantización puede ser uniforme o no uniforme. En la cuantización uniforme, los niveles de cuantización están espaciados de manera uniforme (equiespaciados) a lo largo del rango de valores, mientras que en la cuantización no uniforme, los niveles pueden estar distribuidos de manera no uniforme, lo que permite una mejor representación de ciertos rangos de valores. En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador de 8 niveles.
 
-\defaultfigure{cuantizacion/uniform_vs_non_uniform_3bits.png}{Cuantización uniforme y no uniforme}{uniform_vs_non_uniform}
+\defaultfigure{cuantizacion/uniform_vs_non_uniform_3bits.png}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}
 
-La cuantización puede ser simétrica o asimétrica. En la cuantización simétrica, el rango de valores se divide en partes iguales alrededor de un valor central (\textit{zero point} en inglés), mientras que en la cuantización asimétrica, los niveles de cuantización pueden estar desplazados, permitiendo una mejor representación de valores no centrados alrededor de cero. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits. En el caso particular donde el valor central es cero, se habla de cuantización signada (simétrica) y no signada (asimétrica).
+La cuantización puede ser simétrica o asimétrica. En la cuantización simétrica, el rango de valores se divide en partes iguales alrededor de un valor central (\textit{zero point} en inglés), mientras que en la cuantización asimétrica, los niveles de cuantización pueden estar desplazados, lo que permite una mejor representación de valores no centrados alrededor de cero. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits. En el caso particular donde el valor central es cero, se habla de cuantización signada (simétrica) y no signada (asimétrica).
 
-\defaultfigure{cuantizacion/sym_vs_asym_3bits.png}{Cuantización simétrica y asimétrica}{sym_vs_asym}
+\defaultfigure{cuantizacion/sym_vs_asym_3bits.png}{Cuantización simétrica y asimétrica.}{sym_vs_asym}
 
 % \subsection{Error de cuantización}
 % El concepto general es el de representar un rango continuo de valores en un conjunto discreto de niveles. Este proceso introduce un error de cuantización, que es la diferencia entre el valor original y su representación cuantizada.
 
-\subsection{Funciónes de cuantización}
-\label{sec:funciónes_de_cuantizacion}
+\subsection{Funciones de cuantización}
+\label{sec:funciones_de_cuantizacion}
 
 \input{sections/02_introduccion_especifica/04_cuantizadores}
 
 \subsection{Estrategias de cuantización}
-El proceso de cuantización efectivamente reduce el tamaño del modelo, reduciendo la cantidad de memoria requerida y acelerando la inferencia. Sin embargo, al reducir la precisión numérica, se introduce un error de cuantización que suele afectar el desempeño del modelo. Por lo tanto, es crucial evaluar el impacto de la cuantización en las métricas de evaluación y encontrar un equilibrio adecuado entre compresión y rendimiento.
+La cuantización reduce el tamaño del modelo, la memoria requerida y acelera la inferencia. No obstante, la reducción de la precisión numérica introduce un error de cuantización que puede afectar el rendimiento, desplazando el modelo del punto de convergencia obtenido en el entrenamiento previo a la cuantización. Por lo tanto, es esencial evaluar el impacto de la cuantización en las métricas y hallar un compromiso adecuado entre compresión y precisión.
 
-Existen dos principales estrategias para implementar la cuantización en redes neuronales: la cuantización post-entrenamiento (PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (QAT, por sus siglas del inglés \textit{Quantization Aware Training}). La \ref{fig:qat} y la \ref{fig:ptq} ilustran estas dos estrategias.
+Existen dos estrategias principales para aplicar la cuantización en redes neuronales: la cuantización post-entrenamiento (PTQ) y la cuantización durante el entrenamiento (QAT).
 
-\defaultdiagram{cuantizacion/ptq}{Cuantización post-entrenamiento (PTQ)}{ptq}{1}
-\defaultdiagram{cuantizacion/qat}{Cuantización durante el entrenamiento (QAT)}{qat}{1}
-
-\TODO{Reemplazar diagramas por otros mas claros}
-
-% \TODO{Quizas esto puede ir en la intro y switchear lo que esta ahi}
-PTQ consiste en entrenar una red neuronal en punto flotante y una vez entrenada, cuantizarla. Sin entrenamiento (\textit{fine-tunning} posterior). Por otro lado, QAT (\texttt{QAT}) consiste en entrenar la red neuronal emulando la cuantización en la inferencia durante el entrenamiento, lo que permite que los pesos se entrenen adaptandose a la cuantización, generalmente logrando una mejor perfomance al momento de ser cuantizada, pero a costa de un mayor tiempo de entrenamiento.
+El objetivo de ambas estrategias es minimizar el impacto negativo de la cuantización en la precisión del modelo mediante el ajuste de los parámetros de cuantización y la adaptación del modelo a la representación cuantizada.
 
 \subsubsection{Estrategia PTQ}
+PTQ es la estrategia mayormente utilizada debida a su simplicidad y rapidez de implementación, ya que pueden determinarse los parámetros de cuantización a partir de una red ya entrenada, sin necesidad de reentrenamiento o ajuste fino \textit{fine-tuning} del modelo, y por ende no necesita un conjunto de datos de entrenamiento etiquetados para su aplicación \cite{gholami2021surveyquantizationmethodsefficient}.
 
-La cuantización post-entrenamiento es ampliamente utilizada, debido a que no requiere un proceso de re-entrenamiento, lo que la hace rápida y sencilla de implementar al no requerir un conjunto de datos etiquetados.
+Sin embargo, en modelos complejos o con cuantizaciones agresivas (por ejemplo, INT4), PTQ puede ocasionar pérdidas de precisión significativas debido a la incapacidad del modelo para adaptarse a la representación cuantizada \cite{dai2024trainablefixedpointquantizationdeep}.
 
-El proceso de PTQ generalmente implica los siguientes pasos:
+Para seleccionar los parámetros de cuantización adecuados, se analiza la distribución de los pesos y activaciones de la red de la red. En el caso de los pesos, esto se realiza directamente sobre los valores de los pesos entrenados. Para analizar las activaciones, se utiliza un conjunto de datos representativo de las entradas para realizar una inferencia y recopilar estadísticas sobre las activaciones.
+
+El proceso consiste en, a partir de una red entrenada, realizar los siguientes pasos:
 
 \begin{enumerate}
-    \item Entrenamiento en punto flotante: Se entrena la red neuronal utilizando precisión de punto flotante (FP32).
-    \item Calibración: Se utiliza un conjunto de datos representativo para analizar la distribución de los valores de los parámetros de la red neuronal.
-    \item Extracción de parámetros de cuantización: A partir de la calibración, se determinan los parámetros de cuantización, como los niveles y umbrales de cuantización.
-    \item Cuantización: Se aplica la función de cuantización a los parámetros de la red neuronal, utilizando los parámetros obtenidos en el paso anterior.
-    \item Evaluación: Se evalúa el modelo cuantizado en un conjunto de datos de prueba para medir el impacto de la cuantización en la precisión del modelo.
+    \item Calibración: uso de un conjunto de datos representativo para analizar la distribución de las activaciones de la red.
+    \item Extracción de parámetros de cuantización: determinación de parámetros tales como niveles y umbrales a partir de las distribuciones de pesos y activaciones.
+    \item Cuantización: aplicación de la función de cuantización a los parámetros de la red utilizando los parámetros obtenidos.
+    \item Evaluación: evaluación del modelo cuantizado en un conjunto de prueba para medir el impacto sobre la precisión.
 \end{enumerate}
 
-El proceso de calibración es crucial en PTQ, ya que los parámetros de cuantización dependen de la distribución de los datos. Una calibración no representativa puede llevar a una pérdida significativa de precisión, especialmente en modelos más complejos o cuando se utiliza una cuantización agresiva (por ejemplo, INT4). \TODO{Citar bibliografia}
+Se ilustra el proceso de PTQ en la \reffig{ptq_process}.
 
-\TODO{Mostrar plots como en tesis del colo de la distribucion de pesos}
+\defaultdiagram{cuantizacion/ptq_process}{Cuantización post-entrenamiento (PTQ)}{ptq_process}{0.8}
+
+La definición de los parámetros de cuantización es crítica, puesto que una calibración no representativa puede ocasionar pérdidas de precisión significativas.
+\TODO{Mostrar distribucion en una figura}
 
 \subsubsection{Estrategia QAT}
 \label{sec:qat}
+QAT consiste en entrenar un modelo considerando los efectos de la cuantización durante el proceso de entrenamiento \cite{jacob2017quantizationtrainingneuralnetworks}, al incorporarlos durante el entrenamiento, se permite que el modelo se adapte a la representación cuantizada, y generalmente produce modelos cuantizados de mayor precisión en comparación con PTQ, especialmente en cuantizaciones agresivas \cite{dai2024trainablefixedpointquantizationdeep}.
 
-La cuantización durante el entrenamiento es una técnica más avanzada que busca mitigar el impacto negativo de la cuantización en la precisión del modelo. Esta tecnica genera una mejor adaptación del modelo a la cuantización, resultando en una menor pérdida de precisión en comparación con PTQ, especialmente en casos de cuantización agresiva. Como contrapartida, el proceso de entrenamiento es más costoso, tanto en terminos de tiempo como de recursos, ya que se requiere un re-entrenamiento o ajuste fino (\textit{fine-tunning} en inglés).
+Como se explicó, en la sección \ref{sec:entrenamiento_redes_neuronales}, el proceso de entrenamiento de una red neuronal requiere de una alta precisión numérica, y suele realizarse en punto flotante, esta resolución numerica es particularmente crítica para el \textit{backward pass}, que depende de cálculos precisos para actualizar los pesos de manera efectiva y asegurar la convergencia del entrenamiento.
 
-La idea principal de QAT es simular el efecto de la cuantización durante el proceso de entrenamiento, permitiendo que los parámetros se ajusten teniendo el efecto de la cuantización. Esto se logra mediante una emulación de la cuantización (\textit{fake-quantization} en inglés) en la pasada hacia adelante (\textit{forward-pass}) del entrenamiento, mientras que en la pasada hacia atrás (\textit{backward-pass}) se utilizan los pesos originales en punto flotante para calcular los gradientes y actualizar los pesos. \TODO{Citar bibliografia}
+Las técnicas utilizadas para incluir los efectos de la cuantización durante el entrenamiento, se basan en emular los efectos de la cuantización durante la inferencia (o \textit{forward pass}), y luego realizar el \textit{backward pass} en representación de punto flotante.
 
-QAT modifica el proceso de entrenamiento tradicional (explicado en la seccion \ref{sec:entrenamiento_redes_neuronales}) para incluir la cuantización en la inferencia, permitiendo que el modelo aprenda a adaptarse a la representación cuantizada. En la \reffig{training} se muestra un diagrama del proceso de entrenamiento tradicional.
+Una técnica para emular estos efectos consiste en realizar una operación de cuantización sobre los tensores durante el \textit{forward pass}, y luego revertir esta cuantización \textit{dequantization} para el \textit{backward pass} \cite{dai2024trainablefixedpointquantizationdeep}. Este proceso se ilustra, para un tensor, en la \reffig{quant_dequant}.
+
+\defaultdiagram{cuantizacion/quant_dequant}{Cuantización y descuantización}{quant_dequant}{0.9}
+
+Otra técnica muy utilizada es \textit{fake-quantization} \cite{dai2024trainablefixedpointquantizationdeep}, que consiste en aplicar la función de cuantización durante el \textit{forward pass}, pero mantiene la representación numerica de los tensores en punto flotante. De esta manera, se utilizan valores numericos ajustados a los efectos de la cuantización, pero sin el costo computacional de realizar multiples operaciones de cuantización y descuantización. En este trabajo se utiliza la técnica de \textit{fake-quantization} para emular la cuantización durante el entrenamiento. Con esta técnica, no es necesaria la operación de descuantización, como se muestra en la \reffig{fake_quantization}, pues la representación numérica permanece en punto flotante.
+
+\defaultdiagram{cuantizacion/fake_quantization}{Emulación de la cuantización (\textit{fake-quantization})}{fake_quantization}{0.9}
+%  Sin embargo, incrementa el coste computacional y la duración del entrenamiento, ya que requiere de un reentrenamiento o ajuste fino (ajuste fino (fine-tuning)).
+% \defaultdiagram{cuantizacion/qat_process}{Cuantización durante el entrenamiento (QAT)}{qat_process}{0.8}
+
+QAT consiste en modificar el proceso de entrenamiento tradicional \cite{jacob2017quantizationtrainingneuralnetworks}, explicado en la sección \ref{sec:entrenamiento_redes_neuronales} y que se muestra en la \reffig{training}. QAT incorpora los efectos de la cuantización para forzar la adaptación del modelo a las limitaciones de la cuantización mediante el uso de \textit{fake-quantization} durante el \textit{forward pass}, para obtener una inferencia con los efectos de la cuantización, y luego, utilizarla para calcular la pérdida y retropropagar los gradientes, pero este proceso se mantiene en punto flotante para preservar la precisión del gradiente, como se muestra en la \reffig{qat}.
 
 \defaultdiagram{cuantizacion/training}{Entrenamiento simple}{training}{1}
-
-En la \reffig{qat} se ilustra el proceso de entrenamiento con cuantización durante el entrenamiento, donde se observa la inclusión de \textit{fake-quantization}, que consiste en aplicar una función de cuantización ($q$) a los pesos $w$ al realizar el forward-pass. Es importante resaltar que los pesos cuantizados $q(w)$ se calculan únicamente para la inferencia y que para el algoritmo de backpropagation se utilizan los pesos originales en punto flotante. Debido a que si se utilizaran los pesos cuantizados, se tiene menor precisión para calcular los gradientes y por lo tanto, es posible obtener resultados subóptimos o caer en problemas de convergencia. \TODO{Citar bibliografia}
-
 \defaultdiagram{cuantizacion/training_qat}{Entrenamiento con cuantización}{qat}{1}
 
-En la \reffig{qat_algorithm} es importante notar que el nuevo proceso añade la representación del gradiente de la función de cuantización ($\nabla_q$), pero las funciónes detalladas en la sección \ref{sec:funciónes_de_cuantizacion} no son diferenciables y son nulas en la mayoría de su dominio. Por lo tanto, no es posible calcular el gradiente de manera directa utilizando el algoritmo de backpropagation, pues la propagación del gradiente sería nula en la mayoría de los casos, impidiendo la actualización de los pesos y la convergencia del modelo.
+En la \reffig{qat_algorithm} aparece la representación del término $\nabla_q$, correspondiente al gradiente de la función de cuantización. Sin embargo, las funciones de cuantización suelen tener puntos no diferenciables y derivada nula en el resto de su dominio (véase la sección \ref{sec:funciones_de_cuantizacion}), por lo que no es posible calcular el gradiente de forma directa mediante retropropagación pues esto impediría la propagación del gradiente e inhibiría la actualización de los pesos.
 
-Para solucionar este problema, existen diversas técnicas, las cuales consisten en aproximar la función de cuantización $q$ con una función diferenciable $\hat{q}$. La función mas sencilla y utilizada es el \textit{Straight-Through Estimator} (STE) \TODO{Citar bibliografia}, que consiste en aproximar la función de cuantización con una línea recta en la región activa, de manera que su gradiente sea $1$ en esa región y 0 en el resto del dominio, de aquí el nombre de \textit{straight-through}, ya que en la pasada hacia atrás, el gradiente no sufre modificaciones debido a la cuantización, sino que se propaga directamente. Por ejemplo, en la \reffig{q_ste} se muestra la función de cuantización uniforme (en verde) y su aproximación mediante STE (en rojo).
+Como solución, se aproximan las funciones de cuantización $q$ por funciones diferenciables $\hat{q}$. La aproximación más simple y extendida es el \textit{Straight-Through Estimator} (STE) [CITA REQUERIDA], que reemplaza la derivada nula por una aproximación no nula en la región activa. Con esta aproximación, el gradiente se propaga a través de la cuantización como si fuera la identidad en la región activa. En la \reffig{q_ste} se muestra la función de cuantización uniforme (en verde) y su aproximación mediante STE (en rojo).
 
 \defaultdiagram{cuantizacion/uniform_quantizer_with_ste}{Función de cuantización uniforme y su aproximación mediante STE}{q_ste}{1}
 
@@ -113,6 +124,10 @@ En este caso, se tiene la derivada de la función aproximada, como se muestra en
     \end{cases}
 \end{equation}
 
-En la \reffig{qat_algorithm} se muestra un diagrama detallado de un ejemplo del proceso de entrenamiento con cuantización consciente durante el entrenamiento.
+En la \reffig{qat_algorithm} se muestra un diagrama detallado de un ejemplo del proceso de entrenamiento con QAT.
 
 \defaultdiagram{cuantizacion/training_qat_example}{Ejemplo de entrenamiento con QAT}{qat_algorithm}{1}
+
+El proceso de entrenamiento con QAT consiste en realizar el re-entrenamiento del modelo, mediante el entrenamiento con efectos de cuantización, este proceso de ilustra en la \reffig{qat_process}.
+
+\defaultdiagram{cuantizacion/qat_process}{Proceso de cuantización durante el entrenamiento (QAT)}{qat_process}{0.8}

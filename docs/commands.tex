@@ -7,6 +7,16 @@
     \end{figure}
 }
 
+\newcommand{\defaultfigurecustomsize}[4]
+{
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=#4\textwidth]{#1}
+        \caption{#2}
+        \label{fig:#3}
+    \end{figure}
+}
+
 \newcommand{\defaultdiagram}[4]{
     % #1: diagram file name (without path)
     % #2: caption
@@ -54,3 +64,55 @@
 \newcommand{\refeq}[1]{ecuación \ref{eq:#1}}
 \newcommand{\reffig}[1]{figura \ref{fig:#1}}
 \newcommand{\TODO}[1]{\colorbox{red!30}{TODO: #1}}
+
+
+% --- Define Colors (to match your example) ---
+\colorlet{myblue}{blue!20}    % For Conv
+\colorlet{myred}{red!20}      % For Pool
+\colorlet{mydense}{blue!20}   % For Dense (you used blue)
+\colorlet{myorange}{orange!20}  % For Softmax
+\colorlet{mypurple}{purple!20}  % For Flatten
+\colorlet{mygray}{gray!20}    % For Input
+
+% --- Macro for 3D-like Conv/Pool Box ---
+% #1: name, #2: position, #3: width, #4: height, #5: depth, #6: color, #7: label
+\newcommand{\drawcuboid}[7]{
+    \coordinate (p1) at #2;
+    \coordinate (p2) at ($#2 + (#3,0,0)$);
+    \coordinate (p3) at ($#2 + (#3,#4,0)$);
+    \coordinate (p4) at ($#2 + (0,#4,0)$);
+    \coordinate (p5) at ($#2 + (0,0,#5)$);
+    \coordinate (p6) at ($#2 + (#3,0,#5)$);
+    \coordinate (p7) at ($#2 + (#3,#4,#5)$);
+    \coordinate (p8) at ($#2 + (0,#4,#5)$);
+
+    % Draw faces
+    \draw[fill=#6, opacity=0.3, line width=0.5pt] (p1) -- (p2) -- (p6) -- (p5) -- cycle; % Bottom
+    \draw[fill=#6, opacity=0.3, line width=0.5pt] (p1) -- (p4) -- (p8) -- (p5) -- cycle; % Left
+    \draw[fill=#6, opacity=0.7, line width=1pt] (p2) -- (p3) -- (p7) -- (p6) -- cycle; % Right
+    \draw[fill=#6, opacity=0.8, line width=1pt] (p4) -- (p3) -- (p7) -- (p8) -- cycle; % Top
+    \draw[fill=#6, opacity=0.6, line width=1pt] (p1) -- (p2) -- (p3) -- (p4) -- cycle; % Front
+
+    % Connection anchor
+    \coordinate (#1) at ($#2 + (0.5*#3, 0.5*#4, 0.5*#5)$);
+
+    % Label (with dimensions)
+    \node[
+        font=\sffamily\bfseries\scriptsize,
+        above, yshift=4mm,
+        align=center
+    ] at ($#2 + (0.5*#3, #4, 0.5*#5)$) {#7};
+}
+
+% --- Macro for Flat Dense/Output Layer ---
+% #1: name, #2: position, #3: height, #4: color, #5: label, #6: style
+\newcommand{\drawflatlayer}[6]{
+    \coordinate (orig) at #2;
+    \draw[line width=1pt, fill=#4, opacity=0.8, #6] (orig) rectangle ++(0.1, #3, 0);
+    \coordinate (#1) at ($(orig) + (0.05, 0.5*#3, 0)$);
+    \node[
+        font=\sffamily\bfseries\scriptsize,
+        above, yshift=4mm,
+        align=center
+    ] at ($(#1) + (0, 0.5*#3, 0)$) {#5};
+}

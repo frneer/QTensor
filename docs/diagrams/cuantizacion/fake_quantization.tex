@@ -1,0 +1,16 @@
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em, minimum width=6em},
+    arrow/.style={-latex, thick},
+    operation_block/.style={circle, draw, fill=white, minimum size=4em, text centered, font=\small},
+]
+    \tikzset{node distance = 1cm and 1cm}
+
+    % Node definitions
+    \node (input) [block] {$x$\\ FP32};
+    \node (quant) [operation_block, right=of input] {$q()$};
+    \node (quant_input) [block, right=of quant] {$q(x)$\\ FP32};
+
+    % Arrows
+    \draw [arrow] (input) -- (quant);
+    \draw [arrow] (quant) -- (quant_input);
+\end{tikzpicture}

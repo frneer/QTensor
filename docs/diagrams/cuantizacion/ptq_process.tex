@@ -1,0 +1,32 @@
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=12em, text centered, rounded corners, minimum height=3em, minimum width=12em, font=\small},
+    small_block/.style={rectangle, draw, fill=white, text width=6em, text centered, rounded corners, minimum height=2em, minimum width=6em, font=\small},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 0.2cm and 0.5cm}
+    % Node definitions
+    \node (model) [block] {Modelo pre-entrenado (FP32)};
+
+    % This central node represents the calibration step
+    \node (inference) [block, below=of model] {Inferencia};
+    \node (data) [small_block, left=of inference] {Datos de calibración};
+
+    \node (analyze) [block, below=of inference] {Análisis de rangos};
+    % The rest of the vertical flow
+    \node (define) [block, below=of analyze] {Definición de parámetros de cuantización};
+
+    \node (apply) [block, below=of define] {Cuantización};
+
+    \node (quant_model) [block, below=of apply] {Modelo cuantizado (INT8)};
+
+    \node (eval) [block, below=of quant_model] {Evaluación};
+    \node (eval_data) [small_block, left=of eval] {Datos de evaluación};
+
+    % Arrow drawing
+    % Both model and data feed into the analysis step
+    % \draw [arrow] (model.south) -- (analyze.west);
+    \draw [arrow] (data) -- (inference);
+    \draw [arrow] (eval_data) -- (eval);
+
+\end{tikzpicture}

@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=12em, text centered, rounded corners, minimum height=3em, minimum width=12em, font=\small},
+    small_block/.style={rectangle, draw, fill=white, text width=6em, text centered, rounded corners, minimum height=2em, minimum width=6em, font=\small},
+    arrow/.style={-latex, thick}
+]
+
+    \tikzset{node distance = 0.2cm and 0.5cm}
+    % Node definitions
+    \node (model) [block] {Modelo pre-entrenado (FP32)};
+
+    \node (fine-tunning) [block, below=of model] {Re-entrenamiento};
+    \node (train_data) [small_block, left=of fine-tunning] {Datos de entrenamiento};
+    % The rest of the vertical flow
+
+    \node (quant_model) [block, below=of fine-tunning] {Modelo cuantizado (INT8)};
+
+    \node (eval) [block, below=of quant_model] {Evaluación};
+    \node (eval_data) [small_block, left=of eval] {Datos de evaluación};
+
+    % Arrow drawing
+    % Both model and data feed into the analysis step
+    % \draw [arrow] (model.south) -- (analyze.west);
+    \draw [arrow] (train_data) -- (fine-tunning);
+    \draw [arrow] (eval_data) -- (eval);
+
+\end{tikzpicture}
