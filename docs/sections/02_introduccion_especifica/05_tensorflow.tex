@@ -2,7 +2,7 @@
 
 \section{Frameworks de Aprendizaje Profundo}
 
-La implementación de modelos de redes neuronales complejos y los algoritmos de entrenamiento asociados, como \texit{backpropagation}, requiere un gran volumen de operaciones matemáticas, principalmente sobre tensores. Para facilitar este proceso, la comunidad académica y la industria han desarrollado bibliotecas de software especializadas conocidas como \textit{frameworks} de aprendizaje profundo. En este trabajo se emplearon dos herramientas centrales del ecosistema de Google: \texttt{TensorFlow} \cite{tensorflow} y \texttt{TensorFlow Model Optimization} \cite{tensorflow-model-optimization}.
+La implementación de modelos de redes neuronales complejos y los algoritmos de entrenamiento asociados, como \textit{backpropagation}, requiere un gran volumen de operaciones matemáticas, principalmente sobre tensores. Para facilitar este proceso, la comunidad académica y la industria han desarrollado bibliotecas de software especializadas conocidas como \textit{frameworks} de aprendizaje profundo. En este trabajo se emplearon dos herramientas centrales del ecosistema de Google: \texttt{TensorFlow} \cite{tensorflow} y \texttt{TensorFlow Model Optimization} \cite{tensorflow-model-optimization}.
 
 \subsection{TensorFlow}
 
@@ -96,9 +96,9 @@ Una funcionalidad relevante para esta tesis es la posibilidad de intervenir en l
 
 En Python, un \texttt{decorador} es una función o clase que envuelve otra función o clase (\textit{wrapper}) para modificar su comportamiento. En el caso de la definición de gradientes personalizados, la implementación utiliza el decorador \texttt{@tf.custom\_gradient} aplicado sobre una función que define una operación matemática en el grafo computacional.
 
-Por ejemplo, en la multiplicación de dos tensores \texttt{a} y \texttt{b} del fragmento de código \ref{code:custom_gradient}, la función \texttt{mul} define la operación de multiplicación y \texttt{TensorFlow} calcula automáticamente los gradientes correspondientes. En este caso, los gradientes son $\frac{\partial y}{\partial a} = b$ y $\frac{\partial y}{\partial b} = a$.
+Por ejemplo, en la multiplicación de dos tensores \texttt{a} y \texttt{b} del fragmento de código \ref{code:custom_gradient}, la función \texttt{mul} define la operación de multiplicación y \texttt{TensorFlow} calcula automáticamente los gradientes correspondientes. En este caso, el gradiente calculado es $\nabla=\begin{bmatrix}\frac{\partial y}{\partial a} \\ \frac{\partial y}{\partial b} \end{bmatrix} = \begin{bmatrix} b \\ a \end{bmatrix}$.
 
-\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+\begin{lstlisting}[language=Python,label=code:mul,caption=Definición de la operación mul (gradiente automático) en TensorFlow.]
 # Operacion
 def mul(a, b):
     return a * b
@@ -118,9 +118,9 @@ db_auto = tape1.gradient(y_auto, b)  # = 3.0 (dy/db = a)
 
 Como se observa, la función \texttt{mul} dispone de su gradiente definido por \texttt{TensorFlow}. No obstante, puede resultar necesario definir un gradiente distinto al calculado automáticamente.
 
-A continuación se muestra la modificación de la función \texttt{mul} para definir una operación con gradiente personalizado, como aparece en el fragmento de código \ref{code:custom_gradient}. En este caso, la función \texttt{custom_mul} define la operación de multiplicación y su gradiente personalizado; los gradientes resultan $\frac{\partial y}{\partial a} = 2b$ y $\frac{\partial y}{\partial b} = 2a$.
+A continuación se muestra la modificación de la función \texttt{mul} para definir una operación con gradiente personalizado, como aparece en el fragmento de código \ref{code:customgradient}. En este caso, la función \texttt{custom\_mul} define la operación de multiplicación y su gradiente personalizado como se muestra en la ecuación \ref{eq:custom_gradient}, donde los gradientes personalizados son $\nabla = \begin{bmatrix} \frac{\partial y}{\partial a} \\ \frac{\partial y}{\partial b} \end{bmatrix} = \begin{bmatrix} 2b \\ 2a \end{bmatrix}$.
 
-\begin{lstlisting}[language=Python,label=code:custom_gradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
+\begin{lstlisting}[language=Python,label=code:customgradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
 # Operacion con gradiente personalizado
 @tf.custom_gradient
 def custom_mul(a, b):

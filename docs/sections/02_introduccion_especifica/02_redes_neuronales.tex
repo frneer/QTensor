@@ -100,11 +100,11 @@ Un resumen del ciclo de entrenamiento se presenta en el algoritmo \ref{alg:train
 
 Es posible modelar los sistemas descritos en las secciones \ref{sec:regresion_lineal} y \ref{sec:regresion_logistica} con una red neuronal y determinar sus parámetros mediante el algoritmo de entrenamiento descrito en esta sección.
 
-Para ilustrar esta capacidad, la \reffig{regression_vs_mlp} muestra una comparativa entre el modelo de regresión lineal y un perceptrón multicapa (MLP, por sus siglas en inglés \textit{Multilayer Perceptron}) con una capa oculta, ambos entrenados con el mismo conjunto de datos.
+Para ilustrar esta capacidad, la \reffig{regression_vs_mlp} muestra una comparativa entre el modelo de regresión lineal y un perceptrón multicapa (MLP, por sus siglas en inglés \textit{Multilayer Perceptron}) con una capa oculta de 100 neuronas, y una capa de salida con una sola neurona, ambos entrenados con el mismo conjunto de datos de 200 muestras.
 
 \defaultfigurecustomsize{regression/comparativa_regresion_vs_mlp_con_mse.png}{Comparativa entre la regresión lineal y un MLP con una capa oculta.}{regression_vs_mlp}{1.1}
 
-La tabla \ref{tab:regression_vs_mlp} presenta una comparativa entre ambos modelos en términos de cantidad de parámetros y valor de la función de costo (MSE) alcanzado tras el entrenamiento. Como se observa, el modelo de regresión lineal alcanzó un mejor valor de la función de costo con una cantidad significativamente menor de parámetros.
+La tabla \ref{tab:regression_vs_mlp} presenta una comparativa entre ambos modelos en términos de cantidad de parámetros y valor de la función de costo (MSE) alcanzado tras el entrenamiento. Como se observa, el modelo de MLP logra un desempeño superior al de la regresión lineal, aunque requiere una cantidad significativamente mayor de parámetros para ello. Al tener datos no lineales, el MLP captura mejor la relación subyacente en los datos, al costo de una mayor complejidad del modelo.
 
 \begin{table}[H]
     \centering
@@ -113,31 +113,31 @@ La tabla \ref{tab:regression_vs_mlp} presenta una comparativa entre ambos modelo
         \toprule
         & \textbf{Cantidad de parámetros} & \textbf{MSE} \\
         \midrule
-        \textbf{Regresión lineal} & $2$ & $0.8066$ \\
-        \textbf{MLP} & $301$ & $0.8328$ \\
+        \textbf{Regresión lineal} & $2$ & $0.86$ \\
+        \textbf{MLP} & $101$ & $0.48$ \\
         \bottomrule
     \end{tabular}
     \label{tab:regression_vs_mlp}
 \end{table}
 
-De manera análoga, la \reffig{logistic_vs_mlp} presenta la comparación entre el modelo de regresión logística y un MLP con una capa oculta, ambos entrenados con el mismo conjunto de datos.
+% De manera análoga, la \reffig{logistic_vs_mlp} presenta la comparación entre el modelo de regresión logística y un MLP con una capa oculta, ambos entrenados con el mismo conjunto de datos.
 
-\doublefigure{regression/plot_logistica.png}{Regresión logística}{regression/plot_mlp.png}{MLP con una capa oculta}{Comparativa entre la regresión logística y un MLP con una capa oculta.}{logistic_vs_mlp}
+% \doublefigure{regression/plot_logistica.png}{Regresión logística}{regression/plot_mlp.png}{MLP con una capa oculta}{Comparativa entre la regresión logística y un MLP con una capa oculta.}{logistic_vs_mlp}
 
-Similarmente, la tabla \ref{tab:logistic_vs_mlp} resume la comparación entre ambos modelos en términos de cantidad de parámetros y valor de la función de costo (log-loss). Para conseguir un desempeño similar, el MLP requirió una cantidad significativamente mayor de parámetros en comparación con la regresión logística.
+% Similarmente, la tabla \ref{tab:logistic_vs_mlp} resume la comparación entre ambos modelos en términos de cantidad de parámetros y valor de la función de costo (log-loss). Para conseguir un desempeño similar, el MLP requirió una cantidad significativamente mayor de parámetros en comparación con la regresión logística.
 
-\begin{table}[H]
-    \centering
-    \caption{Comparativa entre la regresión logística y un MLP con una capa oculta.}
-    \begin{tabular}{c c c}
-        \toprule
-        & \textbf{Cantidad de parámetros} & \textbf{log-loss} \\
-        \midrule
-        	\textbf{Regresión logística} & $2$ & $0.0572$ \\
-        	\textbf{MLP} & $121$ & $0.0594$ \\
-        \bottomrule
-    \end{tabular}
-    \label{tab:logistic_vs_mlp}
-\end{table}
+% \begin{table}[H]
+%     \centering
+%     \caption{Comparativa entre la regresión logística y un MLP con una capa oculta.}
+%     \begin{tabular}{c c c}
+%         \toprule
+%         & \textbf{Cantidad de parámetros} & \textbf{log-loss} \\
+%         \midrule
+%         	\textbf{Regresión logística} & $2$ & $0.0572$ \\
+%         	\textbf{MLP} & $121$ & $0.0594$ \\
+%         \bottomrule
+%     \end{tabular}
+%     \label{tab:logistic_vs_mlp}
+% \end{table}
 
 Aun cuando se ha demostrado que las redes neuronales son modelos muy potentes, su complejidad puede constituir una desventaja. Una limitación importante consiste en la necesidad de grandes volúmenes de datos de entrenamiento para ajustar los pesos \cite{Goodfellow2016}. Por otra parte, al aumentar la complejidad del sistema a modelar, suele requerirse una arquitectura más compleja con más capas y neuronas. Esto incrementa tanto la cantidad de parámetros a ajustar como el costo computacional de las operaciones.
