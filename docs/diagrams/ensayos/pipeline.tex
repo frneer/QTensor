@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+    % Ensure multi-line text is centered: use align=center and match text width with min width.
+    block/.style={rectangle, draw, fill=white, align=center, text width=10em, rounded corners, minimum height=2em, minimum width=10em},
+    arrow/.style={-latex, thick},
+]
+
+    \tikzset{node distance = 1cm and 1cm}
+
+    \node[block] (create_model) at (0,0) {Crear modelo};
+    % Single parameter block per main node (stacked lines inside the block)
+    \node[block, left=of create_model] (create_model_params) {tamaño de entrada\\ número de clases};
+
+    \node[block, below=of create_model] (training) {Entrenamiento};
+    \node[block, left=of training] (training_params) {épocas\\ $\eta$\\ tamaño de lote\\ \textit{dataset}};
+
+    \node[block, below=of training] (quantization) {Cuantización};
+    \node[block, left=of quantization] (quantization_params) {\texttt{qconfig}};
+
+    \node[block, below=of quantization] (qat) {QAT};
+    \node[block, left=of qat] (qat_params) {épocas\\ $\eta$\\ tamaño de lote\\ \textit{dataset}};
+
+    \node[block, below=of qat] (evaluation) {Evaluación};
+    \node[block, left=of evaluation] (evaluation_params) {\textit{dataset}};
+
+    % Connect each parameters block to its corresponding main block
+    \draw [arrow] (create_model_params) -- (create_model);
+    \draw [arrow] (training_params) -- (training);
+    \draw [arrow] (quantization_params) -- (quantization);
+    \draw [arrow] (qat_params) -- (qat);
+    \draw [arrow] (evaluation_params) -- (evaluation);
+
+    % Vertical flow between main process blocks
+    \draw [arrow] (create_model) -- (training);
+    \draw [arrow] (training) -- (quantization);
+    \draw [arrow] (quantization) -- (qat);
+    \draw [arrow] (qat) -- (evaluation);
+
+\end{tikzpicture}

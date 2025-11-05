@@ -7,7 +7,7 @@ En este capítulo se presenta el contexto, la motivación y los objetivos del pr
 La inteligencia artificial (IA) es un campo de estudio que
 busca el desarrollo de sistemas capaces de realizar tareas que normalmente requieren
 inteligencia humana, como la toma de decisiones, el reconocimiento de audio e imágenes,
-y el procesamiento del lenguaje natural.
+y el procesamiento del lenguaje natural \cite{russell2021ai}.
 
 La IA tiene aplicaciones en una amplia variedad de áreas, incluyendo la medicina,
 la automoción, la robótica, la educación y el entretenimiento.
@@ -22,7 +22,7 @@ a partir de los datos y mejorar su rendimiento en tareas específicas sin haber 
 
 En este contexto surgen las redes neuronales artificiales, modelos
 inspirados en el funcionamiento del cerebro humano \cite{Principe1997}. Estos modelos se entrenan mediante algoritmos iterativos
-de optimización, utilizando el algoritmo de retropropagación (más conocido por su nombre en inglés, \textit{backpropagation}) \cite{backpropagation}.
+de optimización, mediante el uso del algoritmo de retropropagación (\textit{backpropagation}, en inglés) \cite{backpropagation}.
 
 El entrenamiento se realiza con un conjunto de datos, en un proceso que requiere
 alta precisión numérica y que, generalmente, utiliza representación en punto flotante \cite{Goodfellow2016}.
@@ -38,47 +38,58 @@ La compresión de redes neuronales es un campo de estudio que ha tomado relevanc
 Frente a arquitecturas cada vez más complejas, con un número creciente de parámetros, surge la necesidad de reducir el tamaño de los modelos para facilitar su implementación.
 Esta necesidad es particularmente crítica en dispositivos con recursos limitados, como teléfonos móviles
 y sistemas embebidos que utilizan cómputo de punto fijo \cite{Gupta2015}. Además, es relevante en la búsqueda de soluciones computacionales más eficientes en general.
-Por ejemplo, en el caso de los LLMs, que requieren grandes cantidades de memoria y operaciones de punto flotante (en adelante, FLOPs, por sus siglas en inglés \texttt{Floating-point Operations}) para realizar inferencias, la compresión resulta esencial para su uso práctico, permitiendo una interacción más ágil con el usuario.
+Por ejemplo, en el caso de los LLMs, que requieren grandes cantidades de memoria y operaciones de punto flotante (FLOPs, por sus siglas del inglés \texttt{Floating-point Operations}) para realizar inferencias, la compresión resulta esencial para su uso práctico.
 
 Durante el entrenamiento, la precisión utilizada suele ser de punto flotante y se lleva a cabo
-en GPUs (\textit{Graphics Processing Units}) o TPUs (\textit{Tensor Processing Units}), que implican un alto costo económico y energético \cite{Strubell2019}. En algunos casos, para la inferencia, especialmente en dispositivos con recursos limitados se prefiere utilizar formatos de menor precisión, como punto fijo o enteros, para reducir el consumo de memoria y energía \cite{Jacob2018}.
+en GPUs (\textit{Graphics Processing Units}) o TPUs (\textit{Tensor Processing Units}), que implican un alto costo económico y energético \cite{Strubell2019}. En algunos casos, para la inferencia, no solo en hardware, sino también en \textit{clusters} o entornos distribuidos se prefiere utilizar formatos de menor precisión, como punto fijo o enteros, para reducir el consumo de memoria y energía \cite{Jacob2018}.
 
-La compresión de redes neuronales permite adaptar los modelos para que funcionen eficientemente en estos entornos. Su objetivo principal es reducir la cantidad de memoria requerida para almacenar el modelo, el ancho de banda requerido para la transmisión de los datos y en la cantidad de FLOP necesarias para realizar una inferencia, sin sacrificar de manera significativa
-el desempeño.
+La compresión de redes neuronales permite adaptar los modelos para que funcionen eficientemente en estos entornos. Su objetivo principal es disminuir los requerimientos de memoria para almacenar el modelo, junto con el ancho de banda y el número de FLOPs necesarias durante la inferencia, sin sacrificar de manera significativa el desempeño \cite{8253600}.
 
 Existen diversas técnicas de compresión relevantes para comprimir redes neuronales, como la poda y la cuantización.
 Estas técnicas serán detalladas en la sección \ref{sec:compresion_de_redes}. El foco de este trabajo se centra en una de ellas:
 la cuantización, que consiste en reducir la resolución numérica con la que se representan los parámetros de la red.
 
-\section{Estado del arte}
-\label{sec:estado_arte}
-
-La cuantización provee mejoras significativas en potencia, memoria y velocidad de cómputo. Sin embargo, también deteriora el desempeño de la red y, por ende, es crucial definir cuidadosamente cómo realizar la cuantización. Diversos trabajos han evidenciado que esta pérdida en la precisión de la red, debida a la cuantización, se puede acotar si se seleccionan adecuadamente los esquemas, funciones y parámetros de cuantización \cite{Jin2019Rethinking} \cite{chen2019layerwise}.
-
-
-Para comprender este proceso en mayor detalle, la cuantización de una red neuronal se define por su esquema de cuantización. Dicho esquema define el tipo de cuantizador (es decir, su función) que se aplicará a cada tensor de la red (como pesos, sesgos y activaciones) en cada una de sus capas. Un cuantizador, a su vez, queda definido por una función de cuantización $q(x; \theta)$ y sus parámetros $\theta$ (por ejemplo, el rango, resolución, etc).
+La cuantización de una red neuronal se define por su esquema de cuantización. Dicho esquema define el tipo de cuantizador que se aplicará a cada tensor de la red (como pesos, sesgos y activaciones) en cada una de sus capas. Un cuantizador, a su vez, queda definido por una función de cuantización $q(x; \theta)$ y sus parámetros $\theta$ (por ejemplo, el rango, resolución, etc) \cite{8253600}.
 
 Existen diferentes funciones de cuantización, entre las que se encuentran la cuantización uniforme y no uniforme. Una función de cuantización mapea un rango continuo de valores a un conjunto discreto de niveles, donde a cada intervalo en el dominio de los valores originales se le asigna un valor discreto en el rango cuantizado.
 
-La cuantización uniforme es la más común y utiliza intervalos del mismo tamaño y niveles equidistantes, esta cuantización es completamente compatible con aritmética de punto fijo. Por otro lado, la cuantización no uniforme permite una mayor flexibilidad, ya que utiliza intervalos de tamaño variable. De esta manera, se pueden elegir rangos con mayor resolución en las zonas donde los datos son más densos y rangos con menor resolución donde los datos son más dispersos. Esto resulta beneficioso para ciertas distribuciones de datos, pues permite una representación más eficiente y precisa de los valores. Como resultado, se puede lograr una mayor tasa de compresión, sin comprometer la calidad. Sin embargo, la cuantización no uniforme es más compleja de implementar y puede no ser compatible con hardware que utiliza aritmética de punto fijo \cite{Banner2018}.
+\section{Estado del arte}
+\label{sec:estado_arte}
+La cuantización provee mejoras significativas en potencia, memoria y velocidad de cómputo. Sin embargo, también deteriora el desempeño de la red y, por ende, es crucial definir cuidadosamente cómo realizar la cuantización. Diversos trabajos han evidenciado que esta pérdida en la precisión de la red, debida a la cuantización, se puede acotar si se seleccionan adecuadamente los esquemas, funciones y parámetros de cuantización \cite{Jin2019Rethinking} \cite{chen2019layerwise}.
 
-Actualmente, el esquema más común es aquel en el cual se define un cuantizador para todo el modelo de forma homogénea (global), con funciones de cuantización uniforme y parámetros fijos predefinidos \cite{Krishnamoorthi2018}.
+A pesar de que los formatos en punto flotante restringen los valores numéricos a un rango fijo y por ende reducen el espacio necesario en memoria, no se los considera formatos cuantizados en la literatura. Los principales son FP32, FP16, FP8, TF32 y bfloat16. Entre ellos, FP8, por su baja precisión y rango limitado, a veces se clasifica como una cuantización no uniforme \cite{NVIDIA2022}. En general, los formatos en punto flotante se emplean tanto en entrenamiento como en inferencia, mientras que los formatos en punto fijo se utilizan principalmente en inferencia \cite{NVIDIA2022}.
 
-Independientemente del esquema elegido, en la cuantización de redes neuronales existen dos estrategias principales para su aplicación: la cuantización post-entrenamiento (de ahora en adelante PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (de ahora en adelante QAT, de sus siglas en inglés \textit{Quantization Aware Training}).
+Por otro lado, la cuantización no uniforme ofrece mayor flexibilidad, ya que utiliza intervalos de tamaño variable. Esto permite asignar mayor resolución en las zonas donde los datos son más densos y menor resolución en las zonas más dispersas. De esta forma, se logra una representación más precisa y eficiente de los valores, lo que alcanza mayores tasas de compresión sin degradar significativamente la calidad del modelo \cite{Banner2018}. No obstante, este tipo de cuantización es más compleja de implementar y puede no ser compatible con hardware que utiliza aritmética de punto fijo \cite{Banner2018}.
+
+En contraste, la cuantización uniforme es la más común y se basa en intervalos de igual tamaño y niveles equidistantes. Este enfoque es totalmente compatible con la aritmética de punto fijo, lo que permite su implementación mediante representaciones de números enteros como INT32, INT16, INT8 o INT4. Gracias a ello, se logra una mayor eficiencia energética y una reducción en el tamaño del hardware, motivo por el cual los formatos enteros son los preferidos para la inferencia optimizada \cite{Jacob2018}.
+
+En \cite{Krishnamoorthi2018} se presentó un esquema de precisión uniforme, el cual hace referencia al uso de la misma aritmética y formato de cuantización para toda la red neuronal. En este enfoque, se aplican funciones de cuantización uniforme con parámetros fijos y homogéneos en todas las capas del modelo.
+
+Sin embargo, el enfoque más utilizado actualmente es el de precisión mixta, en el cual se asigna diferente precisión a distintas partes de la red, de acuerdo con su sensibilidad numérica y su impacto en el rendimiento general. Este esquema permite optimizar el compromiso entre precisión, tamaño del modelo y consumo energético, siempre que la plataforma de hardware lo permita \cite{Micikevicius2018}.
+
+Por ejemplo, en microprocesadores la elección está limitada a formatos estándar como INT32, INT16, INT8 o INT4, mientras que en FPGA y ASIC es posible definir cualquier número de bits para la representación. En estos casos, la posibilidad de ajustar la precisión de manera más fina permite lograr un mejor balance entre compresión y pérdida de precisión, lo que adapta el diseño al requerimiento específico de cada aplicación \cite{Han2016}.
+
+En \cite{electronics13101923} se presentó la cuantización flexible, un enfoque que combina las funciones de cuantización uniforme y no uniforme. Esta técnica permite alcanzar niveles de compresión similares a los de la cuantización no uniforme, pero mantiene las ventajas de la cuantización uniforme, entre ellas su compatibilidad con hardware basado en aritmética de punto fijo.
+
+Además, el esquema propuesto en \cite{electronics13101923} es compatible con el concepto de precisión mixta, ya que permite asignar diferentes configuraciones de cuantización a distintas capas de la red, lo que logra una mejor adaptación a las características de los datos y de la arquitectura del modelo.
+
+Independientemente del esquema elegido, en la cuantización de redes neuronales existen dos estrategias principales para su aplicación: la cuantización post-entrenamiento (PTQ, por sus siglas del inglés \textit{Post-Training Quantization}) y la cuantización durante el entrenamiento (QAT, por sus siglas en inglés \textit{Quantization Aware Training}).
 
 PTQ consiste en entrenar una red neuronal en punto flotante y, una vez entrenada, cuantizarla. Para ello, se definen los parámetros de los cuantizadores a partir de las distribuciones de los tensores. Esta técnica es sencilla de implementar, pero puede llevar a una pérdida significativa de exactitud \cite{Nagel2020}.
 
 QAT consiste en entrenar la red neuronal con una emulación de la cuantización en la inferencia, lo cual permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. QAT puede, además, incluir el entrenamiento de los propios parámetros de cuantización, como el rango y la resolución. Esto permite una optimización más profunda, ya que el entrenamiento de los pesos del modelo se ve influenciado directamente por el efecto de la cuantización final. Esta técnica es más compleja de implementar, pero suele llevar a una mejor preservación de la exactitud del modelo \cite{Jacob2018}.
 
-En este trabajo se implementó un cuantizador flexible \cite{electronics13101923}, el cual combina las funciones de cuantización uniforme y no uniforme. Esto permite obtener el nivel de compresión de la cuantización no uniforme, pero con las ventajas de la cuantización uniforme, como su compatibilidad con dispositivos que utilizan punto fijo. Además, la implementación realizada en este trabajo permite definir diferentes esquemas de cuantización para distintas capas, lo que brindó mayor flexibilidad y adaptabilidad a las características de los datos y la arquitectura del modelo.
+Los aportes de este trabajo incluyen la implementación de una librería en Python que permite realizar entrenamiento consciente de cuantización (QAT). La misma es compatible con el framework \texttt{TensorFlow} \cite{tensorflow} y posibilita el uso de cuantizadores uniformes con un número arbitrario de bits, y con parámetros entrenables, funcionalidades que no se encuentra implementada de forma nativa en dicho entorno. Asimismo, incorpora la posibilidad de emplear cuantizadores flexibles, basados en \cite{electronics13101923} con parámetros entrenables.
 
-Finalmente, estos cuantizadores se diseñaron con parámetros adaptables. Es decir, los parámetros de cuantización se entrenaron durante el proceso de QAT, lo que permitió que el modelo se adaptara a la cuantización de manera óptima durante el entrenamiento.
+Esta herramienta permite explorar arquitecturas en punto fijo con aritmética arbitraria, ya sea uniforme, flexible o una combinación de ambas, lo que ofrece un mayor grado de adaptabilidad a las características del modelo y del hardware de destino.
+
+Finalmente, otro aporte relevante es que los parámetros del cuantizador también son entrenables durante el proceso de QAT, lo que permite que la red se adapte dinámicamente al esquema de cuantización y optimice su desempeño durante el entrenamiento.
 
 % https://www.ibm.com/think/topics/quantization-aware-training#f01
 \section{Objetivos}
 \label{sec:objetivos}
 
-El objetivo principal de esta tesis es el diseño, implementación y evaluación de una biblioteca de software, \texttt{QTensor}, construida sobre \texttt{TensorFlow} \cite{tensorflow} y \texttt{Keras} \cite{keras}, que simplifique la investigación y aplicación de técnicas de QAT con cuantizadores de parámetros adaptables.
+El objetivo principal de esta tesis es el diseño, implementación y evaluación de una biblioteca de software, \texttt{QTensor}, construida sobre \texttt{TensorFlow} y \texttt{Keras} \cite{keras}, que simplifique la investigación y aplicación de técnicas de QAT con cuantizadores de parámetros adaptables.
 Para alcanzar este fin, se plantean los siguientes objetivos específicos:
 
 \begin{itemize}

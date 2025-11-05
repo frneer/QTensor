@@ -13,25 +13,29 @@ Los requerimientos funciónales de la biblioteca se definieron en base a los obj
 \subsection{Atributos de calidad}
 \label{sec:atributos_calidad}
 
-Los atributos de calidad definidos en la ISO 25010 \TODO{Cita} definen un modelo de calidad de software, donde se formaliza la definición de requisitos no funcionales. La importancia de los requerimientos no funcionales es que sin ellos, se puede llegar a una solución que cumple con los requisitos técnicos, pero que no satisface las necesidades del usuario. Este modelo se compone de dos partes, características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas de estas propiedades. Las mismas se muestran en la \reffig{iso_25010}.
+Los atributos de calidad definidos en la ISO 25010 \cite{ISO25010} definen un modelo de calidad de software, donde se formaliza la definición de requisitos no funcionales. La importancia de los requerimientos no funcionales es que sin ellos, se puede llegar a una solución que cumple con los requisitos técnicos, pero que no satisface las necesidades del usuario. Este modelo se compone de dos partes, características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas de estas propiedades. Las mismas se muestran en la \reffig{iso_25010}.
 
-\defaultfigure{implementacion/iso_25010.png}{Modelo de calidad de software ISO 25010.}{iso_25010}
+% Use \protect\footnotemark in the caption (moving argument) and place the footnote text
+% immediately after the figure to avoid fragility inside \caption.
+\defaultfigure{implementacion/iso_25010.png}{Modelo de calidad de software ISO 25010.\protect\footnotemark}{iso_25010}
+\footnotetext{Imagen tomada de \href{https://iso25000.com/index.php/en/iso-25000-standards/iso-25010}{iso25000.com}.}
 
 En el caso de \texttt{QTensor}, se buscó obtener una solución que permita a investigadores y desarrolladores trabajar de manera eficiente, intuitiva y directa. Que no requieran un entrenamiento extenso para poder utilizarlo. Por lo tanto, los atributos de calidad que se definieron pertenecen a las características adecuación funciónal, capacidad de interacción, y mantenibilidad. La definición de los atributos elegidos se muestra en la tabla \ref{tab:iso25010}.
 
 \begin{table}[H]
 \centering
-\begin{tabular}{c c c p{6cm}}
+% Make table body and header smaller while leaving caption at normal size
+\begin{tabularx}{\textwidth}{{l p{3cm} p{3cm} X}}
 \toprule
-\textbf{Req. ID} & \textbf{Requisito} & \textbf{Caracter\'{i}stica} & \textbf{Descripción} \\ \hline
-RNF1.1 & Adecuación funcional & Pertinencia funciónal. & Capacidad del producto software para proporcionar un conjunto de funciónes que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
+\textbf{ID} & \textbf{Requisito} & \textbf{Característica} & \textbf{Descripción} \\ \hline
+RNF1.1 & Adecuación funcional & Pertinencia funciónal. & Capacidad del producto software para proporcionar un conjunto de funciones que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
 RNF2.1 & Capacidad de interacción & Auto-descriptividad. & Capacidad de un producto para presentar la información adecuada, haciendo su uso inmediatamente evidente para el usuario sin interacciones excesivas con el producto u otros recursos (documentación, \textit{help desks}, otros usuarios...). \\
 \hline
 RNF3.1 & Mantenibilidad & Capacidad para ser probado & Facilidad con la que se pueden establecer criterios de prueba para un sistema o componente y con la que se pueden llevar a cabo las pruebas para determinar si se cumplen dichos criterios. \\
 \hline
 RNF3.2 & Mantenibilidad & Modularidad & Capacidad de un producto para evitar que los cambios en un componente afecten a otros componentes.\\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Atributos de calidad elegidos}
 \label{tab:iso25010}
 \end{table}
@@ -42,7 +46,7 @@ Definidos los requerimientos funcionales y no funcionales, se procedió a analiz
 
 Tanto en la industria como en los entornos académicos, existen dos bibliotecas de facto \texttt{Tensorflow} y \texttt{PyTorch}.
 
-Ambas tienen un framework de cuantización, \texttt{PyTorch} lo implementa en la misma biblioteca, a traves del modulo \texttt{quantization} \cite{pytorch_quantization_docs}, mientras que \texttt{Tensorflow} lo implementa a traves de una biblioteca secundaria \texttt{TFMOT} \cite{tensorflow_model_optimization}. Ambas bibliotecas proveen soporte nativo para 8 bits, pero no soportan la definición de esquemas de cuantización de manera directa, sin embargo ambas soportan definir cuantizadores personalizados e inyectarlos en el modelo a cuantizar.
+Ambas tienen un framework de cuantización, \texttt{PyTorch} lo implementa en la misma biblioteca, a traves del módulo \texttt{quantization} \cite{pytorch_quantization_docs}, mientras que \texttt{Tensorflow} lo implementa a traves de una biblioteca secundaria \texttt{TFMOT} \cite{tensorflow_model_optimization}. Ambas bibliotecas proveen soporte nativo para 8 bits, pero no soportan la definición de esquemas de cuantización de manera directa, sin embargo ambas soportan definir cuantizadores personalizados e inyectarlos en el modelo a cuantizar.
 
 Debido a que ambas bibliotecas parecen tener un soporte similar, y no hay diferencias significativas en la cantidad de usuarios entre una y la otra. Se eligió tensorflow debido a que en el entorno del laboratorio de sistemas embebidos, en el que se desarrolla este trabajo, se utiliza principalmente esta biblioteca.
 
@@ -69,16 +73,14 @@ Para asegurar la calidad del código y la funcionalidad de la biblioteca, se imp
 
 Este \textit{pipeline} construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración. Si alguna de estas etapas falla, el \textit{pipeline} marca el \textit{pull request} o el \textit{push} como fallido, y bloquea la fusión de la rama hasta que se resuelvan los problemas.
 
-\subsection{Analisis de las capacidades y limitaciones de \texttt{TFMOT}}
-El caso sencillo de cuantización de cuantizar un modelo entero con 8 bits se puede realizar como se muestra en el fragmento de codigo \ref{code:tfmot_quantization_simple}.
+\subsection{Análisis de las capacidades y limitaciones de \texttt{TFMOT}}
+La cuantización de un modelo completo con un esquema uniforme de 8 bits puede realizarse como muestra el fragmento de código \ref{code:tfmot_quantization_simple}.
 
 \begin{lstlisting}[language=Python,label=code:tfmot_quantization_simple,caption=Uso sencillo de TFMOT para cuantización uniforme de 8 bits.]
 quant_aware_model = tfmot.quantization.keras.quantize_model(base_model)
 \end{lstlisting}
 
-% \texttt{QTensor} fue diseñado como una capa de abstracción y extensión sobre \texttt{TFMOT}. Esto permite a los desarrolladores aprovechar las funcionalidades existentes de \texttt{TFMOT}. La arquitectura modular de \texttt{QTensor} facilita la incorporación de nuevas características y la adaptación a diferentes casos de uso.
-
-En el caso de querer utilizar una configuracion especifica para una capa, se debe realizar lo que se muestra en el fragmento de codigo \ref{code:tfmot_quantization_custom_layer}
+Si se desea aplicar una configuración personalizada a una capa, debe emplearse el patrón que muestra el fragmento \ref{code:tfmot_quantization_custom_layer}. Donde se define una clase, \texttt{MyDenseQuantizeConfig}, que implementa la interfaz \texttt{QuantizeConfig}, la cual determina cómo se cuantizan los pesos, las activaciones y las salidas de la capa (como se desarrollará en la sección \ref{sec:generate_config}). A continuación, debe especificarse para cada capa la configuración personalizada (la biblioteca \texttt{TFMOT} denomina este proceso \texttt{annotate}) y, finalmente, aplicarse la cuantización al modelo completo mediante la función \texttt{quantize\_apply}.
 
 \begin{lstlisting}[language=Python,label=code:tfmot_quantization_custom_layer,caption=Uso de TFMOT para cuantización con configuración personalizada en una capa.]
   quantize_config = MyDenseQuantizeConfig()
@@ -95,43 +97,41 @@ En el caso de querer utilizar una configuracion especifica para una capa, se deb
 \end{lstlisting}
 %   Source https://github.com/tensorflow/model-optimization/blob/e2d531bfa2ce10916a1066c67b1438d17cc67dac/tensorflow_model_optimization/python/core/quantization/keras/quantize.py#L83
 
-Como se muestra en el fragmento de codigo \ref{code:tfmot_quantization_custom_layer}, es necesario definir una clase que implemente la interfaz \texttt{QuantizeConfig}, que define como cuantizar los pesos, las activaciones y las salidas de la capa. Luego, es necesario anotar la capa que se desea cuantizar con la configuración personalizada (generalmente en su definición), y finalmente aplicar la cuantización al modelo completo.
+Como resula evidente en el extracto anterior, la principal limitación de \texttt{TFMOT} es su baja ergonomía para definir esquemas de cuantización complejos. Si bien la biblioteca ofrece soporte nativo para cuantizadores uniformes de 8 bits (con y sin signo), para otros esquemas resulta necesario implementar y coordinar varias clases e interfaces, por ejemplo, cuantizadores, descripciones de cuantización y anotaciones. Esta necesidad de código adicional complica la interacción con la biblioteca, pues impide definir y aplicar de forma sencilla distintos esquemas a capas específicas. Además, la documentación oficial es limitada y no proporciona ejemplos claros sobre el uso de estas funcionalidades avanzadas.
 
-El mayor punto de dificultad con la biblioteca \texttt{TFMOT} es la ergonomia para definir esquemas de cuantización complejos. Tiene soporte nativo para cuantizadores uniformes de 8 bits, tanto con signo como sin signo, para otras configuraciones, es necesario definir y articular varias clases e interfaces, como cuantizadores, definiciones de cuantización, y anotaciones de cuantización. Esta falta de ergonomia dificulta la interaccion de los usuarios con la biblioteca, ya que no es posible definir y aplicar sencillamente diferentes esquemas de cuantización a diferentes capas. Sumado a esto, la documentación oficial es escasa y no provee ejemplos claros de como utilizar estas funcionalidades avanzadas.
-
-Los cuantizadores existentes en la biblioteca tampoco tienen parámetros entrenables, son fijos, lo cual genera que la adaptación sea solo de los parámetros del modelo, y no de los parámetros del cuantizador, lo cual es una característica deseable en nuestra implementación.
+Cabe destacar que los cuantizadores incluidos en la biblioteca tampoco disponen de parámetros entrenables, son estáticos. En consecuencia, la adaptación durante el entrenamiento afecta únicamente a los parámetros del modelo y no al propio cuantizador, una capacidad que es un requerimiento para el desarrollo de esta librería como se definió en la sección \ref{sec:requerimientos_funcionales}.
 
 \subsection{Arquitectura de la biblioteca \texttt{QTensor}}
 
-La biblioteca \texttt{QTensor} fue diseñada como una capa de abstracción y extensión sobre \texttt{TFMOT}. Esto permite extender las funcionalidades existentes de \texttt{TFMOT} para lograr obtener los requisitos funcionales descriptos en la sección \ref{sec:requerimientos_funcionales}. En la \reffig{qtensor_modules} se diagrama la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{Tensorflow}.
+La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}. En la \reffig{qtensor_modules} se presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}.
 
-\defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Interacción entre QTensor, TFMOT, Keras y Tensorflow.}{qtensor_modules}{1}
+\defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Grafo de dependencias entre las bibliotecas.}{qtensor_modules}{1}
 
-El diseño de \texttt{QTensor} es modular, es decir, se compone de varios módulos, con funcionalidades específicas. Lo que facilita la incorporación de nuevas características, la mantenibilidad del código y la adaptación a diferentes casos de uso. Esta característica apoya el atributo de calidad RNF3.2 definido en la sección \ref{sec:atributos_calidad}.
+El diseño de \texttt{QTensor} es modular, se compone de módulos con funcionalidades específicas, lo que facilita la incorporación de nuevas características, mejora la mantenibilidad del código y favorece la adaptación a distintos casos de uso. Además, esta característica respalda el atributo de calidad RNF3.2 definido en la sección \ref{sec:atributos_calidad}.
 
 En la \reffig{qtensor_overview} se muestra la estructura general de la biblioteca y sus módulos principales.
 
-\defaultdiagram{implementacion/qtensor_modules}{Estructura general de la biblioteca QTensor.}{qtensor_overview}{1}
+\defaultdiagram{implementacion/qtensor_modules}{Módulos y dependencias de la biblioteca \texttt{QTensor}.}{qtensor_overview}{1}
 
 \begin{itemize}
-    \item \texttt{quantizers}: módulo que contiene la implementación de los cuantizadores personalizados con parámetros entrenables y gradientes personalizados.
-    \item \texttt{configs}: módulo que contiene abstracciones para definir configuraciones de cuantización como diccionarios de Python.
-    \item \texttt{utils}: módulo que contiene la implementación de herramientas para evaluar el rendimiento de los modelos cuantizados.
-    \item \texttt{stages}: módulo que contiene la implementación de las etapas del flujo de trabajo de entrenamiento y cuantización.
+  \item \texttt{quantizers}: implementación de cuantizadores personalizados con parámetros entrenables y gradientes definidos.
+  \item \texttt{configs}: abstracciones para describir esquemas de cuantización mediante diccionarios.
+  \item \texttt{utils}: utilidades para evaluar el rendimiento y analizar modelos cuantizados.
+  \item \texttt{stages}: componentes para definir y orquestar las etapas del flujo de trabajo de entrenamiento y cuantización.
 \end{itemize}
 
 \subsection{Implementación de los cuantizadores (módulo \texttt{quantizers})}
 
 \subsubsection{Clase \texttt{Quantizer}}
 
-La interfaz \texttt{Quantizer} \cite{tensorflow_quantizer_api} define las operaciones matemáticas que transforman tensores durante la cuantización, la cual define dos métodos principales.
+La interfaz de \texttt{TFMOT} \texttt{Quantizer} \cite{tensorflow_quantizer_api} define las operaciones matemáticas que transforman tensores durante la cuantización, la cual define dos métodos principales.
 
 \begin{enumerate}
     \item \texttt{build}, que construye las variables de estado necesarias para el algoritmo de cuantización.
     \item \texttt{\_\_call\_\_}, que aplica la operación de cuantización a los tensores de entrada.
 \end{enumerate}
 
-El método \texttt{build} se llama una vez que se conoce la forma de los tensores de entrada, y permite inicializar las variables de estado. El método \texttt{\_\_call\_\_} se llama cada vez que se aplica la cuantización, y debe implementar la lógica de cuantización, esta es la que se coloca en el grafo computacional explicado en la sección \ref{sec:tensorflow_model_optimization}, permitiendo la cuantización de los tensores y por ende, esta en el camino del gradiente.
+El método \texttt{build} se llama una vez que se conoce la forma de los tensores de entrada, y permite inicializar las variables de estado. El método \texttt{\_\_call\_\_} se llama cada vez que se aplica la cuantización, y debe implementar la lógica de cuantización, esta es la que se coloca en el grafo computacional explicado en la sección \ref{sec:tensorflow_model_optimization}, para ejecutarse durante el \textit{forward pass}, las operaciones realizadas en este método deben tener definidas sus derivadas para permitir el cálculo de gradientes durante el \textit{backward pass}.
 
 \subsubsection{Modificaciones a la clase \texttt{Quantizer}}
 Para la implementación de cuantizadores con parámetros entrenables y gradientes personalizados, se realizaron algunas modificaciones sobre la clase \texttt{Quantizer} de \texttt{TFMOT}.
@@ -159,7 +159,7 @@ Para definir parámetros entrenables, se modificó el método \texttt{build} par
 
 Por otro lado, los parámetros entrenables de los cuantizadores tiene restricciones específicas, por ejemplo los niveles y umbrales de la cuantización deben siempre estar ordenados, el parámetro que define el rango $\alpha$ debe ser siempre positivo, entre otros.
 
-Para definir este comportamiento se implementaron restricciones en los parámetros entrenables utilizando la interfaz de keras \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define una operación de restricción que se aplica a los tensores entrenables durante el entrenamiento. Se implementaron las siguientes restricciones personalizadas en el módulo \texttt{constraints}:
+Para definir este comportamiento se implementaron restricciones en los parámetros entrenables utilizando la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define una operación de restricción que se aplica a los tensores entrenables durante el entrenamiento, como parte de la actualización de los mismos. Se implementaron las siguientes restricciones personalizadas en el módulo \texttt{constraints}:
 
 \begin{itemize}
     \item \texttt{PositiveConstraint} que asegura que un tensor sea siempre positivo.
@@ -168,7 +168,7 @@ Para definir este comportamiento se implementaron restricciones en los parámetr
 \end{itemize}
 
 %\TODO{Quizas agregar todo el codigo en apendice}
-En el fragmento de código \ref{code:quantizer_constraints} se muestra la implementación de la restricción \texttt{PositiveConstraint}.
+En el fragmento de código \ref{code:quantizer_constraints} se muestra la implementación de la restricción \texttt{PositiveConstraint}. Donde se utiliza la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value} para limitar los valores del tensor entre un valor mínimo (en este caso, un valor muy pequeño positivo definido por \texttt{tf.keras.backend.epsilon()} \cite{tensorflow_epsilon_api}) y el infinito positivo. Es necesario utilizar un valor mínimo mayor a cero para evitar divisiones por cero en los cálculos posteriores y asegurar la estabilidad numérica.
 
 \begin{lstlisting}[language=Python,label=code:quantizer_constraints,caption=Definición de restricciones para parámetros entrenables.]
   class PositiveConstraint(tf.keras.constraints.Constraint):
@@ -306,9 +306,9 @@ En este caso también se utiliza la acumulación de los gradientes, para todos l
 
 \subsubsection{Clase \texttt{QuantizeConfig}}
 
-Para definir como cuantizar una capa, se define la interfaz \texttt{QuantizeConfig}, que permite definir como cuantizar los pesos, las activaciones y las salidas de la capa.
+Para especificar cómo se cuantiza una capa, \texttt{TFMOT} proporciona la interfaz \texttt{QuantizeConfig}. Dicha interfaz permite indicar los cuantizadores que deben aplicarse a los pesos, las activaciones y las salidas de la capa. El fragmento de código \ref{code:quantize_config} muestra una implementación de ejemplo: donde se definien dos cuantizadores personalizados, \texttt{MyQuantizer} y \texttt{SomeOtherQuantizer}, y una clase \texttt{MyQuantizeConfig} que los asigna a los atributos correspondientes de la capa.
 
-\begin{lstlisting}[language=Python,label=code:quantize_config,caption=Interfaz QuantizeConfig de TFMOT.]
+\begin{lstlisting}[language=Python,label=code:quantize_config,caption=Interfaz \texttt{QuantizeConfig} de \texttt{TFMOT}.]
 class MyQuantizer(Quantizer):
   ...
 
@@ -339,15 +339,17 @@ class MyQuantizeConfig(QuantizeConfig):
 
 \end{lstlisting}
 
-Esto implica definir para cada configuración de cuantización, una clase que implemente la interfaz \texttt{QuantizeConfig}, y defina los cuantizadores a utilizar para los pesos, las activaciones y las salidas de la capa. Lo cual genera una gran cantidad de código repetitivo, y dificulta la definición de nuevas configuraciones de cuantización, de pruebas y de experimentación.
+Este enfoque obliga a crear, para cada configuración de cuantización, una clase que implementara \texttt{QuantizeConfig} y describiera explícitamente los cuantizadores para pesos, activaciones y salidas. Como resultado, se genera código repetitivo y se encarece la definición de nuevas configuraciones, la escritura de pruebas y la experimentación.
+
+Para mejorar la ergonomía y simplificar la definición de esquemas de cuantización, se propuso facilitar la definición de los mismos como diccionarios de Python.
 
 \subsubsection{Clase \texttt{GenerateConfig}}
 \label{sec:generate_config}
-Para solucionar este problema, se busca obtener una forma de definir configuraciones en formato JSON, y que la biblioteca se encargue de generar las clases necesarias para aplicar la cuantización. Esto se logra definiendo una clase \texttt{GenerateConfig} que recibe un diccionario con la configuración de cuantización, y hereda de \texttt{QuantizeConfig}, implementando los métodos necesarios para definir los cuantizadores a utilizar.
+Esto se logra definiendo una clase \texttt{GenerateConfig} que recibe un diccionario con la configuración de cuantización, y hereda de \texttt{QuantizeConfig}, implementando los métodos necesarios para definir los cuantizadores a utilizar de manera dinámica.
 
-Para adaptar los métodos de la interfaz \texttt{QuantizeConfig} a esta nueva forma de definir las configuraciones, se hizo provecho de la funcionalidad de Python de inspeccionar los atributos de una clase en tiempo de ejecución, utilizando la función nativa \texttt{getattr}.
+Para adaptar los métodos de la interfaz \texttt{QuantizeConfig} a esta nueva forma de definir las configuraciones, se hizo provecho de la funcionalidad de Python de inspeccionar los atributos de una clase en tiempo de ejecución, utilizando las funciones nativas \texttt{getattr} y \texttt{setattr}.
 
-Por ejemplo, la configuracion de pesos es manejada por métodos descriptos en el fragmento de código \ref{code:generate_config}.
+Para que sea compatible para todo tipo de capas y atributos de las mismas, fue necesario agregar soporte para atributos anidados, para lo cual se implementaron las funciones auxiliares \texttt{get\_nested\_attribute} y \texttt{set\_nested\_attribute}, que permiten obtener y establecer atributos anidados a partir de una cadena de texto que representa la ruta del atributo. A modo de ejemplo, el fragmento de código \ref{code:generate_config} muestra como se realiza esta configuración para los pesos.
 
 \begin{lstlisting}[language=Python,label=code:generate_config,caption=Metodos para cuantizar los pesos]
     def get_weights_and_quantizers(
@@ -367,10 +369,41 @@ Por ejemplo, la configuracion de pesos es manejada por métodos descriptos en el
             self.weights.keys(), quantize_weights
         ):
             set_nested_attribute(layer, attribute, quantized_weight)
-
 \end{lstlisting}
 
-De esta manera, la definición de nuevas configuraciones de cuantización, y la experimentación con diferentes esquemas de cuantización, se vuelve mucho más sencilla y rápida. El ejemplo del fragmento \ref{code:quantize_config} se puede ahora definir sencillamente como se muestra en el fragmento de código \ref{code:generate_config_usage}.
+Se definio a partir de este mecanismo los métodos restantes de la interfaz \texttt{QuantizeConfig} para activaciones, siguiendo el mismo patrón, y se tiene así una clase que permite definir cualquier configuración de cuantización a partir de un diccionario, como se muestra en el fragmento de código \ref{code:generate_config}.
+
+\begin{lstlisting}[language=Python,label=code:generate_config,caption=Definición de la clase \texttt{GenerateConfig}.]
+  class GenerateConfig(QuantizeConfig):
+
+    def __init__(
+        self,
+        weights: AttributeQuantizerDict = None,
+        activations: AttributeQuantizerDict = None,
+    ):
+      ...
+    def get_weights_and_quantizers(
+        self, layer: Layer
+    ) -> list[Tuple[Tensor, Quantizer]]:
+      ...
+
+    def set_quantize_weights(
+        self, layer: Layer, quantize_weights: list[Tensor]
+    ):
+        ...
+
+    def get_activations_and_quantizers(
+        self, layer: Layer
+    ) -> list[Tuple[Tensor, Quantizer]]:
+        ...
+
+    def set_quantize_activations(
+        self, layer: Layer, quantize_activations: list[Tensor]
+    ):
+        ...
+\end{lstlisting}
+
+Este mecanismo habilita la definición de nuevas configuraciones de cuantización de manera dinámica, y facilita la experimentación con diferentes esquemas de cuantización. El ejemplo del fragmento \ref{code:quantize_config} se puede reescribir y definir de manera simple y concisa como se muestra en el fragmento de código \ref{code:generate_config_usage}.
 
 \begin{lstlisting}[language=Python,label=code:generate_config_usage,caption=Uso de la clase GenerateConfig para definir una configuración de cuantización.]
   config = GenerateConfig(
@@ -426,11 +459,11 @@ Previamente, la cuantización de un modelo completo con diferentes configuracion
         quant_aware_model = quantize_apply(model)
 \end{lstlisting}
 
-Para simplificar este proceso se diseño una interfaz de alto nivel, en el modulo \texttt{qmodel} que define las funciónes necesarias para cuantizar cualquier modelo definido en \texttt{TensorFlow} a partir de cualquier descripción de esquema de cuantización.
+Para simplificar este proceso se diseño una interfaz de alto nivel, en el módulo \texttt{qmodel} que define las funciones necesarias para cuantizar cualquier modelo definido en \texttt{TensorFlow} a partir de cualquier descripción de esquema de cuantización.
 
-El ejemplo del fragmento \ref{code:custom_cuantization_layout} se puede ahora definir sencillamente como se muestra en el fragmento de código \ref{code:qmodel_usage}.
+El ejemplo del fragmento \ref{code:custom_cuantization_layout} se puede rescribir como se muestra en el fragmento de código \ref{code:qmodel_usage}.
 
-\begin{lstlisting}[language=Python,label=code:qmodel_usage,caption=Uso del modulo qmodel para cuantizar un modelo a partir de una descripción de esquema de cuantización.]
+\begin{lstlisting}[language=Python,label=code:qmodel_usage,caption=Uso del módulo qmodel para cuantizar un modelo a partir de una descripción de esquema de cuantización.]
 model = Sequential([
     Dense(128, activation="relu", name="hidden"),
     Dense(64, activation="relu", name="hidden_1"),
@@ -463,92 +496,71 @@ De esta manera no solo se desacopla la definición del esquema de cuantización 
 
 
 \subsection{Implementación de computos de complejidad espacial (módulo \texttt{utils})}
-Para calcular la complejidad espacial de un modelo cuantizado, se implementaron las funciónes necesarias para calcular la complejidad espacial de modelos sin cuantizar y cuantizados, tanto para el caso de cuantización uniforme como para el esquema de cuantización flexible.
+% Para calcular la complejidad espacial de un modelo cuantizado, se implementaron las funciones necesarias para calcular la complejidad espacial de modelos sin cuantizar y cuantizados, tanto para el caso de cuantización uniforme como para el esquema de cuantización flexible.
 
-Para calcular la complejidad espacial de un modelo, se itera sobre las capas del modelo, y se calcula la complejidad espacial de cada capa, sumando los resultados. La complejidad espacial de una capa se calcula como la suma del tamaño de los pesos y las activaciones.
+La complejidad espacial de un modelo $S_{M}$, se calcula acumulando la complejidad espacial de cada capa, como se muestra en la \refeq{space_complexity_model}, con $N_{L}$ la cantidad de capas del modelo.
 
-Como se desarrollo anteriormente, los esquemas de cuantización pueden contener cuantizadores de distintos tipos y parametros no cuantizados, con lo cual, para calcular la complejidad espacial de una capa, es necesario identificar el tipo de cuantizador utilizado para cada peso y activación, y aplicar la función de cálculo de complejidad espacial correspondiente. La implementación de esta lógica se muestra en el fragmento de código \ref{code:compute_model_space_complexity}.
+\begin{equation}
+  \label{eq:space_complexity_model}
+  S_{M} = \sum_{i=1}^{N_{L}} S_{L_i}
+\end{equation}
 
-\begin{lstlisting}[language=Python,label=code:compute_model_space_complexity,caption=Cálculo de la complejidad espacial de un modelo cuantizado.]
-  def compute_space_complexity_model(model: tf.keras.Model) -> float:
-    """Compute the uniform space complexity of a model based on its
-    quantization configuration."""
-    total_space_complexity = 0.0
+A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, como se muestra en la \refeq{space_complexity_layer}, con $N_{\theta}$ la cantidad de parámetros de la capa.
 
-    # Make an inference to ensure the model is built
-    model(tf.random.normal((1,) + model.input_shape[1:]))
+\begin{equation}
+  \label{eq:space_complexity_layer}
+  S_{L} = \sum_{j=1}^{N_{\theta}} S_{\theta_j}
+\end{equation}
 
-    for layer in model.layers:
-        if isinstance(layer, QuantizeWrapperV2):
-            layer_size = compute_space_complexity_quantize(layer)
-        else:
-            layer_size = compute_space_complexity(layer)
-        total_space_complexity += layer_size
+Como se desarrollo anteriormente, la granularidad de los esquemas de cuantización es a nivel de parámetro. Y la complejidad espacial depende del tipo de cuantización aplicada.
 
-    return total_space_complexity
-\end{lstlisting}
+En el caso de un parámetro sin cuantización, la complejidad espacial, en bits se calcula como el tamaño del tipo de dato del parámetro, multiplicado por la cantidad de elementos del tensor, como se muestra en la \refeq{space_complexity_no_quantized}.
 
-Donde la función \texttt{compute\_space\_complexity\_quantize} calcula la complejidad espacial de una capa cuantizada, determinando el tipo de cuantizador utilizado para cada parámtero, como se muestra en el fragmento de código \ref{code:compute_quantized_layer_space_complexity}.
+\begin{equation}
+  \label{eq:space_complexity_no_quantized}
+    S_{\theta} = P \cdot k
+\end{equation}
 
-\begin{lstlisting}[language=Python,label=code:compute_quantized_layer_space_complexity,caption=Cálculo de la complejidad espacial de una capa cuantizada.]
-  def compute_space_complexity_quantize(qlayer: QuantizeWrapperV2) ->
-    total_layer_size = 0.0
-    qconfig = qlayer.quantize_config
+donde $P$ es el tamaño en bits del tipo de dato del parámetro, y $k$ es la cantidad de elementos del tensor.
 
-    weights_and_quantizers = qconfig.get_weights_and_quantizers(qlayer.layer)
+En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es la misma que la de un parámetro sin cuantización, pero en este caso $P$ es el número de bits utilizado en la cuantización $b$, como se muestra en la \refeq{space_complexity_uniform}.
 
-    for weight, quantizer in weights_and_quantizers:
-        if isinstance(quantizer, UniformQuantizer):
-            weight_size = weight.shape.num_elements() * quantizer.bits
-        elif isinstance(quantizer, FlexQuantizer):
-            weight_size = compute_huffman_nominal_complexity(weight)
-            weight_size += quantizer.n_levels * quantizer.bits
-        else:
-            raise ValueError(f"Unknown quantizer type: {type(quantizer)}")
-        total_layer_size += weight_size
+\begin{equation}
+  \label{eq:space_complexity_uniform}
+    S_{\theta_{q_{u}}} = b \cdot k
+\end{equation}
 
-    return total_layer_size
-\end{lstlisting}
+En el caso de la cuantización flexible, la complejidad espacial se calcula asumiendo que su implementación en hardware utiliza la codificación de Huffman, pues es esta la manera presentada de implementación en su descripción \cite{electronics13101923}.
 
-\subsubsection{Complejidad para el modelo sin cuantizar}
-Para una capa sin cuantizar, para obtener la complejidad espacial en bits se utiliza la función mostrada en el fragmento de código \ref{code:compute_space_complexity}.
+La codificación de Huffman es un esquema de codificación sin pérdida que asigna códigos de longitud variable a diferentes símbolos, basándose en sus frecuencias de aparición. Los símbolos más frecuentes reciben códigos más cortos, mientras que los menos frecuentes reciben códigos más largos. Esto permite reducir el tamaño total de los datos al aprovechar la distribución de frecuencias de los símbolos. Los detalles de la codificación de Huffman se encuentran en el apéndice \ref{appendix:huffman}.
 
-\begin{lstlisting}[language=Python,label=code:compute_space_complexity,caption=Cálculo de la complejidad espacial de una capa sin cuantizar.]
-def compute_space_complexity(layer):
-    total_layer_size = 0.0
-    for weight in layer.weights:
-        weight_size = (
-            8 * weight.dtype.size * weight.shape.num_elements()
-        )  # bits
-        total_layer_size += weight_size
+% La complejidad espacial entonces puede representarte como la suma del espacio necesario para almacenar los valores de los niveles del cuantizador $S_{l}$, y el espacio necesario para almacenar los índices $S_{\mathcal{I}}$ de los niveles asignados a cada parámetro cuantizado.
 
-    return total_layer_size
-\end{lstlisting}
+Para implementar esta codificación, es necesario almacenar los niveles de cuantización en la memoria del hardware, y los índices de los niveles asignados a cada parámetro cuantizado.
 
-\subsubsection{Complejidad para el cuantizador uniforme}
-Para el caso uniforme, el tamaño de cada peso, depende de la cantidad de bits utilizada en la cuantización. Por lo tanto, la complejidad espacial de los pesos cuantizados se calcula como se muestra en el fragmento de código \ref{code:complexity_uniform}.
+La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra en la \refeq{space_complexity_flexible_levels}.
 
-\begin{lstlisting}[language=Python,label=code:complexity_uniform,caption=Cálculo de la complejidad espacial de un modelo cuantizado con el esquema uniforme.]
-    weight_size = weight.shape.num_elements() * quantizer.bits
-\end{lstlisting}
+\begin{equation}
+  \label{eq:space_complexity_flexible_levels}
+    S_{l} = N_{l} \cdot b
+\end{equation}
 
-\subsubsection{Complejidad para el cuantizador flexible}
+La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad nominal de la codificación de Huffman: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador, como se muestra en la \refeq{space_complexity_flexible_indices}.
 
-En el caso de la cuantización flexible, se considerara que la implementación utiliza la codificación de Huffman. Lo cual reduce el espacio necesario para almacenar los parámetros. Por lo tanto, la complejidad espacial de los parámetros del cuantizador se calculara como el valor nominal de la codificación de Huffman. Los detalles de la codificación de Huffman se encuentran en el apéndice \ref{appendix:huffman}.
+\begin{equation}
+  \label{eq:space_complexity_flexible_indices}
+    S_{\mathcal{I}} = k \cdot H
+\end{equation}
 
-\begin{lstlisting}[language=Python,label=code:complexity_flexible,caption=Cálculo de la complejidad espacial de un modelo cuantizado con el esquema flexible.]
-def compute_huffman_nominal_complexity(qweights):
-    N = qweights.shape.num_elements()
-    counter = Counter(qweights.numpy().flatten())
-    total = sum(counter.values())
-    probabilities = np.array([freq / total for freq in counter.values()])
-    entropy = -np.sum(probabilities * np.log2(probabilities))
-    return N * entropy
-\end{lstlisting}
+Por lo tanto, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra en la \refeq{space_complexity_flexible}.
 
-A esto como se muestra en el fragmento de código \ref{code:compute_quantized_layer_space_complexity}, se le suma el espacio necesario para almacenar los niveles del cuantizador, pues se deben almacenar en alguna sección de la memoria del hardware donde se desplegará el modelo cuantizado.
+\begin{equation}
+  \label{eq:space_complexity_flexible}
+    S_{\theta_{q_{f}}} = S_{l} + S_{\mathcal{I}} = N_{l} \cdot b + k \cdot H
+\end{equation}
 
-\subsection{Implementación del modulo de flujo de trabajo (módulo \texttt{stages})}
+
+\subsection{Implementación del módulo de flujo de trabajo (módulo \texttt{stages})}
 
 Un flujo típico de trabajo utilizado durante el desarrollo de este trabajo, y que se busca facilitar con la implementación de este módulo, consta de los siguientes pasos:
 
