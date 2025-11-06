@@ -1,5 +1,8 @@
-En este capítulo se presenta el contexto, la motivación y los objetivos del presente trabajo. Se comienza exponiendo las necesidades que disparan el interés de la compresión de redes neuronales. A continuación, se realiza un análisis del estado del arte, describiendo las técnicas de compresión existentes. Finalmente, se definen los objetivos generales y específicos que guían el desarrollo de esta tesis.
+En este capítulo se presenta el contexto general, la motivación y los objetivos del presente trabajo. Se describe el papel de la inteligencia artificial y del aprendizaje automático en el desarrollo de modelos cada vez más complejos, lo que impulsa la necesidad de aplicar técnicas de compresión en redes neuronales.
 
+Luego, se analiza el estado del arte, abarcando las principales estrategias de compresión y las tendencias actuales en cuantización, tanto en hardware con recursos limitados como en entornos de cómputo de gran escala.
+
+Finalmente, se establecen los objetivos generales y específicos que guían esta tesis, centrada en el desarrollo de una biblioteca que facilite la investigación y aplicación de técnicas de cuantización adaptables mediante entrenamiento consciente de cuantización (QAT).
 
 \section{Motivación}
 \label{sec:motivacion}
@@ -81,11 +84,10 @@ QAT consiste en entrenar la red neuronal con una emulación de la cuantización 
 
 Los aportes de este trabajo incluyen la implementación de una librería en Python que permite realizar entrenamiento consciente de cuantización (QAT). La misma es compatible con el framework \texttt{TensorFlow} \cite{tensorflow} y posibilita el uso de cuantizadores uniformes con un número arbitrario de bits, y con parámetros entrenables, funcionalidades que no se encuentra implementada de forma nativa en dicho entorno. Asimismo, incorpora la posibilidad de emplear cuantizadores flexibles, basados en \cite{electronics13101923} con parámetros entrenables.
 
-Esta herramienta permite explorar arquitecturas en punto fijo con aritmética arbitraria, ya sea uniforme, flexible o una combinación de ambas, lo que ofrece un mayor grado de adaptabilidad a las características del modelo y del hardware de destino.
+Otro aporte relevante es que los parámetros del cuantizador también son entrenables durante el proceso de QAT, lo que permite que la red se adapte dinámicamente al esquema de cuantización y optimice su desempeño durante el entrenamiento.
 
-Finalmente, otro aporte relevante es que los parámetros del cuantizador también son entrenables durante el proceso de QAT, lo que permite que la red se adapte dinámicamente al esquema de cuantización y optimice su desempeño durante el entrenamiento.
+La herramienta desarrollada en este trabajo permite explorar arquitecturas en punto fijo con aritmética arbitraria, ya sea uniforme, flexible o una combinación de ambas, lo que ofrece un mayor grado de adaptabilidad a las características del modelo y del hardware de destino.
 
-% https://www.ibm.com/think/topics/quantization-aware-training#f01
 \section{Objetivos}
 \label{sec:objetivos}
 
