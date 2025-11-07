@@ -1,47 +1,52 @@
 \section{Resultados}
 \label{sec:resultados}
 
+En esta sección se presentan los resultados obtenidos para el ensayo descrito en la sección \ref{sec:ensayos}, con el objetivo de comparar los dos esquemas de cuantización. Para cada configuración de bits y niveles se realizaron múltiples ejecuciones con distintas semillas aleatorias, con el fin de obtener resultados estadísticos.
+
+Los resultados se enfocan en el análisis de la relación entre la complejidad del modelo cuantizado y la precisión alcanzada, lo que permite evaluar y comparar el desempeño de cada esquema bajo las diferentes configuraciones. Los gráficos presentan, para cada configuración, el valor máximo, el valor medio y el valor mínimo de precisión observados. No obstante, el análisis se centró en los valores máximos obtenidos, ya que para aplicaciones prácticas interesa identificar la mejor precisión, la configuración seleccionada suele ser la que maximiza la precisión, por este motivo, y para facilitar la comparación entre esquemas, se tomaron como referencia los valores máximos observados en las ejecuciones.
+
 \subsection{Resultados para el esquema de cuantización uniforme}
 \label{sec:uniform_results}
 
-En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en Kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado.
+En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en Kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado. La figura muestra tres curvas, cada una compuesta por la coleccion dentro de todas las ejecuciones con diferentes semillas aleatorias, mostrando el valor máximo, medio y mínimo de precisión alcanzada para cada configuración de bits.
 
 \defaultfigure{resultados/complexity_vs_quantized_uniform_stats.png}{Resultados de la cuantización uniforme.}{uniform_results}
 
-En la tabla \ref{tab:uniform_results} se exponen los resultados cuantitativos obtenidos con el esquema de cuantización uniforme.
+La tabla \ref{tab:uniform_results} presenta los valores máximos obtenidos con el esquema de cuantización uniforme para las diferentes configuraciones de bits.
 
 \input{sections/04_ensayos_y_resultados/tab_uniform}
 
-Los resultados mostraron que el esquema de cuantización uniforme presenta buena capacidad de compresión hasta aproximadamente $8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $0.7585$ (equivalente a $4.00\times$ de compresión). Con $10$ y $16$ bits se obtuvieron valores máximos de $0.7581$ y $0.7584$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuyee, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
+Los resultados mostraron que el esquema de cuantización uniforme presenta capacidad de compresión aceptable hasta compresiones de $\approx8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $102.51\%$ en comparación con el modelo original, con una tasa de compresión de $4.00\times$. Con $10$ y $16$ bits se obtuvieron valores relativos de precisión de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuye, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
 
-Además, algunas configuraciones superaron la precisión del modelo original. Esto ocurre porque, al continuar el entrenamiento tras la cuantización y mantener una resolución relativamente alta ($\geq 8$ bits), la optimización de los parámetros predominó frente a la pérdida de precisión numérica.
+Algunas configuraciones superaron la precisión del modelo original. En estos casos, el ruido introducido por la cuantización actúa como una forma de regularización, ayudando al modelo a generalizar mejor y evitar el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
 
 \subsection{Resultados para el esquema de cuantización flexible}
 \label{sec:flexible_results}
 
 En segundo lugar, se presentan los resultados obtenidos con el esquema de cuantización flexible en la \reffig{flexible_results}.
 
-\defaultfigure{resultados/complexity_vs_quantized_flex_stats2.png}{Resultados de la cuantización flexible.}{complexity_vs_quantized_flex_stats2}
-
+\defaultfigure{resultados/complexity_vs_quantized_flex_stats2.png}{Resultados de la cuantización flexible.}{flexible_results}
 
 A continuación, la tabla \ref{tab:flexible_results} expone los resultados cuantitativos obtenidos con el esquema de cuantización flexible para las diferentes combinaciones de bits y niveles. Este esquema permite un control más fino del balance entre precisión y complejidad, lo que habilita configuraciones con alta compresión y pérdidas de precisión acotadas.
 
 \input{sections/04_ensayos_y_resultados/tab_flexible}
 
-A compresiones muy altas (por ejemplo, $8/3$ con $24.23\times$) la precisión se mantuvo alrededor de $0.7194$, equivalente al $96.73\%$ de la precisión del modelo original, lo que demuestra que el esquema de cuantización flexible es capaz de sostener un desempeño razonable incluso bajo compresiones agresivas.
+Con compresiones muy altas, como el caso de 8 bits y 3 niveles, que corresponde a una tasa de compresión de $24.23\times$, la precisión se mantuvo en un $96.73\%$ de la precisión del modelo original. Esto demuestra que el esquema de cuantización flexible puede conservar un desempeño sólido incluso bajo condiciones de compresión agresiva.
+
+Otro análisis de mayor granularidad se realizó al comparar la precisión alcanzada en función de el número de niveles y la cantidad de bits, en lugar de simplemente contra la complejidad del modelo. En la \reffig{flex_heatmap} se presenta un mapa de calor que ilustra cómo varía la precisión relativa del modelo cuantizado en función del número de bits y niveles utilizados en la cuantización flexible.
+
+\defaultfigure{resultados/flex_heatmap.png}{Mapa de calor de la precisión relativa para el esquema de cuantización flexible en función del número de bits y niveles.}{flex_heatmap}
+
+En la \reffig{flex_heatmap} se observa que, exceptuando los casos donde la cantidad de niveles es muy baja ($2$ niveles), la precisión es menos sensible a cambios en el número de bits utilizados, que al número de niveles el que tiene un impacto más significativo en la precisión alcanzada.
 
 \subsection{Comparación de esquemas de cuantización}
 
-
-Finalmente, en la \reffig{uniform_vs_flex_max_curves} se mostraron los resultados obtenidos con ambos esquemas de cuantización, uniforme y flexible.
+Finalmente, en la \reffig{uniform_vs_flex_max_curves} se presentan los resultados obtenidos con ambos esquemas de cuantización, uniforme y flexible.
 
 \defaultfigure{resultados/uniform_vs_flex_max_curves.png}{Comparación de los esquemas de cuantización uniforme y flexible.}{uniform_vs_flex_max_curves}
 
-
 En la zona de mayor tasa de compresión se observó que el esquema de cuantización flexible proporcionó mejores valores de precisión en comparación con el esquema uniforme, este último no permitió alcanzar altas tasas de compresión sin una pérdida significativa de precisión.
 
-La tabla \ref{tab:compare_results} muestra los resultados cuantitativos completos que aparecen en la gráfica de la \reffig{uniform_vs_flex_max_curves}, e incluye todos los modelos entrenados con ambos esquemas. En términos de la frontera de Pareto (precisión vs. complejidad), el esquema flexible dominó a partir de compresiones superiores a \mbox{$\sim$10$\times$}.
+En términos de la frontera de Pareto (precisión vs. complejidad), el esquema flexible dominó a partir de compresiones superiores a \mbox{$\sim$10$\times$}.
 
 Asimismo, se observaron configuraciones con compresiones de entre 12$\times$ y 18$\times$ con pérdidas de precisión por debajo de dos puntos porcentuales respecto del modelo original. Para compresiones moderadas (\mbox{$\leq$ 8$\times$}) ambos esquemas mostraron desempeños similares, mientras que para tasas de compresión muy altas (\mbox{$\geq$ 20$\times$}) la ventaja del esquema flexible fue aún más pronunciada.
-
-\input{sections/04_ensayos_y_resultados/tab_compare}

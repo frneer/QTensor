@@ -21,22 +21,25 @@
 \draw (170, 34.5) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize]  {$16\times 16\times 64$};
 
 % Conv2 (128)
-\draw  [fill=white  ,fill opacity=1 ] (220, 106.5) -- (274, 52.5) -- (284, 52.5) -- (284, 175.5) -- (230, 229.5) -- (220, 229.5) -- cycle ;
-\draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ] (284, 52.5) -- (230, 106.5) -- (220, 106.5) ;
-\draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ] (230, 106.5) -- (230, 229.5) ;
+% Increased frontal width to be double that of Conv1 (Conv1 front width ~11.81 -> target ~23.62);
+% keep the same center (225) so shift front-left and front-right accordingly.
+\draw  [fill=white  ,fill opacity=1 ] (213.19, 106.5) -- (267.19, 52.5) -- (290.81, 52.5) -- (290.81, 175.5) -- (236.81, 229.5) -- (213.19, 229.5) -- cycle ;
+\draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ] (290.81, 52.5) -- (236.81, 106.5) -- (213.19, 106.5) ;
+\draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ] (236.81, 106.5) -- (236.81, 229.5) ;
 \draw (245, 34.5) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize] {$16\times 16\times 128$};
 % Place layer name below the cuboid
 \draw (205, 240) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize] {\texttt{conv2d\_1}};
 
 % Pool2
-\draw  [color=red  ,draw opacity=1 ][fill=white  ,fill opacity=1 ] (290, 113.5) -- (324, 79.5) -- (334, 79.5) -- (334, 152.5) -- (300, 186.5) -- (290, 186.5) -- cycle ;
-\draw  [color=red  ,draw opacity=1 ] (334, 79.5) -- (300, 113.5) -- (290, 113.5) ; \draw  [color=red  ,draw opacity=1 ] (300, 113.5) -- (300, 186.5) ;
 \draw (305, 62.5) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize]  {$8\times 8\times 128$};
+% Pool2 (adjusted frontal width to match Conv2: double Conv1)
+\draw  [color=red  ,draw opacity=1 ][fill=white  ,fill opacity=1 ] (283.19, 113.5) -- (317.19, 79.5) -- (340.81, 79.5) -- (340.81, 152.5) -- (306.81, 186.5) -- (283.19, 186.5) -- cycle ;
+\draw  [color=red  ,draw opacity=1 ] (340.81, 79.5) -- (306.81, 113.5) -- (283.19, 113.5) ; \draw  [color=red  ,draw opacity=1 ] (306.81, 113.5) -- (306.81, 186.5) ;
 
 % Flatten Arrow
-\draw    (340, 135) -- (360, 135) ;
-\draw [shift={(360, 135)}, rotate = 180] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
-\draw (335, 110) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize] {Flatten};
+\draw    (345, 135) -- (365, 135) ;
+\draw [shift={(365, 135)}, rotate = 180] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
+\draw (342.5, 110) node [anchor=north west][inner sep=0.75pt]  [font=\scriptsize] {Flatten};
 
 % Dense1 (256)
 \draw  [color=blue  ,draw opacity=1 ][fill=white  ,fill opacity=1 ] (370, 134.07) -- (372.57, 131.5) -- (428, 131.5) -- (428, 137.93) -- (425.43, 140.5) -- (370, 140.5) -- cycle ;

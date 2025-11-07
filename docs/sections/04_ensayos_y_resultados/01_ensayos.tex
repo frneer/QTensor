@@ -1,6 +1,6 @@
 \section{Ensayos}
 \label{sec:ensayos}
-El objetivo de los ensayos es presentar un ejemplo completo del uso de la biblioteca \texttt{QTensor} y demostrar los beneficios de QAT y de la cuantización flexible.
+El objetivo de los ensayos es presentar un ejemplo completo del uso de la biblioteca \texttt{QTensor}, demostrar los beneficios de QAT y de la cuantización flexible.
 
 El experimento consistió en definir un modelo, entrenarlo con el conjunto de datos CIFAR-10, aplicar dos esquemas de cuantización (uno que utiliza el cuantizador uniforme y otro el flexible), reentrenarlo mediante QAT y, finalmente, evaluar los modelos cuantizados en términos de precisión y tamaño.
 
@@ -9,15 +9,15 @@ Los resultados mostraron que el cuantizador flexible alcanzó tasas de compresi�
 \subsection{Conjunto de datos: CIFAR-10}
 Para los ensayos se empleó el conjunto CIFAR-10 \cite{krizhevsky2009learning}, compuesto por $60000$ imágenes a color de $32\times32$ píxeles, clasificadas en 10 categorías (avión, automóvil, pájaro, gato, ciervo, perro, rana, caballo, barco y camión). La partición utilizada fue de $50000$ imágenes para entrenamiento y $10000$ para prueba.
 
-CIFAR-10 se consideró adecuado por su tamaño moderado y por la diversidad de clases, lo que permitió evaluar técnicas de cuantización sin requerir recursos computacionales excesivos. En la figura \ref{fig:cifar10} se mostraron ejemplos representativos de cada clase del conjunto.
+CIFAR-10 se consideró adecuado por su tamaño moderado y por la diversidad de clases, lo que permitió evaluar técnicas de cuantización sin requerir recursos computacionales excesivos. En la \reffig{fig:cifar10} se mostraron ejemplos representativos de cada clase del conjunto.
 
-\defaultfigure{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}
+\defaultfigurecustomsize{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}{0.85}
 
 \subsection{Modelo}
 \label{sec:model}
 El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{LeCun1998}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa 0.5 y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con $2175626$ parámetros entrenables.
 
-La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y la figura \reffig{fig:model_architecture} ilustra la misma.
+La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y \reffig{model_architecture} ilustra la misma.
 
 \begin{table}[H]
     \centering
@@ -41,18 +41,19 @@ La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizad
     \end{tabularx}
     \label{tab:model_architecture}
 \end{table}
+
 \defaultdiagram{neural_nets/new_model}{Arquitectura del modelo utilizado.}{model_architecture}{1}
 
 A continuación se exponen las funciones principales de los tipos de capa empleados:
 
 \begin{itemize}
-    \item Capas convolucionales (\texttt{Conv2D}): extraen características espaciales de las imágenes mediante filtros deslizantes que realizan productos punto entre pesos y regiones locales de entrada, y genera mapas de características que captan patrones como bordes y texturas \cite{Krizhevsky2012}.
+    \item Capas convolucionales (\texttt{Conv2D}): Extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas. \cite{Krizhevsky2012}.
 
     \item Capas de submuestreo (\texttt{MaxPool2D}): reducen la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo en ventanas locales, lo que genera invarianza a pequeñas traslaciones y reduce el costo computacional \cite{LeCun1998}.
 
     \item Capa de aplanado (\texttt{Flatten}): transformó la salida tridimensional de las capas convolucionales en un vector unidimensional para conectarla con capas totalmente conectadas \cite{Goodfellow2016}.
 
-    \item Capas densas (\texttt{Dense}): implementan una capa totalmente conectada como se describió en la sección \ref{sec:redes_neuronales}, realiza combinaciones lineales seguidas de funciones de activación no lineales, con la función de producir representaciones de alto nivel y llevar a cabo la clasificación final.
+    \item Capas densas (\texttt{Dense}): implementan una capa totalmente conectada como se describió en la sección \ref{sec:redes_neuronales}, realiza combinaciones lineales seguidas de funciones de activación no lineales, con la función de producir representaciones de alto nivel y llevar a cabo la clasificación final. Los parámetros de esta capa son los pesos y los \textit{biases} asociados a cada neurona \cite{Goodfellow2016}.
 
     \item \texttt{Dropout}: durante el entrenamiento, desactiva aleatoriamente un porcentaje de conexiones (50\%), lo que ayuda a prevenir el sobreajuste \cite{Srivastava2014}.
 \end{itemize}
@@ -60,9 +61,9 @@ A continuación se exponen las funciones principales de los tipos de capa emplea
 Las funciones de activación empleadas fueron las siguientes:
 
 \begin{itemize}
-        \item \texttt{ReLU} (\textit{Rectified Linear Unit}): definida como $f(x)=\max(0,x)$, se utiliza por su eficiencia computacional y para mitigar el problema del gradiente desvaneciente \cite{Nair2010}.
+    \item \texttt{ReLU} (\textit{Rectified Linear Unit}): definida como $f(x)=\max(0,x)$, se utiliza por su eficiencia computacional y para mitigar el problema del gradiente desvaneciente \cite{Nair2010}.
 
-    \item \texttt{Softmax}: aplicada en la capa de salida para transformar el vector de activaciones en una distribución de probabilidad sobre las clases: $\sigma(z_i)=\dfrac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$ \cite{Bridle1990}.
+    \item \texttt{Softmax}: función aplicada en la capa de salida de un modelo de clasificación. Transforma el vector de activaciones en una distribución de probabilidad sobre las clases, donde cada valor representa la probabilidad estimada de que la muestra pertenezca a esa clase. La suma de todas las probabilidades es igual a 1. \cite{Bridle1990}.
 \end{itemize}
 
 \subsection{Esquemas de cuantización}
@@ -71,8 +72,8 @@ Se evaluaron dos esquemas de cuantización representativos para comparar los res
 
 Ambos esquemas comparten las siguientes características:
 \begin{itemize}
-\item Los \textit{biases} se cuantizaron con cuantizadores uniformes signados de 8 bits
-\item Las activaciones con cuantizadores uniformes no signados de 16 bits, dado que estos parámetros influían de forma significativa en el desempeño de la red. En particular, la activación de la última capa densa (\texttt{dense\_1}) no se cuantizó para preservar la precisión de la salida.
+\item Los \textit{biases} se cuantizaron con cuantizadores uniformes signados de 8 bits.
+\item Las activaciones se cuantizaron con cuantizadores uniformes no signados de 16 bits. La selección de los parámetros de cuantización para las activaciones requirió especial cuidado y una estrategia de búsqueda robusta. No obstante, como se explicó, este experimento dejó de lado la exploración en profundidad de los hiperparámetros, por ello, se decidió emplear una cuantización poco agresiva para permitir comparar los esquemas definidos sin interferencias. En particular, la activación de la última capa densa (\texttt{dense\_1}) no se cuantizó para preservar la precisión de la salida: ello resultó fundamental para no alterar el entrenamiento de la red, puesto que la derivada de la función de activación suele ser muy cercana a $0$ y, por tanto, el gradiente puede desvanecerse, lo que impediría el aprendizaje efectivo del modelo. Tras el entrenamiento, la activación de esta capa pudo cuantizarse sin afectar de forma significativa la precisión. Además, este trabajo se centró en evaluar los beneficios de la cuantización sobre la complejidad espacial del modelo, la cuantización de las activaciones no tiene un impacto directo en el tamaño del modelo, pero si en la precisión.
 \end{itemize}
 
 La diferencia entre los grupos radica en la cuantización de los pesos de las capas convolucionales y densas.
@@ -87,48 +88,63 @@ Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final
 \centering
 \caption{Esquemas de cuantización definidos para los ensayos.}
 \label{tab:quant_layouts_final}
-% Reduce font size for the table body; place inside the float so it affects the typeset box.
 \footnotesize
-% Use tabularx so the wide "Params." columns wrap to \textwidth.
-% Use fixed-width paragraph columns for the 'Parámetros cuantizador' fields
-% so their wrapping is predictable. Adjust 0.28\textwidth if needed.
-% Use fixed-width p{...} columns for full manual control. Widths chosen to
-% approximately sum to \textwidth; adjust values if needed.
-\begin{tabularx}{\textwidth}{@{} >{\centering\arraybackslash}p{0.15\textwidth} >{\centering\arraybackslash}p{0.05\textwidth} >{\centering\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}p{0.15\textwidth} >{\centering\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}p{0.15\textwidth} @{} }
+\renewcommand{\arraystretch}{1.3}
+%
+% --- SOLUCIÓN: Cambiar 'p' por 'm' para centrar verticalmente ---
+%
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}m{0.12\textwidth} % <-- 'm' en lugar de 'p'
+    >{\raggedright\arraybackslash}m{0.14\textwidth} % <-- 'm' en lugar de 'p'
+    >{\raggedright\arraybackslash}m{0.15\textwidth} % <-- 'm' en lugar de 'p'
+    >{\raggedright\arraybackslash}m{0.13\textwidth} % <-- 'm' en lugar de 'p'
+    >{\raggedright\arraybackslash}m{0.15\textwidth} % <-- 'm' en lugar de 'p'
+    >{\raggedright\arraybackslash}m{0.13\textwidth}  % <-- 'm' en lugar de 'p'
+@{} }
 \toprule
  & & \multicolumn{2}{c}{\textbf{Esquema 1: Uniforme}} & \multicolumn{2}{c}{\textbf{Esquema 2: Flexible}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-\textbf{Capa} & \textbf{Tipo*} & \textbf{Cuantizador} & \textbf{Parámetros del cuantizador} & \textbf{Cuantizador} & \textbf{Parámetros del cuantizador} \\
+\textbf{Capa} & \textbf{Componente} & \textbf{Tipo} & \textbf{Parámetros} & \textbf{Tipo} & \textbf{Parámetros} \\
 \midrule
-\texttt{conv2d} & k & Uniforme & $W \in \text{D}^*$ & Flexible & \shortstack[l]{\(W=8\)\\\(L=16\)} \\
-& b & Uniforme & $W=8$ & Uniforme & $W=8$ \\
-& a & Uniforme & $W=16$ & Uniforme & $W=16$ \\
+%
+\multirow{3}{*}{\texttt{conv2d}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
+\cmidrule(lr){2-6}
+& bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
+\cmidrule(lr){2-6}
+& activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\texttt{conv2d\_1} & k & Uniforme & $W \in \text{D}^*$ & Flexible & \shortstack[l]{\(W\in\{4,6,8\}\)\\\(L\in\text{A}^*\)} \\
- & b & Uniforme & $W=8$ & Uniforme & $W=8$ \\
- & a & Uniforme & $W=16$ & Uniforme & $W=16$ \\
+\multirow{3}{*}{\texttt{conv2d\_1}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
+\cmidrule(lr){2-6}
+ & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
+\cmidrule(lr){2-6}
+ & activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\texttt{dense} & k & Uniforme & $W \in \text{D}^*$ & Flexible & \shortstack[l]{\(W\in\{4,6,8\}\)\\\(L\in\text{A}^*\)} \\
- & b & Uniforme & $W=8$ & Uniforme & $W=8$ \\
- & a & Uniforme & $W=16$ & Uniforme & $W=16$ \\
+\multirow{3}{*}{\texttt{dense}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
+\cmidrule(lr){2-6}
+ & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
+\cmidrule(lr){2-6}
+ & activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\texttt{dense\_1} & k & Uniforme & $W \in \text{D}^*$ & Flexible & \shortstack[l]{\(W=8\)\\\(L=16\)} \\
-& b & Uniforme & $W=8$ & Uniforme & $W=8$ \\
-& a & None & - & None & - \\
+\multirow{3}{*}{\texttt{dense\_1}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
+\cmidrule(lr){2-6}
+& bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
+\cmidrule(lr){2-6}
+& activation & --------- & --------- & --------- & --------- \\
 \bottomrule
-\multicolumn{6}{@{}l}{\textit{Tipos representados por: k = kernel, b = bias, a = activación.}} \\
-\multicolumn{6}{@{}l}{\textit{$W$: resolución de bits. $L$: niveles de cuantización.}} \\
-\multicolumn{6}{@{}l}{\textit{*Conjunto A para $L$: $\{2,3,4,6,8,10,16\}$.}} \\
-\multicolumn{6}{@{}l}{\textit{*Conjunto D para $W$: $\{1,2,3,4,5,6,8,10,16,24\}$.}} \\
+%
+\multicolumn{6}{@{}l}{\textit{$b$: resolución de bits. $n_{l}$: número de niveles de cuantización.}} \\
+\multicolumn{6}{@{}l}{\textit{*Conjunto $\mathcal{B} = \{1,2,3,4,5,6,8,10,16,24\}$.}} \\
+\multicolumn{6}{@{}l}{\textit{**Conjunto $\mathbb{L} = \{2,3,4,6,8,10,16\}$.}} \\
 \end{tabularx}
 \end{table}
 
 \subsection{\texttt{Pipeline}s experimentales}
 
-Se definió una serie de \texttt{Pipeline}s (ver sección \ref{sec:pipeline}) que describen las etapas necesarias para reproducir los experimentos, y generan las configuraciones de cuantización (\texttt{qconfig}s) de forma dinámica para cada esquema de cuantización y configuración de hiperparámetros.
+Se definieron una serie de \texttt{Pipeline}s (ver sección \ref{sec:pipeline}) que describen las etapas necesarias para reproducir los experimentos, y generan las configuraciones de cuantización (\texttt{qconfig}) de forma dinámica para cada esquema de cuantización y configuración de hiperparámetros.
 
-Los pipelines generados para ambos esquemas poseen las mismas etapas, que se ilustran en la figura \ref{fig:experimental_pipeline}.
-\defaultdiagram{ensayos/pipeline}{Diagrama del \texttt{Pipeline} experimental.}{experimental_pipeline}{1}
+Los pipelines generados para ambos esquemas poseen las mismas etapas, que se ilustran en la \reffig{experimental_pipeline}.
+% \TODO{Este diagrama se puede mejorar}
+\defaultdiagram{ensayos/pipeline}{Diagrama del \texttt{Pipeline} experimental.}{experimental_pipeline}{0.7}
 
 La única diferencia entre ambos pipelines radicó en la etapa de cuantización, donde se aplicó el esquema correspondiente (uniforme o flexible) con la configuración definida en la tabla \ref{tab:quant_layouts_final}. Para cada esquema se generaron pipelines para cada configuración de bits y niveles. A su vez, cada configuración se ejecutó tres veces con diferentes semillas aleatorias para obtener resultados estadísticos.
 
@@ -138,36 +154,47 @@ La tabla \ref{tab:pipeline_stages} describe las etapas y las configuraciones de 
     \centering
     \caption{Etapas del pipeline experimental y parámetros relevantes. Los nombres entre \texttt{} corresponden a las claves usadas en el script de experimentos.}
     \label{tab:pipeline_stages}
-    % Reduce font size for the table body; place inside the float so it affects the typeset box.
     \footnotesize
-    % Use fixed-width columns so we can apply \multirow for stages with multiple parameters.
-    \begin{tabularx}{\textwidth}{@{} >{\ttfamily}p{0.2\textwidth} p{0.46\textwidth} p{0.15\textwidth} p{0.15\textwidth} @{} }
+    \renewcommand{\arraystretch}{1.2}
+    %
+    % Columna 'Descripción' (m{...}) ya está centrada verticalmente.
+    % Las columnas 3 y 4 están centradas horizontal y verticalmente.
+    %
+    \begin{tabularx}{\textwidth}{@{}
+        >{\ttfamily}m{0.2\textwidth}
+        m{0.42\textwidth}  % <-- 'm' la centra verticalmente
+        >{\centering\arraybackslash}m{0.15\textwidth}
+        >{\centering\arraybackslash}m{0.19\textwidth}
+    @{} }
     \toprule
     \textbf{Etapa} & \textbf{Descripción} & \textbf{Parámetro} & \textbf{Valor} \\
     \midrule
     % model_creation: no parameters
-    Crear modelo & Creación del modelo a emplear. & - & - \\
+    Crear modelo & Creación del modelo a emplear. & --- & --- \\
     \midrule
-    % initial_training: multiple parameters -> use multirow
-    \multirow{4}{*}{Entrenamiento} & \multirow{4}{0.46\textwidth}{Entrenamiento inicial del modelo antes de cuantizar. Para obtener una precisión base contra la cual contrastar los resultados} & epochs & 20 \\
-    \cmidrule(l{3pt}r{40pt}){3-4}
-    & & batch\_size & 128 \\
-    \cmidrule(l{3pt}r{40pt}){3-4}
+    % initial_training: multiple parameters
+    \multirow{4}{*}{\texttt{Entrenamiento}} & \multirow{4}{0.42\textwidth}{Entrenamiento inicial del modelo antes de cuantizar. Para obtener una precisión base contra la cual contrastar los resultados.} & epochs & 20 \\
+    %
+    % \cmidrule 'recortada' (trimmed)
+    \cmidrule(l{4pt}r{20pt}){3-4}
+    %
+    & & \texttt{batch\_size} & 128 \\
+    \cmidrule(l{4pt}r{20pt}){3-4}
     & & $\eta$ & $10^{-3}$ \\
-    \cmidrule(l{3pt}r{40pt}){3-4}
-    & & val\_split & $0.1$ \\
+    \cmidrule(l{4pt}r{20pt}){3-4}
+    & & \texttt{val\_split} & $0.1$ \\
     \midrule
     % quantization: single parameter
-    Cuantización & Aplicación del esquema de cuantización (parametrizado por la configuración experimental). & qconfig & \shortstack[l]{ver tabla\\\ref{tab:quant_layouts_final}} \\
+    \texttt{Cuantización} & Aplicación del esquema de cuantización (parametrizado por la configuración experimental). & \texttt{qconfig} & \shortstack[c]{ver tabla\\ \ref{tab:quant_layouts_final}} \\
     \midrule
     % qat: multiple parameters
-    \multirow{3}{*}{QAT} & \multirow{3}{0.46\textwidth}{Re-entrenamiento con QAT para entrenar el modelo cuantizado.} & epochs & 200 \\
-    \cmidrule(l{3pt}r{40pt}){3-4}
-    & & batch\_size & $16$ \\
-    \cmidrule(l{3pt}r{40pt}){3-4}
+    \multirow{3}{*}{\texttt{QAT}} & \multirow{3}{0.42\textwidth}{Re-entrenamiento con QAT para entrenar el modelo cuantizado.} & epochs & 200 \\
+    \cmidrule(l{4pt}r{20pt}){3-4}
+    & & \texttt{batch\_size} & $16$ \\
+    \cmidrule(l{4pt}r{20pt}){3-4}
     & & $\eta$ & $10^{-5}$ \\
     \midrule
-    Evaluación & Evaluación de la precisión y complejidad del modelo con el conjunto de datos de evaluación. & - & - \\
+    \texttt{Evaluación} & Evaluación de la precisión y complejidad del modelo con el conjunto de datos de evaluación. & --- & --- \\
     \bottomrule
     \end{tabularx}
 \end{table}

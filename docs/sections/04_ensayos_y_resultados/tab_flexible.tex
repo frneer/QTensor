@@ -1,14 +1,31 @@
 {\footnotesize
-\begin{longtable}{@{}r r r r c c@{}}
+
+% --- SOLUCIÓN: Eliminado el \begin{table}[H] y \centering ---
+% (ltablex no puede estar dentro de un float 'table')
+
+    % --- SOLUCIÓN: Centrado vertical para columnas X ---
+    \renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+
+    % --- SOLUCIÓN: Cambiado 'longtable' por 'tabularx' (de ltablex) ---
+    \begin{tabularx}{\textwidth}{@{}
+        >{\centering\arraybackslash}X  % Precisión
+        >{\centering\arraybackslash}X  % Prec. Rel.
+        >{\centering\arraybackslash}X  % Compl.
+        >{\centering\arraybackslash}X  % Compres.
+        >{\centering\arraybackslash}X % Bits
+        >{\centering\arraybackslash}X % Niv.
+    @{}}
     \caption{Resultados de cuantización flexible} \label{tab:flexible_results} \\
     \toprule
-    Precisión & Prec. Rel. (\%) & Compl. (Kb) & Compres. & Bits & Niv. \\
+    % --- SOLUCIÓN: Encabezados completos ---
+    \textbf{Máxima Precisión} & \textbf{Precisión Relativa (\%)} & \textbf{Complejidad (Kb)} & \textbf{Tasa de Compresión} & \textbf{Bits} & \textbf{Niveles} \\
     \midrule
     \endfirsthead
 
     \multicolumn{6}{c}{\tablename\ \thetable\ -- Continuación de la página anterior} \\
     \toprule
-    Precisión & Prec. Rel. (\%) & Compl. (Kb) & Compres. & Bits & Niv. \\
+    % --- SOLUCIÓN: Encabezados completos (repetidos) ---
+    \textbf{Máxima Precisión} & \textbf{Precisión Relativa (\%)} & \textbf{Complejidad (Kb)} & \textbf{Tasa de Compresión} & \textbf{Bits} & \textbf{Niveles} \\
     \midrule
     \endhead
 
@@ -19,6 +36,7 @@
     \bottomrule
     \endlastfoot
 
+    % --- Datos de la tabla ---
     \rowcolor{gray!20}
     $0.7437$ & $100.00$ & $67988.31$ & $1.00\times$ & \texttt{-} & \texttt{-} \\
     $0.7354$ & $98.88$ & $7633.31$ & $8.91\times$ & $6$ & $25$ \\
@@ -53,5 +71,7 @@
     $0.7061$ & $94.94$ & $2389.88$ & $28.45\times$ & $8$ & $2$ \\
     $0.7054$ & $94.85$ & $2484.54$ & $27.36\times$ & $6$ & $2$ \\
     $0.6987$ & $93.95$ & $2119.35$ & $32.08\times$ & $4$ & $2$ \\
-\end{longtable}
+    \end{tabularx}
+
+% --- SOLUCIÓN: Eliminado el \end{table} ---
 }

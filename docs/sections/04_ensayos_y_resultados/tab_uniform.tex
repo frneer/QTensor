@@ -2,9 +2,25 @@
 \begin{table}[H]
     \centering
     \caption{Resultados de cuantización uniforme}
-    \begin{tabular}{@{}r r r r c@{}}
+    \label{tab:uniform_results}
+
+    % --- SOLUCIÓN: Redefinir X para que se centre verticalmente (m) ---
+    \renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+
+    \begin{tabularx}{\textwidth}{@{}
+        >{\centering\arraybackslash}X  % Máxima Precisión
+        >{\centering\arraybackslash}X  % Precisión Relativa
+        >{\centering\arraybackslash}X  % Complejidad
+        >{\centering\arraybackslash}X  % Tasa de Compresión
+        >{\centering\arraybackslash}X  % Bits
+    @{}}
         \toprule
-        Prec. (máx.) & Prec. Rel. (\%) & Compl. (Kb) & Compres. & Bits \\
+        % --- Encabezados completos ---
+        \textbf{Máxima Precisión} &
+        \textbf{Precisión Relativa (\%)} &
+        \textbf{Complejidad (Kb)} &
+        \textbf{Tasa de Compresión} &
+        \textbf{Bits} \\
         \midrule
         $0.7591$ & $102.51$ & $50917.08$ & $1.34\times$ & $24$ \\
         $0.7585$ & $102.43$ & $16997.08$ & $4.00\times$ & $8$ \\
@@ -19,7 +35,6 @@
         $0.6371$ & $86.03$ & $6397.08$ & $10.63\times$ & $3$ \\
         $0.3698$ & $49.94$ & $2157.08$ & $31.52\times$ & $1$ \\
         \bottomrule
-    \end{tabular}
-    \label{tab:uniform_results}
+    \end{tabularx}
 \end{table}
 }
