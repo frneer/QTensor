@@ -5,11 +5,11 @@
     \tikzset{node distance = 1cm and 2cm}
     % Nodes
     \node (x_input) at (0, 0) [block] {$x$};
-    \node (w_input) [below=of x_input] [block] {$w$};
-    \node (forward_pass) [right=of w_input] [block] {Forward Pass};
+    \node (w_input) [below=of x_input] [block] {$\theta$};
+    \node (forward_pass) [right=of w_input] [block] {\textit{forward pass}};
     \node (loss) [below=of forward_pass] [block] {Loss};
     \node (y_input) [below=of loss] [block] {$y$};
-    \node (gradient) [left=of loss] [block] {Backward Pass};
+    \node (gradient) [left=of loss] [block] {\textit{backward pass}};
 
     % % Arrows
     \draw [arrow] (x_input) -| (forward_pass);
@@ -17,6 +17,6 @@
     \draw [arrow] (y_input) -- (loss);
     \draw [arrow] (forward_pass) -- node[below=of forward_pass, yshift = 1.5cm, xshift = -0.2cm] {$\hat{y}$} (loss);
     \draw [arrow] (loss) -- (gradient);
-    \draw [arrow] (gradient) --  (w_input); % Gradient updates W
+    \draw [arrow] (gradient) --  node[below=of w_input, yshift = 1.25cm, xshift = -0.5cm] {SGD} (w_input); % Gradient updates W
 
 \end{tikzpicture}
