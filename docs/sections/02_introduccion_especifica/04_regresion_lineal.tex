@@ -1,0 +1,62 @@
+\subsection{Regresión lineal}
+\label{sec:regresion_lineal}
+El modelo de regresión lineal es uno de los modelos más simples utilizados en el modelado de sistemas. Este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en la \refeq{linear_regression} \cite{Bishop2006}.
+
+\begin{equation}
+    \label{eq:linear_regression}
+    \hat{y} = \theta_0 + \theta_1 x
+\end{equation}
+
+En el caso general de la regresión lineal, se busca modelar la relación entre una variable dependiente $y$ y una o más variables independientes $x_j$ mediante una combinación lineal de estas últimas, como se muestra en la \refeq{linear_regression_general}.
+
+\begin{equation}
+    \label{eq:linear_regression_multivariable}
+    \hat{y} = \theta_0 + \sum_{j=1}^{m} \theta_j x_j
+\end{equation}
+
+Una elección común para la métrica utilizada en problemas de regresión lineal es el error cuadrático medio explicado en la sección \ref{sec:metricas_regresion}, definida en la \refeq{mse}. En este caso, la función de costo $\mathcal{L}$ a minimizar es directamente la métrica MSE, como se muestra en la \refeq{mse_regression}.
+
+\begin{equation}
+    \label{eq:mse_regression}
+    \mathcal{L}(\theta, \mathcal{D}) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+\end{equation}
+
+Para este problema particular, es posible deducir analíticamente los valores de $\mathbf{\theta}$ que minimizan la función de costo definida en la \refeq{mse_regression}.
+
+Si se deriva la función de costo con respecto a los parámetros y se iguala a cero como se muestra en la \refeq{mse_derivative}.
+
+\begin{equation}
+    \label{eq:mse_derivative}
+    \frac{\partial \mathcal{L}}{\partial \theta} = 0
+\end{equation}
+
+Se obtiene la fórmula conocida como OLS (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos $\hat{\theta}$ de manera directa, como se muestra en la \refeq{ols}, donde $X$ es la matriz de características, $\hat{\theta}$ es el vector de parámetros, y $y$ es el vector de salidas reales, como se muestra en la \refeq{ols_matrices} \cite{Bishop2006}
+
+\begin{equation}
+    \label{eq:ols}
+        \hat{\theta} = \left(X^T X\right)^{-1} X^T y
+\end{equation}
+
+\begin{equation}
+    \label{eq:ols_matrices}
+      X =
+        \begin{bmatrix}
+        1 & x_{1,1} & x_{2,1} & \dots & x_{n,1} \\
+        1 & x_{1,2} & x_{2,2} & \dots & x_{n,2} \\
+        \vdots & \vdots & \vdots & \dots & \vdots \\
+        1 & x_{1,m} & x_{2,m} & \dots & x_{n,m}
+        \end{bmatrix}
+      \quad \quad
+      \hat{\theta} =
+        \begin{bmatrix}
+          \hat{\theta}_0 \\ \hat{\theta}_1 \\ \hat{\theta}_2 \\ \dots \\ \hat{\theta}_n
+        \end{bmatrix}
+      \quad \quad
+      y = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_m \end{bmatrix}
+    \end{equation}
+
+Este problema es un caso de un problema de optimización con solución cerrada, ya que permite calcular los parámetros óptimos de manera directa sin necesidad de utilizar métodos iterativos.
+
+A modo de ilustración, el resultado de aplicar este modelo a un conjunto de datos se muestra en la \reffig{linear_regression}, donde se observa la línea de regresión ajustada a los datos, así como los errores entre las predicciones del modelo y los datos reales.
+
+\defaultfigurecustomsize{regression/linear_regression.png}{Regresión Lineal.}{linear_regression}{1.1}

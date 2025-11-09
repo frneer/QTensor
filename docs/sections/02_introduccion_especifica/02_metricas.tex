@@ -1,10 +1,10 @@
-\section{Métricas de evaluación}
+\subsection{Métricas de evaluación}
 \label{sec:metricas}
 
-En el contexto del aprendizaje automático, las métricas de evaluación permiten cuantificar el desempeño de un modelo en tareas específicas. Asimismo, facilitan la comparación entre modelos, el ajuste de hiperparámetros y la validación del proceso de aprendizaje. La elección de la métrica adecuada depende del tipo de problema abordado.
+En el contexto del aprendizaje automático, las métricas de evaluación permiten cuantificar el desempeño de un modelo en tareas específicas. Asimismo, facilitan la comparación entre modelos y la validación del proceso de aprendizaje. La elección de la métrica adecuada depende del tipo de problema abordado.
 
 
-\subsection{Métricas para problemas de regresión}
+\subsubsection{Métricas para problemas de regresión}
 \label{sec:metricas_regresion}
 
 En problemas de regresión, se emplean métricas que cuantifican el error de predicción, entre ellas:
@@ -12,12 +12,13 @@ En problemas de regresión, se emplean métricas que cuantifican el error de pre
 \begin{itemize}
     \item Error cuadrático medio (MSE, por sus siglas en inglés \textit{Mean Squared Error}): se define como la media de los cuadrados de las diferencias entre las predicciones y los valores reales \cite{botchkarev2019performance}.
     \begin{equation}
+        \label{eq:mse}
         \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
     \end{equation}
 
     \item Error absoluto medio (MAE, por sus siglas en inglés \textit{Mean Absolute Error}): se define como la media de las diferencias absolutas entre las predicciones y los valores reales \cite{willmott2005advantages}.
     \begin{equation}
-        \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+        \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
     \end{equation}
 
     \item Coeficiente de determinación ($R^2$): mide la proporción de varianza en los datos explicada por el modelo. Un valor de $R^2$ cercano a $1$ indica un buen ajuste \cite{alexander2016rsquared}.
@@ -26,9 +27,9 @@ En problemas de regresión, se emplean métricas que cuantifican el error de pre
     \end{equation}
 \end{itemize}
 
-\subsection{Métricas para problemas de clasificación}
+\subsubsection{Métricas para problemas de clasificación}
 \label{sec:metricas_clasificacion}
-Por su parte, en problemas de clasificación, las métricas se definen a partir de la matriz de confusión y sus componentes: verdaderos positivos (TP, por sus siglas en inglés \textit{True Positives}), falsos positivos (FP, por sus siglas en inglés \textit{False Positives}), verdaderos negativos (TN, por sus siglas en inglés \textit{True Negatives}) y falsos negativos (FN, por sus siglas en inglés \textit{False Negatives}). Los verdaderos positivos corresponden a instancias positivas correctamente clasificadas; los falsos positivos, a instancias negativas clasificadas como positivas; los verdaderos negativos, a instancias negativas correctamente clasificadas; y los falsos negativos, a instancias positivas clasificadas como negativas. La tabla \ref{tab:confusion_matrix} resume estos conceptos para un problema de clasificación binaria \cite{sokolova2009systematic}.
+En problemas de clasificación, las métricas se definen a partir de la matriz de confusión y sus componentes: verdaderos positivos (TP, por sus siglas en inglés \textit{True Positives}), falsos positivos (FP, por sus siglas en inglés \textit{False Positives}), verdaderos negativos (TN, por sus siglas en inglés \textit{True Negatives}) y falsos negativos (FN, por sus siglas en inglés \textit{False Negatives}). Los verdaderos positivos corresponden a instancias positivas correctamente clasificadas; los falsos positivos, a instancias negativas clasificadas como positivas; los verdaderos negativos, a instancias negativas correctamente clasificadas; y los falsos negativos, a instancias positivas clasificadas como negativas. La tabla \ref{tab:confusion_matrix} resume estos conceptos para un problema de clasificación binaria \cite{sokolova2009systematic}.
 
 \begin{table}[H]
     \centering

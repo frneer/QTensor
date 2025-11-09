@@ -1,0 +1,67 @@
+\subsection{Regresión logística}
+\label{sec:regresion_logistica}
+
+El modelo de regresión logística se utiliza en problemas de clasificación binaria. Estima la probabilidad de que una observación pertenezca a una clase mediante la función sigmoide \cite{Bishop2006}, como se muestra en la \refeq{logistic_regression}.
+
+\begin{equation}
+    \label{eq:logistic_regression}
+    \hat{y} = \mathbb{P}\left(y=1 \mid x\right)  = \frac{1}{1 + e^{-\left(\theta_0 + \sum_{j=1}^{m} \theta_j x_j\right)}}
+\end{equation}
+
+El valor de salida $\hat{y}$ pertenece al intervalo $\left[0, 1\right]$ y representa la probabilidad de que la observación pertenezca a la clase 1. En la práctica, se utiliza un umbral (comúnmente $0.5$). Si $\hat{y} \geq 0.5$, la observación se asigna a la clase 1, en caso contrario, a la clase 0. La \reffig{logistic_regression} ilustra el comportamiento de la función sigmoide en un problema de regresión logística con una sola variable independiente.
+
+\defaultfigurecustomsize{regression/logistic_regression.png}{Regresión Logística.}{logistic_regression}{1.1}
+
+En este modelo, el objetivo es correctamente clasificar las observaciones en sus respectivas clases. Para lograr esto, la regresión logística no predice una clase directamente, sino que modela la probabilidad $\mathbb{P}(y_i \mid x_i)$ de que cada observación pertenezca a su clase correspondiente. Intuitivamente, un modelo bien ajustado es aquel que asigna una alta probabilidad a los resultados que realmente se observaron en $\mathcal{D}$ \cite{Bishop2006}.
+
+Este principio se formaliza mediante la función de verosimilitud $V(\theta)$, la cual mide la probabilidad conjunta de observar todos los datos de la muestra (de tamaño $n$) dados los parámetros $\theta$, y se expresa como el producto de las probabilidades individuales en la \refeq{likelihood} \cite{Bishop2006}.
+
+\begin{equation}
+    \label{eq:likelihood}
+      V(\theta) = \prod_{i=1}^{n} \mathbb{P}(y_i \mid x_i)
+\end{equation}
+
+Por conveniencia computacional, se trabaja con el logaritmo de la función de verosimilitud, conocido como log-verosimilitud, que convierte el producto en una suma, como se muestra en la \refeq{log_likelihood}.
+
+\begin{equation}
+    \label{eq:log_likelihood}
+      \ell(\theta) = \sum_{i=1}^{n} \left[ y_i \log(\mathbb{P}(y_i \mid x_i)) + (1 - y_i) \log(1 - \mathbb{P}(y_i \mid x_i)) \right]
+\end{equation}
+
+En consecuencia, la función de costo se define como el negativo de la log-verosimilitud; por lo tanto, el problema se plantea como la minimización de dicha función (equivalente a maximizar la log-verosimilitud) con respecto a los parámetros $\theta$.
+
+En este problema, no existe una solución cerrada para optimizar la función de costo, por lo que se deben emplear métodos numéricos iterativos. Entre estos métodos, destacan los algoritmos de optimización basados en utilizar el gradiente de la función de costo \cite{Nocedal2006}.
+
+Estos algoritmos se pueden clasificar principalmente por la cantidad de información que utilizan. La familia más común son los métodos de primer orden, como el algoritmo de gradiente descendente (GD). Estos consisten en actualizar en cada iteración los parámetros moviéndose en la dirección opuesta al gradiente (la dirección de máximo decrecimiento) de la función de costo. Este fue, de hecho, el método utilizado para ajustar los parámetros en el modelo que genera la \reffig{logistic_regression}.
+
+Existen también métodos de segundo orden, como el método de Newton-Raphson \cite{Nocedal2006}, que no solo utilizan el gradiente (primera derivada), sino también la matriz Hessiana (segunda derivada) para modelar la curvatura de la función. Aunque estos métodos pueden converger más rápido, el costo de calcular la Hessiana es computacionalmente prohibitivo para la mayoría de los problemas modernos.
+
+Por esta razón, los métodos de primer orden como el algoritmo de gradiente descendente son los utilizados en el entrenamiento de redes neuronales.
+
+% En este problema, no existe una solución cerrada para optimizar la función de costo, por lo que se deben emplear métodos numéricos iterativos. Entre estos métodos, destacan los algoritmos de optimización basados en utilizar el gradiente de la función de costo \cite{Nocedal2006}.
+
+% Estos algoritmos, donde se utiliza el gradiente de la función de costo, consisten en actualizar en cada iteración los parámetros en la dirección de máximo decrecimiento de la función de costo. El método newton-raphson es un ejemplo de estos métodos que puede aplicarse en este contexto \cite{Nocedal2006}, sin embargo, existen otros métodos mayormente utilizados en el aprendizaje supervisado moderno como el algoritmo de gradiente descendiente, que fue el utilizado para ajustar los parámetros en el modelo utilizado para generar la \reffig{logistic_regression}.
+
+% Una variante de este algoritmo es el descenso por gradiente estocástico (SGD, por sus siglas del inglés \textit{Stochastic Gradient Descent}), que utiliza un subconjunto aleatorio de los datos de entrenamiento en cada iteración para calcular el gradiente, véase la \refeq{sgd}. Este método reduce el costo computacional al computar de manera segmentada el paso de iteración en lo que se denominan $\textit{batches}$. Además, el componente aleatorio del método ayuda a escapar de mínimos locales, mejorando las probabilidades de convergencia \cite{robbins1951stochastic}.
+
+% \begin{equation}
+%     \label{eq:sgd}
+%     \theta_{n+1} = \theta_n - \eta \nabla_{\theta} L(y_i, \hat{y}_i)
+% \end{equation}
+
+% en particular, el descenso por gradiente permite aproximar los parámetros que maximizan la verosimilitud.
+
+% \TODO{Revisar esta ultima parte}
+% En el caso de problemas con clasificación multiclase, se suele utilizar la función de costo de entropía cruzada generalizada (\textit{categorical cross-entropy} en inglés) cuya ecuación se muestra en la \refeq{categorical_cross_entropy} y la función de activación \textit{softmax}, cuya ecuación se muestra en la \refeq{softmax}, para modelar las probabilidades de pertenencia a cada clase.
+
+% \begin{equation}
+%     \label{eq:categorical_cross_entropy}
+%     L(\mathbf{y}, \hat{\mathbf{y}}) = - \sum_{i=1}^{n} \sum_{c=1}^{C} y_{i,c} \log(\hat{y}_{i,c})
+% \end{equation}
+
+% \begin{equation}
+%     \label{eq:softmax}
+%     \hat{y}_{i,c} = \frac{e^{z_{i,c}}}{\sum_{k=1}^{C} e^{z_{i,k}}}
+% \end{equation}
+
+% donde $C$ es el número de clases, $y_{i,c}$ es una variable indicadora que vale 1 si la observación $i$ pertenece a la clase $c$ y 0 en caso contrario, e $\hat{y}_{i,c}$ es la probabilidad estimada de que la observación $i$ pertenezca a la clase $c$, calculada mediante la función \textit{softmax} aplicada a los logits $z_{i,c}$.

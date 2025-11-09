@@ -1,0 +1,155 @@
+\section{Redes neuronales}
+\label{sec:redes_neuronales}
+Una red neuronal es un modelo matemático inspirado en la estructura y el funcionamiento del cerebro humano. La unidad básica de una red neuronal está representada por el modelo de perceptrón, el cual simula el comportamiento de una neurona biológica \cite{rosenblatt1958perceptron}.
+
+\subsection{Perceptrón}
+\label{sec:perceptron}
+
+El perceptrón es una unidad de procesamiento que recibe múltiples entradas $\mathbf{x} = [x_1, x_2, \ldots, x_n]$ y produce una salida $y_j$. Esta se obtiene como resultado de una combinación lineal de las entradas ponderadas por sus respectivos pesos $\mathbf{w} = [w_{1_j}, w_{2_j}, \ldots, w_{n_j}]$, a la que se añade un sesgo $b_j$. Dicha combinación se transforma mediante una función de activación no lineal $\varphi$, lo que introduce la capacidad de modelar relaciones complejas en los datos. La \refeq{perceptron} describe matemáticamente el funcionamiento de un perceptrón y la \reffig{perceptron} ilustra su estructura.
+
+\begin{equation}
+    \label{eq:perceptron}
+    y_j = \varphi\left(\sum_{i=1}^{n} w_{i_j} x_i + b_j\right)
+\end{equation}
+
+% \input{diagrams/neuron}
+\defaultdiagram{neuron.tex}{Esquema del perceptrón.}{perceptron}{1.0}
+
+\subsection{Perceptrón multicapa}
+\label{sec:perceptron_multicapa}
+
+No obstante, la funcionalidad del modelo de perceptrón es limitada, ya que solo resuelve problemas linealmente separables. El modelo de perceptrón multicapa (MLP, por sus siglas en inglés), supera esta limitación mediante la composición de perceptrones simples.
+
+Un MLP está formado por varias capas de perceptrones conectadas entre sí. Gracias a la mezcla de combinaciones lineales y funciones de activación no lineales en cada capa, la red puede modelar relaciones no lineales complejas y aprender representaciones jerárquicas de los datos \cite{cybenko1989approximation}.
+
+El MLP consta de tres etapas: una capa de entrada, una o más capas ocultas y una capa de salida. Cada capa está formada por un conjunto de neuronas que reciben entradas de la capa anterior y envían sus salidas a la siguiente. La \reffig{mlp} ilustra la estructura de un perceptrón multicapa. Estas capas suelen denominarse densas o totalmente conectadas, porque cada neurona de una capa está conectada a todas las neuronas de la capa siguiente.
+
+En este paradigma, cada capa adicional aprende representaciones de mayor abstracción. Las capas iniciales extraen características simples, las capas profundas combinan esas características para identificar patrones complejos. Por tanto, aumentar la profundidad incrementa la capacidad expresiva de la red y su habilidad para resolver problemas más complejos \cite{lecun:hal-04206682}.
+
+Históricamente, en el aprendizaje supervisado, era necesaria realizar una extracción manual de características relevantes de los datos y preprocesamiento de los mismos para su posterior uso en el entrenamiento de modelos. Sin embargo, las redes neuronales profundas han revolucionado este enfoque al permitir que el modelo aprenda automáticamente dichas características a partir de los datos crudos, eliminando la necesidad de ingeniería de características manual y mejorando significativamente el desempeño en tareas complejas como el reconocimiento de imágenes y el procesamiento del lenguaje natural \cite{Goodfellow2016}.
+
+% \input{diagrams/mlp}
+\defaultdiagram{mlp.tex}{Esquema de un perceptrón multicapa.}{mlp}{0.8}
+
+Desde el punto de vista matemático, las salidas de este modelo pueden representarse como la composición de funciones no lineales, donde cada función representa una capa de la red. La \refeq{mlp} describe matemáticamente el funcionamiento de un perceptrón multicapa con $k$ capas, donde $\mathbf{w}_l$ y $\mathbf{b}_l$ son los pesos y sesgos de la capa $l$, y $\varphi_l$ es la función de activación aplicada en esa capa.
+
+\begin{equation}
+    \label{eq:mlp}
+    \mathbf{\hat{y}} = \varphi_k\left(\mathbf{w}_k \cdot \varphi_{k-1}\left(\mathbf{w}_{k-1} \cdots \varphi_1\left(\mathbf{w}_1 \cdot \mathbf{x} + \mathbf{b}_1\right) + \mathbf{b}_{k-1}\right) + \mathbf{b}_k\right)
+\end{equation}
+
+% TODO{Fran} hablar de SGD aca ver bishop tabs abiertas.
+% Para optimizar los parámetros de la red neuronal, se emplea una función de costo $\mathcal{L}(\mathbf{y}, \hat{\mathbf{y}})$, tal como se describió en la sección \ref{sec:modelado_de_sistemas}. La elección de esta función depende del problema a resolver: si es de regresión o clasificación, si es clasificación binaria o multiclase, entre otros aspectos. Esta función se minimiza mediante algoritmos de optimización iterativos, como el descenso por gradiente, como se describió en la sección \ref{sec:gradiente_descendiente}. No obstante, como puede observarse en la \refeq{mlp}, en el caso de MLP la salida de la red es una composición de múltiples funciones no lineales, lo que dificulta el cálculo directo del gradiente con respecto a los pesos y sesgos.
+
+\subsection{Entrenamiento de redes neuronales}
+\label{sec:entrenamiento_redes_neuronales}
+La diferencia central entre el entrenamiento de redes neuronales y la optimización de modelos más simples, como la regresión lineal o logística, radica en la complejidad de la función que se optimiza \cite{Goodfellow2016}.
+
+Esta complejidad proviene de la estructura profunda y no lineal de las redes: la función de costo $\mathcal{L}(\theta, \mathcal{D})$ puede ser no convexa y presentar múltiples mínimos locales, dificultando la convergencia de los algoritmos de optimización \cite{Goodfellow2016}.
+
+Para lograr entrenar estos modelos profundos, generalmente se requieren grandes cantidades de datos etiquetados. Lo que incrementa la complejidad computacional del proceso de entrenamiento y la necesidad de utilizar técnicas avanzadas de optimización.
+
+Como se desarrollo en la sección \ref{sec:funcion_de_costo}, los problemas de aprendizaje automático, buscan optimizar la función de costo $\mathcal{L}(\theta, \mathcal{D})$ con respecto a los parámetros del modelo $\theta$, para datos no vistos previamente. Y por ende, el conjunto de datos suele dividirse en tres subconjuntos: entrenamiento, validación y prueba. El conjunto de entrenamiento ($\mathcal{D}_{\mathrm{train}}$) se utiliza para ajustar los pesos de la red para minimizar la función de costo. El conjunto de validación ($\mathcal{D}_{\mathrm{val}}$) se emplea para monitorear el desempeño durante el entrenamiento y seleccionar hiperparámetros del modelo y de entrenamiento (como la tasa de aprendizaje, el número de capas o el tamaño de las capas ocultas) y prevenir el sobreajuste mediante criterios de parada temprana (\textit{early stopping}) \cite{Goodfellow2016}. Finalmente, el conjunto de prueba ($\mathcal{D}_{\mathrm{test}}$) se reserva para evaluar el desempeño final del modelo sobre datos no vistos durante el desarrollo \cite{vanderGoot2021} y verificar su capacidad de generalización.
+
+El algoritmo de gradiente descendente explicado en la sección \ref{sec:gradiente_descendiente}, en este contexto, realiza en cada iteración (época) la evaluación de la función de costo $\mathcal{L}(\theta, \mathcal{D}_{\mathrm{train}})$ y el cálculo de su gradiente con respecto a los parámetros $\theta$ para todo el conjunto de datos de entrenamiento. Sin embargo, debido a la gran cantidad de datos y parámetros, este enfoque puede ser computacionalmente costoso e ineficiente.
+
+Un algoritmo ampliamente utilizado en el entrenamiento de redes neuronales es el descenso por gradiente estocástico (SGD, por sus siglas en inglés). Como solución práctica para conjuntos de datos grandes, SGD actualiza los parámetros usando un subconjunto aleatorio de muestras llamado \textit{minibatch}. Esto reduce el coste computacional por iteración y permite trabajar con datos que no caben en memoria \cite{Goodfellow2016}.
+
+Además, la selección aleatoria de minibatches introduce ruido en la estimación del gradiente, lo que puede ayudar a escapar de mínimos locales y, en algunos casos, mejorar la generalización del modelo \cite{Goodfellow2016}.
+
+A partir de SGD se desarrollaron variantes que buscan mejorar la convergencia y la estabilidad del entrenamiento, por ejemplo mediante el uso de momento, tasas de aprendizaje adaptativas o técnicas de regularización \cite{Goodfellow2016}.
+
+Como ejemplo de estas variantes, en este trabajo se emplea ADAM (\textit{Adaptive Moment Estimation}) \cite{kingma2017adammethodstochasticoptimization}. ADAM mantiene promedios móviles del gradiente y del cuadrado del gradiente, lo que permite adaptar la tasa de aprendizaje de forma individual para cada parámetro.
+
+% Para el entrenamiento de redes neuronales se emplean diversos algoritmos de optimización. Entre los más comunes se encuentra el descenso por gradiente estocástico (SGD, por sus siglas en inglés) \cite{Qian1999}, una variante del algoritmo de gradiente descendiente explicado en la sección \ref{sec:gradiente_descendiente}. También se emplea el algoritmo ADAM (\textit{Adaptive Moment Estimation}) \cite{kingma2017adammethodstochasticoptimization}. Independientemente del optimizador empleado, el cálculo del gradiente de la función de costo con respecto a los parámetros se realiza mediante el algoritmo de retropropagación o \textit{backpropagation}. Este procedimiento calcula los gradientes al propagar el error desde la salida hacia la entrada de la red y aplica la regla de la cadena para descomponer el gradiente en términos de los gradientes de cada capa \cite{rumelhart1986learning}. De este modo, se obtienen de forma eficiente los gradientes necesarios para actualizar los parámetros en cada iteración del algoritmo de optimización.
+
+Otra dificultad en el entrenamiento es el cálculo de gradientes: como la predicción $\hat{\mathbf{y}}$ es una composición de muchas funciones no lineales (véase \refeq{mlp}), calcular su gradiente de forma directa resulta complejo.
+
+Para abordar este problema se emplea el algoritmo de retropropagación (\textit{backpropagation}). Este procedimiento aplica la regla de la cadena para descomponer el gradiente en los gradientes de cada capa \cite{rumelhart1986learning}: primero se calcula el error en la salida y luego se propaga hacia atrás a través de la red. Gracias a ello es posible obtener de forma eficiente los gradientes necesarios para actualizar los parámetros en cada iteración.
+
+Una iteración o época del algoritmo de entrenamiento de una red neuronal consta de los siguientes pasos:
+
+\begin{enumerate}
+    \item Pasada hacia adelante (\textit{forward pass} en inglés): se calcula la salida de la red para el conjunto de datos de entrenamiento o un \textit{minibatch} del mismo, utilizando los parámetros actuales de la red $\theta$.
+    \item Cálculo del valor de la función de costo: se determina el valor de la función de costo $\mathcal{L}(\theta, \mathcal{D}_{\mathrm{train}})$ utilizando las salidas predichas y las salidas reales del conjunto de datos.
+    \item Pasada hacia atrás (\textit{backward pass} en inglés): el error se propaga hacia atrás a través de la red. Mediante la regla de la cadena, se calculan los gradientes de la función de costo con respecto a cada peso. Aquí se aplica el algoritmo de \textit{backpropagation}.
+    \item Actualización de pesos: los pesos se actualizan mediante el algoritmo de optimización seleccionado, como el descenso por gradiente estocástico (SGD) o ADAM.
+\end{enumerate}
+
+La \reffig{simple_training_loop} muestra un diagrama del ciclo (\textit{loop}) de entrenamiento de una red neuronal.
+
+\defaultdiagram{training/simple_training_loop}{\textit{Loop} de entrenamiento de una red neuronal.}{simple_training_loop}{1}
+
+Este proceso se repite, hasta cumplir con algún criterio de parada. Este criterio puede basarse, por ejemplo, en un número fijo de épocas o la evaluación del desempeño en el conjunto de validación. o determinado de épocas consecutivas, lo que ayuda a prevenir el sobreajuste \cite{Goodfellow2016}.
+
+Un criterio ampliamente utilizado es conocido como \textit{early stopping}. Este método implica monitorear el desempeño del modelo en el conjunto de validación durante el entrenamiento y detener el proceso cuando el desempeño comienza a deteriorarse, es decir, cuando la función de costo en el conjunto de validación deja de mejorar. Esta técnica ayuda a prevenir el sobreajuste al evitar que el modelo se ajuste demasiado a las particularidades del conjunto de entrenamiento \cite{Goodfellow2016}.
+
+Un resumen del ciclo de entrenamiento se presenta en el algoritmo \ref{alg:training_loop}.
+
+\begin{algorithm}[H]
+    \caption[Ciclo de entrenamiento]{Ciclo de entrenamiento.}
+  \label{alg:training_loop}
+  \KwIn{Conjunto de entrenamiento $\mathcal{D}_{\mathrm{train}}$, conjunto de validación $\mathcal{D}_{\mathrm{val}}$, parámetros $\theta$, modelo $f(\cdot;\theta)$,  número de épocas $E$, tasa de aprendizaje $\eta$}
+  \KwOut{Parámetros entrenados $\theta$}
+  \BlankLine
+  \For{$\mathrm{epoch}\leftarrow 1$ \KwTo $E$}{
+    \ForEach{minibatch $(x_b, y_b) \in \mathcal{D}_{\mathrm{train}}$}{
+      $\hat{y}_b \leftarrow f(x_b; \theta)$
+      \tcp*[r]{Forward}
+      $\mathcal{L} \leftarrow \ell(\hat{y}_b, y_b)$
+      \tcp*[r]{Pérdida}
+    Calcular $\nabla_\theta \mathcal{L}$ vía backprop
+      \tcp*[r]{Backward}
+      $\theta \;\leftarrow\; \theta - \eta\,\nabla_\theta \mathcal{L}$
+      \tcp*[r]{Actualización de parámetros (paso SGD)}
+    }
+    \BlankLine
+    \tcp{Evaluación en el conjunto de validación}
+    Evaluar $f(\cdot;\theta)$ en $\mathcal{D}_{\mathrm{val}}$\;
+  }
+\end{algorithm}
+
+\subsection{Redes neuronales como modelos generales}
+\label{sec:redes_neuronales_como_modelos_generales}
+Una característica destacada de las redes neuronales es su capacidad para ser utilizadas como modelos generales para una amplia variedad de problemas de aprendizaje automático. Gracias a su estructura flexible y capacidad para aprender representaciones complejas, las redes neuronales pueden adaptarse a diferentes tipos de datos y tareas, incluyendo regresión, clasificación, procesamiento de imágenes, reconocimiento de voz, entre otros \cite{Goodfellow2016}.
+
+En particular, es posible modelar los sistemas descritos en las secciones \ref{sec:regresion_lineal} y \ref{sec:regresion_logistica} con una red neuronal y determinar sus parámetros mediante el algoritmo de entrenamiento descrito en esta sección.
+
+Para ilustrar esta capacidad, la \reffig{regression_vs_mlp} muestra una comparativa entre el modelo de regresión lineal y un perceptrón multicapa (MLP, por sus siglas en inglés \textit{Multilayer Perceptron}) con una capa oculta de $100$ neuronas, y una capa de salida con una sola neurona, ambos entrenados con el mismo conjunto de datos $\mathcal{D}_{\mathrm{train}}$ de $200$ muestras.
+
+\defaultfigurecustomsize{regression/comparativa_regresion_vs_mlp_con_mse.png}{Comparativa entre la regresión lineal y un MLP con una capa oculta.}{regression_vs_mlp}{1.1}
+
+La tabla \ref{tab:regression_vs_mlp} presenta una comparativa entre ambos modelos en términos de cantidad de parámetros y valor de la función de costo (MSE) alcanzado tras el entrenamiento. Como se observa, el modelo de MLP logra un desempeño superior al de la regresión lineal, aunque requiere una cantidad significativamente mayor de parámetros para ello. Al tener datos no lineales, el MLP captura mejor la relación subyacente en los datos, al costo de una mayor complejidad del modelo.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparativa entre la regresión lineal y un MLP con una capa oculta.}
+    \begin{tabular}{c c c}
+        \toprule
+        & \textbf{Cantidad de parámetros} & \textbf{MSE} \\
+        \midrule
+        \textbf{Regresión lineal} & $2$ & $0.86$ \\
+        \textbf{MLP} & $101$ & $0.48$ \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:regression_vs_mlp}
+\end{table}
+
+Este ejemplo ilustra cómo las redes neuronales pueden servir como modelos generales, capaces de adaptarse a diferentes tipos de problemas y superar las limitaciones de modelos más simples, como la regresión lineal.
+
+Sin embargo, las capacidades de las redes neuronales profundas trascienden ampliamente el ámbito de la regresión tradicional presentada en la sección anterior. Estos modelos han demostrado un rendimiento sobresaliente en tareas complejas como el reconocimiento de imágenes, el procesamiento del lenguaje natural, los videojuegos y la robótica \cite{Goodfellow2016}.
+
+Algunas de las arquitecturas más representativas y sus aplicaciones incluyen:
+
+\begin{itemize}
+\item Redes neuronales convolucionales (CNNs): especialmente efectivas para procesar datos con estructura espacial, como imágenes y videos. Se emplean ampliamente en tareas de visión por computadora, tales como clasificación de imágenes, detección de objetos y segmentación semántica \cite{lecun1998gradient}.
+\item Redes neuronales recurrentes (RNNs): diseñadas para manejar datos secuenciales, como texto o series temporales. Han sido utilizadas en procesamiento del lenguaje natural, traducción automática y generación de texto \cite{hochreiter1997long}.
+\item Transformers: una arquitectura que revolucionó el procesamiento del lenguaje natural. Los Transformers emplean mecanismos de atención para modelar dependencias de largo alcance en secuencias y constituyen la base de modelos avanzados como BERT y GPT \cite{vaswani2017attention}.
+\end{itemize}
+
+En conjunto, estas arquitecturas ilustran el enorme potencial de las redes neuronales profundas para abordar problemas complejos en una amplia gama de dominios. Sin embargo, su uso presenta limitaciones prácticas, una de ellas es la necesidad de grandes volúmenes de datos etiquetados para ajustar los pesos \cite{Goodfellow2016}.
+
+Además, modelar sistemas más complejos suele exigir arquitecturas más profundas (más capas y neuronas). Como resultado, aumentan tanto el número de parámetros a ajustar como el coste computacional de las operaciones. A modo de ilustración, en la \reffig{model_complexity_over_time} se muestra la evolución de la complejidad de los modelos a lo largo del tiempo, evidenciando la tendencia exponencial en el número de parámetros.
+
+\defaultfigure{redes/model_complexity_over_time.png}{Evolución de la complejidad de los modelos en el tiempo.\protect\footnotemark}{model_complexity_over_time}
+\footnotetext{Imagen tomada de Our World in Data (2023), \"Exponential growth of parameters in notable AI systems\". Disponible en: \url{https://ourworldindata.org/grapher/exponential-growth-of-parameters-in-notable-ai-systems}, bajo licencia Creative Commons BY 4.0.}
