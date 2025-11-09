@@ -2,7 +2,7 @@ En este capítulo se presenta el contexto general, la motivación y los objetivo
 
 Luego, se analiza el estado del arte, abarcando las principales estrategias de compresión y las tendencias actuales en cuantización, tanto en hardware con recursos limitados como en entornos de cómputo de gran escala.
 
-Finalmente, se establecen los objetivos generales y específicos que guían esta tesis, centrada en el desarrollo de una biblioteca que facilite la investigación y aplicación de técnicas de cuantización adaptables mediante entrenamiento consciente de cuantización (QAT).
+Finalmente, se establecen los objetivos generales y específicos que guían esta tesis, centrada en el desarrollo de una biblioteca que facilite la investigación y aplicación de técnicas de cuantización adaptables mediante entrenamiento consciente de cuantización.
 
 \section{Motivación}
 \label{sec:motivacion}
@@ -48,7 +48,7 @@ en GPUs (\textit{Graphics Processing Units}) o TPUs (\textit{Tensor Processing U
 
 La compresión de redes neuronales permite adaptar los modelos para que funcionen eficientemente en estos entornos. Su objetivo principal es disminuir los requerimientos de memoria para almacenar el modelo, junto con el ancho de banda y el número de FLOPs necesarias durante la inferencia, sin sacrificar de manera significativa el desempeño \cite{8253600}.
 
-Existen diversas técnicas de compresión relevantes para comprimir redes neuronales, como la poda y la cuantización.
+Existen diversas técnicas de compresión relevantes para comprimir redes neuronales, como la poda, la factorizacion de tensores, la cuantizacion, entre otras.
 Estas técnicas serán detalladas en la sección \ref{sec:compresion_de_redes}. El foco de este trabajo se centra en una de ellas:
 la cuantización, que consiste en reducir la resolución numérica con la que se representan los parámetros de la red.
 
@@ -82,7 +82,7 @@ PTQ consiste en entrenar una red neuronal en punto flotante y, una vez entrenada
 
 QAT consiste en entrenar la red neuronal con una emulación de la cuantización en la inferencia, lo cual permite que la red se adapte a la cuantización durante el entrenamiento de sus pesos. QAT puede, además, incluir el entrenamiento de los propios parámetros de cuantización, como el rango y la resolución. Esto permite una optimización más profunda, ya que el entrenamiento de los pesos del modelo se ve influenciado directamente por el efecto de la cuantización final. Esta técnica es más compleja de implementar, pero suele llevar a una mejor preservación de la exactitud del modelo \cite{Jacob2018}.
 
-Los aportes de este trabajo incluyen la implementación de una librería en Python que permite realizar entrenamiento consciente de cuantización (QAT). La misma es compatible con el framework \texttt{TensorFlow} \cite{tensorflow} y posibilita el uso de cuantizadores uniformes con un número arbitrario de bits, y con parámetros entrenables, funcionalidades que no se encuentra implementada de forma nativa en dicho entorno. Asimismo, incorpora la posibilidad de emplear cuantizadores flexibles, basados en \cite{electronics13101923} con parámetros entrenables.
+Los aportes de este trabajo incluyen la implementación de una librería en Python que permite realizar QAT. La misma es compatible con el framework \texttt{TensorFlow} \cite{tensorflow} y posibilita el uso de cuantizadores uniformes con un número arbitrario de bits, y con parámetros entrenables, funcionalidades que no se encuentra implementada de forma nativa en dicho entorno. Asimismo, incorpora la posibilidad de emplear cuantizadores flexibles, basados en \cite{electronics13101923} con parámetros entrenables.
 
 Otro aporte relevante es que los parámetros del cuantizador también son entrenables durante el proceso de QAT, lo que permite que la red se adapte dinámicamente al esquema de cuantización y optimice su desempeño durante el entrenamiento.
 
