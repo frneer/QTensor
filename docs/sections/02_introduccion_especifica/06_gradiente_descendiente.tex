@@ -8,7 +8,7 @@ El método de gradiente descendiente consiste en actualizar los parámetros en l
     \theta_{n+1} = \theta_n - \eta \nabla_{\theta} L(y, \hat{y})
 \end{equation}
 
-El gradiente de una función define la dirección de mayor incremento de la función en un punto determinado. Por lo tanto, al restar el gradiente en la actualización de los parámetros, se avanza en la dirección de mayor decremento de la función de costo, buscando minimizarla iterativamente.
+El gradiente de una función define la dirección de mayor incremento de la misma en un punto determinado. Por lo tanto, al restar el gradiente en la actualización de los parámetros, se avanza en la dirección de mayor decremento de la función de costo, buscando minimizarla iterativamente.
 
 Es posible también caer en mínimos locales de la función de costo, dependiendo de la forma de la función y del punto de inicio. Sin embargo, en muchos casos prácticos, el gradiente descendiente puede encontrar soluciones suficientemente buenas, incluso si no son óptimas globales \cite{Bishop2006}.
 

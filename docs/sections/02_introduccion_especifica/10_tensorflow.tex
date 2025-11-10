@@ -45,6 +45,7 @@ Esta biblioteca admite QAT mediante la modificación del grafo computacional par
 Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte nativo de \texttt{TFMOT} incluye únicamente cuantizadores uniformes a enteros de 8 bits, con signo o sin signo.
 
 \subsubsection{Diferenciación automática y backpropagation}
+\label{sec:autodiff}
 La diferenciación automática es una técnica computacional que permite calcular de forma eficiente las derivadas de funciones matemáticas complejas. En el contexto del aprendizaje profundo, resulta fundamental para entrenar redes neuronales mediante el algoritmo de retropropagación. Este algoritmo, descrito en la sección \ref{sec:entrenamiento_redes_neuronales}, se basa en la regla de la cadena para calcular derivadas parciales de manera eficiente; \texttt{TensorFlow} implementa esta funcionalidad mediante \texttt{tf.autodiff} y emplea el grafo computacional para ejecutar el algoritmo de retropropagación.
 
 	exttt{TensorFlow} registra todas las operaciones ejecutadas a partir de la clase \texttt{tf.\allowbreak{}GradientTape}; cada operación dispone de su regla de derivación. A partir de este registro se construye automáticamente un grafo de gradientes asociado al grafo directo. Para calcular la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo.
