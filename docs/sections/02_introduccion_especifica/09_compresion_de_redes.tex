@@ -1,52 +1,103 @@
 \section{Compresión de redes neuronales}
 \label{sec:compresion_de_redes}
 
-La compresión de redes neuronales es un proceso que consiste en reducir el tamaño de los datos, en particular, de los parámetros de una red neuronal. Esta compresión busca disminuir la complejidad del modelo en dos dimensiones: por un lado, la complejidad espacial, relacionada con la memoria necesaria para almacenar el modelo; por otro lado, la complejidad temporal, asociada al costo computacional de las operaciones.
+La compresión de redes neuronales es un proceso que consiste en reducir el tamaño de los datos, en particular, de los parámetros de una red neuronal. Esta compresión busca disminuir la complejidad del modelo en dos dimensiones: por un lado, la complejidad espacial, relacionada con la memoria necesaria para almacenar el modelo y el otro, la complejidad temporal, asociada al costo computacional de las operaciones.
 
-En este sentido, la complejidad espacial se define como la cantidad de memoria necesaria para almacenar los parámetros del modelo. Al reducir el tamaño de cada uno de estos parámetros, se disminuye la cantidad total de memoria requerida para almacenar el modelo. Esto resulta especialmente beneficioso para dispositivos con recursos limitados.
+En este sentido, la complejidad espacial se define como la cantidad de memoria necesaria para almacenar los parámetros del modelo. Al reducir el tamaño de cada uno de estos parámetros, se disminuye la cantidad total de memoria requerida. Esto resulta especialmente beneficioso para dispositivos con recursos limitados, como dispositivos móviles o sistemas embebidos, donde la memoria disponible es un recurso crítico \cite{DBLP:journals/corr/abs-2010-03954}.
 
-Por su parte, la complejidad temporal se mide en términos de la cantidad de operaciones necesarias para realizar una inferencia con el modelo. La reducción de la cantidad de parámetros o de su precisión disminuye la complejidad de los cálculos necesarios y, por ende, la cantidad de operaciones de procesador requeridas. Esto acelera el tiempo de inferencia y mejora la eficiencia energética del modelo.
+Por su parte, la complejidad temporal se mide en términos de la cantidad de FLOPs necesarias para realizar una inferencia con el modelo. La reducción de la cantidad de parámetros o de su precisión disminuye la complejidad de los cálculos necesarios y, por ende, la cantidad de operaciones de procesador requeridas. Esto acelera el tiempo de inferencia \cite{molchanov2017pruning}.
 
-La compresión también mejora la eficiencia energética del modelo, ya que el acceso a memoria y la realización de operaciones computacionales son procesos que consumen energía. Al reducir la cantidad de datos que deben ser procesados y almacenados, se disminuye el consumo energético asociado a la inferencia del modelo. Esto es beneficioso tanto para sistemas con recursos limitados como para aplicaciones que buscan minimizar su huella energética, como la computación en la nube.
+La compresión también mejora la eficiencia energética del modelo, ya que el acceso a memoria y la realización de operaciones computacionales son procesos que consumen energía. Al reducir la cantidad de datos que deben ser procesados y almacenados, se disminuye la cantidad de FLOPs necesarias y, por ende, se disminuye el consumo energético asociado a la inferencia del modelo. Esto es beneficioso tanto para sistemas con recursos limitados como para aplicaciones que buscan minimizar su huella energética, como la computación en la nube. En los últimos años compañías como OpenAI, Google, entre otras, han disponibilizado sus modelos en la nube en lo que se conoce como \textit{Machine Learning as a Services} (MLaaS), donde la eficiencia energética es un factor clave para reducir costos operativos y el impacto ambiental \cite{barros2024scheduling}.
 
 \TODO{Revisar este párrafo luego de presentar los resultados, porque creo que vamos a probar con 4, 6 y 8 bits, ¿no?
 En ese caso esto no aplica, más allá de que no le demos tanta bola.}
 Dado el alcance de esta investigación, este trabajo se enfoca en evaluar el impacto sobre la complejidad espacial, dado que constituye el factor determinante para el despliegue de modelos en dispositivos con memoria limitada. La complejidad temporal, aunque importante, no se aborda en profundidad, ya que su exploración cuantitativa está fuera del alcance del mismo.
 
 \subsection{Técnicas de compresión}
-Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
+Existen múltiples técnicas de compresión de redes neuronales, las cuales permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
 
 \begin{itemize}
     \item Compartición de pesos (\textit{Weight Sharing} en inglés): se agrupan los pesos de la red en un conjunto reducido de valores, lo que permite una representación más compacta sin afectar demasiado la capacidad de generalización \cite{8253600}.
     \item Poda (\textit{Weight Pruning} en inglés): se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, lo que reduce la cantidad de parámetros sin afectar significativamente la precisión del modelo \cite{8253600}.
     \item Cuantización (\textit{Quantization} en inglés): se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia \cite{8253600}.
-    \item Descomposición tensorial (\textit{Tensor Decomposition} en inglés): se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de operaciones necesarias durante la inferencia \cite{8253600}.
+    \item Factorización de tensores (\textit{Tensor Decomposition} en inglés): se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de FLOPS necesarias durante la inferencia \cite{8253600}.
     \item Destilación de conocimiento (\textit{Knowledge Distillation} en inglés): se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), lo que transfiere la información esencial en una forma más compacta \cite{8253600}.
 \end{itemize}
 
 Cada técnica posee ventajas y desventajas y la elección de la técnica adecuada depende del caso de uso específico, el tipo de arquitectura del modelo y los requisitos de rendimiento \cite{DBLP:journals/corr/abs-2010-03954}.
 
-\section{Cuantización}
+\subsubsection{Cuantización}
 \label{sec:cuantizacion}
 
-La cuantización de redes neuronales consiste en representar los parámetros de la red con menor precisión numérica, mediante la conversión de valores representados en punto flotante de 32 bits (FP32 por sus siglas en inglés, \textit{Floating Point 32-bit}) a formatos de menor precisión, como enteros de 8 o 4 bits (INT8 o INT4 por sus siglas en inglés, \textit{Integer 8-bit} e \textit{Integer 4-bit}, respectivamente).
+La cuantización es una compresión con perdida y tiene su origen en el procesamiento de señales digitales, donde se utiliza para representar señales continuas en un formato discreto. En el dominio analógico, las señales pueden tomar cualquier valor dentro de un rango continuo, mientras que en el dominio digital, estas señales deben ser representadas mediante un conjunto finito de valores discretos, la transformación específica de estos valores depende de la función de cuantización.
 
-La función de cuantización mapea un valor continuo a un conjunto discreto de niveles, y queda definida por dos series de parámetros: los niveles de cuantización y los umbrales de cuantización. Los niveles de cuantización son los valores discretos a los que se mapean los valores continuos, mientras que los umbrales de cuantización definen los límites entre estos niveles.
+La función de cuantización $q(x)$ mapea un valor continuo de entrada $x$ a un conjunto discreto de salida $y$. Esta función queda definida por dos series de parámetros: los niveles de cuantización $\mathbf{l}$, que definen los valores posibles de salida y los umbrales de cuantización $\mathbf{t}$ que delimitan el espacio de entrada en m\'ultiples intervalos y se asigna a cada uno de ellos un nivel de cuantización específico \cite{sayood2017introduction}.
 
-\subsection{Características de funciones de cuantización}
+Por ejemplo, podemos definir una función de cuantización de $8$ niveles, con $8$ intervalos como se muestra en la tabla \ref{tab:quantization_example}.
 
-Existen múltiples características para definir el tipo de cuantización. Algunas de las características que definen una función de cuantización se presentan a continuación.
+\begin{table}[H]
+    \centering
+    \caption{Función de cuantización de 8 niveles.}
+    \begin{tabular}{c|c}
+        \hline
+        \textbf{Intervalo de entrada} & \textbf{Nivel de cuantización} \\
+        \hline
+        $(-\infty, -3.5)$ & $-4$ \\
+        $[-3.5, -2.5)$ & $-3$ \\
+        $[-2.5, -1.5)$ & $-2$ \\
+        $[-1.5, -0.5)$ & $-1$ \\
+        $[-0.5, 0.5)$ & $0$ \\
+        $[0.5, 1.5)$ & $1$ \\
+        $[1.5, 2.5)$ & $2$ \\
+        $[2.5, \infty)$ & $3$ \\
+        \hline
+    \end{tabular}
+    \label{tab:quantization_example}
+\end{table}
 
-La cuantización puede ser uniforme o no uniforme. En la cuantización uniforme, los niveles de cuantización están espaciados de manera uniforme (equiespaciados) a lo largo del rango de valores, mientras que en la cuantización no uniforme, los niveles pueden estar distribuidos de manera no uniforme, lo que permite una mejor representación de ciertos rangos de valores. En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador de 8 niveles.
+La tabla \ref{tab:quantization_example} define una función $q(x)$ que, por ejemplo, para un valor de entrada $x = 2.3$, devuelve un valor de salida $y = q(2.3) = 2$, ya que $2.3$ se encuentra en el intervalo $[1.5, 2.5)$, el cual está asociado al nivel de cuantización $2$.
 
+En este caso los umbrales de cuantización quedan definidos por la \refeq{quantization_thresholds_example}.
+\begin{equation}
+    \label{eq:quantization_thresholds_example}
+    \mathbf{t} = \{t_0, t_1, \ldots\} = \{-3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5\}.
+\end{equation}
+
+Y los niveles de cuantización por la \refeq{quantization_levels_example}.
+\begin{equation}
+    \label{eq:quantization_levels_example}
+    \mathbf{l} = \{l_0, l_1, \ldots\} = \{-4, -3, -2, -1, 0, 1, 2, 3\}.
+\end{equation}
+
+Este tipo de cuantización, donde tanto los niveles como los umbrales de cuantización son valores equiespaciados, se conoce como cuantización uniforme \cite{sayood2017introduction}, la definición matemática formal de este tipo de cuantización se presenta en la sección \ref{sec:uniform}.
+
+La cantidad de niveles $n_l$ en el caso de la cuantización uniforme depende del número de bits $b$ utilizados para representar cada valor cuantizado, y se calcula como $n_{l} = 2^b$. Por ejemplo, si se utilizan 8 bits para la cuantización, se tendrán $n_{l} = 2^8 = 256$ niveles de cuantización.
+
+Otra función de cuantización utilizada normalmente es la cuantización no uniforme \cite{sayood2017introduction}. En donde los niveles y umbrales de cuantización no están equiespaciados y la cantidad de niveles no esta limitada a potencias de 2. Este tipo de cuantización puede ser beneficiosa en situaciones donde la distribución de los datos no es uniforme, permitiendo una mejor representación de ciertos rangos de valores. La misma será detallada en la sección \ref{sec:non_uniform}.
+
+En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador de 8 niveles.
+
+\TODO{Reemplazar figura con tikz}
 \defaultfigure{cuantizacion/uniform_vs_non_uniform_3bits.png}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}
 
-La cuantización puede ser simétrica o asimétrica. En la cuantización simétrica, el rango de valores se divide en partes iguales alrededor de un valor central (\textit{zero point} en inglés), mientras que en la cuantización asimétrica, los niveles de cuantización pueden estar desplazados, lo que permite una mejor representación de valores no centrados alrededor de cero. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits. En el caso particular donde el valor central es cero, se habla de cuantización signada (simétrica) y no signada (asimétrica).
+Otra característica importante es que la cuantización puede ser signada o no signada. En la cuantización signada, el rango de valores se divide en partes iguales alrededor de cero, mientras que en la cuantización no signada, los niveles de cuantización son siempre positivos, en donde se mejora la precisión para el rango positivo de valores. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits.
 
+\TODO{Reemplazar figura con tikz - sign/unsign}
 \defaultfigure{cuantizacion/sym_vs_asym_3bits.png}{Cuantización simétrica y asimétrica.}{sym_vs_asym}
 
-% \subsection{Error de cuantización}
-% El concepto general es el de representar un rango continuo de valores en un conjunto discreto de niveles. Este proceso introduce un error de cuantización, que es la diferencia entre el valor original y su representación cuantizada.
+Toda función de cuantización introduce un error de cuantización, que es la diferencia entre el valor original y su representación cuantizada. Este error se busca minimizar para preservar la precisión de la representación original. En el caso, por ejemplo, de una cuantización uniforme de 8 niveles, el error de cuantización máximo es la mitad del tamaño del intervalo entre niveles consecutivos \cite{sayood2017introduction}. En aplicaciones como el procesamiento de señales, este error puede manifestarse como ruido, conocido como ruido de cuantización.
+
+A diferencia de otras aplicaciones donde una métrica crítica es el error de cuantización, en la cuantización de redes neuronales el objetivo principal es minimizar el impacto de este error en la precisión del modelo, que si bien está relacionado con el mismo, no es equivalente. En este caso, el objetivo no es mantener la representación exacta de los pesos, si no una versión equivalente de la distribución de los pesos a efectos de la precisión del modelo. Analogamente a las compresiones de audio donde lo importante es mantener la calidad percibida y no la representación exacta de la señal original, con la ventaja de que en este caso se cuenta con un valor cuantitativo para medir la calidad de la compresión: la precisión del modelo.
+
+Un aspecto importante, pero que no esta directamente definido por la función de cuantización es la representación numérica utilizada para almacenar los valores cuantizados. Generalmente se utiliza la notación INTX para referirse a representación en un formato de enteros (\textit{integer} en inglés) de X bits. Y la notación FPY para referirse a la representación en punto flotante (\textit{floating point} en inglés) de Y bits.
+
+En el contexto de la cuantización de redes neuronales, como fue explicado en la sección \ref{sec:entrenamiento_redes_neuronales}, es necesaria una alta precisión numérica durante el entrenamiento de las mismas, por lo que este proceso se realiza generalmente en punto flotante de 32 bits (FP32). Luego, al aplicar cuantizaciones se suelen utilizar representaciones enteras, equivalentes a formatos de punto fijo en hardware (INT8, INT4).
+
+En particular, la cuantización de redes neuronales consiste en representar los parámetros de la red con menor precisión numérica, mediante la conversión de sus parámetros $\theta$ representados originalmente en FP32 a formatos de menor precisión, como INT8 o INT4.
+
+La principal razón para utilizar representaciones en punto fijo es la eficiencia computacional que ofrecen, ya que las operaciones en punto fijo son extremadamente eficientes en términos de velocidad y consumo energético en comparación con las operaciones en punto flotante. Esto se debe a que las operaciones en punto fijo requieren menos recursos computacionales y son más rápidas de ejecutar en hardware especializado, como unidades de procesamiento de tensores (TPU), unidades de procesamiento gráfico (GPU) o FPGA optimizadas para cálculos en punto fijo en donde generalmente se ejecutan modelos de aprendizaje automático. La desventaja que suele presentar la cuantización en punto fijo es la determinación de un rango adecuado para representar los valores, ya que un rango inadecuado puede llevar a saturaciones o pérdidas de precisión significativas \cite{gholami2021surveyquantizationmethodsefficient}.
+
+A continuación, en la sección \ref{sec:funciones_de_cuantizacion}, se presentan las funciones de cuantización relevantes para la cuantización de redes neuronales, seguido por la descripción de las estrategias utilizadas para aplicar la cuantización en redes neuronales de una manera efectiva en la sección \ref{sec:estrategias_de_cuantizacion}.
 
 \subsection{Funciones de cuantización}
 \label{sec:funciones_de_cuantizacion}
@@ -54,6 +105,7 @@ La cuantización puede ser simétrica o asimétrica. En la cuantización simétr
 \input{sections/02_introduccion_especifica/09_01_cuantizadores}
 
 \subsection{Estrategias de cuantización}
+\label{sec:estrategias_de_cuantizacion}
 La cuantización reduce el tamaño del modelo, la memoria requerida y acelera la inferencia. No obstante, la reducción de la precisión numérica introduce un error de cuantización que puede afectar el rendimiento, desplazando el modelo del punto de convergencia obtenido en el entrenamiento previo a la cuantización. Por lo tanto, es esencial evaluar el impacto de la cuantización en las métricas y hallar un compromiso adecuado entre compresión y precisión.
 
 Existen dos estrategias principales para aplicar la cuantización en redes neuronales: la cuantización post-entrenamiento (PTQ) y la cuantización durante el entrenamiento (QAT).
