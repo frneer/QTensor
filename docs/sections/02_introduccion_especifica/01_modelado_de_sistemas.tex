@@ -1,6 +1,15 @@
 \subsection{Modelado de sistemas}
 \label{sec:modelado_de_sistemas}
-El modelado de sistemas y de relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$ como se muestra en la \reffig{system}.
+Dentro del aprendizaje automático, existen dos enfoques principales:
+
+\begin{itemize}
+    \item Aprendizaje supervisado: en este enfoque, el modelo se entrena utilizando un conjunto de datos etiquetados, donde cada entrada tiene una salida correspondiente conocida. El objetivo es que el modelo aprenda a mapear las entradas a las salidas correctas.
+    \item Aprendizaje no supervisado: en este enfoque, el modelo se entrena utilizando datos no etiquetados. El objetivo es que el modelo descubra patrones o estructuras subyacentes en los datos sin la guía de salidas conocidas.
+\end{itemize}
+
+Este trabajo se enfoca en el aprendizaje supervisado, en el cual pueden distinguirse principalmente dos tipos de problemas: los de regresión y los de clasificación.
+
+En los problemas de regresión, el objetivo consiste en predecir una variable de salida continua a partir de un conjunto de variables de entrada, mientras que en los problemas de clasificación la salida es discreta o categórica, representando la pertenencia de una observación $x_j$ a una clase o categoría determinada. Ambos enfoques comparten el mismo principio general de aprendizaje a partir conjunto de datos etiquetados $\mathcal{D} = \{(x_i,y_i)\}_{i=1}^N$, donde cada par $(x_i,y_i)$ representa un valor de entrada y su correspondiente salida para un sistema cuya relación funcional es desconocida $y = f(x)$.
 
 \begin{figure}[H]
     \centering
@@ -15,61 +24,120 @@ El modelado de sistemas y de relaciones entre variables es una tarea fundamental
     \label{fig:system}
 \end{figure}
 
-En el caso general, la salida observada $y$ puede estar afectada por ruido, lo que dificulta la tarea de modelado, ya que agrega incertidumbre a la relación entre las variables de entrada y salida \cite{Bishop2006}.
-
-    \begin{figure}[H]
-        \centering
-        \begin{tikzpicture}
-            \node (input) at (0, 0) [] {$x$};
-            \node[rectangle, draw, minimum width=2cm, minimum height=1cm, right=of input] (system) {$f$};
-            \node (output) [right=of system] {$y$};
-            \node[circle, draw, minimum size=0.8cm, right=of output] (add) {$+$};
-            \node (final_output) [right=of add] {$y + n$};
-            \node (noise) [below=of add] {$n$};
-            \draw[-stealth] (input) -- (system);
-            \draw[-stealth] (system) -- (output);
-            \draw[-stealth] (output) -- (add);
-            \draw[-stealth] (noise) -- (add);
-            \draw[-stealth] (add) -- (final_output);
-        \begin{pgfonlayer}{background}
-            \node [
-                draw,
-                dotted,
-                blue,
-                rounded corners,
-                fit=(system) (add) (noise) (output),
-                inner sep=0.5cm
-            ] {};
-        \end{pgfonlayer}
-        \end{tikzpicture}
-        \caption{Sistema observado con ruido.}
-        \label{fig:system_noise}
-    \end{figure}
-
-En este contexto, modelar un sistema consiste en encontrar una función $f$ que aproxime la relación $y = f(x)$ mediante un modelo $\hat{f}$, con parámetros $\theta$, que permita estimar la salida $\hat{y}$ a partir de una entrada $x$, como se muestra en la \refeq{system_approximation} y la \reffig{system_model}.
+Un modelo en este contexto busca establecer una relación funcional entre las variables de entrada $x$ y la salida $y$, de manera que sea capaz de generalizar el comportamiento observado en los datos. Dicha relación puede expresarse mediante una función $\hat{f}(x;\theta)$, donde $\theta$ representa el conjunto de parámetros del modelo. Esta relación se representa en \eqref{eq:system_approximation}.
 
 \begin{equation}
     \label{eq:system_approximation}
     \hat{y} = \hat{f}(x; \theta) \approx f(x)
 \end{equation}
 
-    \begin{figure}[H]
-        \centering
-        \begin{tikzpicture}
-            \node (input) at (0, 0) [] {$x$};
-            \node (output) at (4, 0) [] {$\hat{y}$};
-            \node[rectangle, draw, minimum width=2cm, minimum height=1cm] (system) at (2, 0) {$\hat{f}$};
-            \draw[-stealth] (input) -- (system);
-            \draw[-stealth] (system) -- (output);
-        \end{tikzpicture}
-        \caption{Modelo del sistema.}
-        \label{fig:system_model}
-    \end{figure}
+En la práctica, los datos disponibles suelen contener ruido, ya sea en las variables de entrada, en la salida o en ambas. Este ruido puede provenir de errores de medición, incertidumbre inherente al sistema o factores no observados que afectan la variable objetivo. Por esta razón, el modelo no busca reproducir exactamente las observaciones, sino aproximar la relación subyacente entre las variables que generaron dichos datos \cite{Bishop2006}. En la \reffig{system_noise} se muestra un esquema donde la salida $y$ tiene una componente de ruido aditivo.
 
-En primer lugar, para hallar $\hat{f}$, se debe definir el tipo de modelo a utilizar, es decir, la forma funcional de $\hat{f}$. Lo cual dependerá de la naturaleza del sistema a modelar. Existen dos principales clases de problemas de modelado: regresión y clasificación. La diferencia radica en el espacio de salida $y$. En los problemas de regresión, la variable de salida es continua, mientras que en los problemas de clasificación, la variable de salida es discreta y representa categorías o clases.
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node (input) at (0, 0) [] {$x$};
+        \node[rectangle, draw, minimum width=2cm, minimum height=1cm, right=of input] (system) {$f$};
+        \node (output) [right=of system] {$f(x)$};
+        \node[circle, draw, minimum size=0.8cm, right=of output] (add) {$+$};
+        \node (final_output) [right=of add] {$y$};
+        \node (noise) [below=of add] {$n$};
+        \draw[-stealth] (input) -- (system);
+        \draw[-stealth] (system) -- (output);
+        \draw[-stealth] (output) -- (add);
+        \draw[-stealth] (noise) -- (add);
+        \draw[-stealth] (add) -- (final_output);
+    \begin{pgfonlayer}{background}
+        \node [
+            draw,
+            dotted,
+            blue,
+            rounded corners,
+            fit=(system) (add) (noise) (output),
+            inner sep=0.5cm
+        ] {};
+    \end{pgfonlayer}
+    \end{tikzpicture}
+    \caption{Sistema observado con ruido.}
+    \label{fig:system_noise}
+\end{figure}
 
-En segundo lugar, los parámetros $\theta$, para ajustar estos parámetros, se emplean técnicas de optimización que buscan minimizar la diferencia entre las salidas reales $y$ y las salidas estimadas $\hat{y}$ del modelo.
+En resumen, el objetivo del aprendizaje supervisado es aproximar la función desconocida $f$ a partir de un conjunto de datos con ruido, de modo que la función estimada $\hat{f}(x; \theta)$ se acerque lo más posible a $f$ bajo algún criterio de error o desempeño.
 
-Tanto para la definición del modelo como para el ajuste de los parámetros, se depende en tener un conjunto de datos representativo del sistema a modelar, que contenga pares de entradas y salidas conocidas $(x_i, y_i)$. Es a partir de estos datos que se puede realizar un analisis de la relación entre las variables para definir la forma funcional del modelo $\hat{f}$ y luego, ajustar los parámetros para que el modelo se aproxime lo mejor posible al comportamiento del sistema real.
+Como se mencionó anteriormente en esta sección, la función $\hat{f}$ es paramétrica, es decir, depende de un conjunto finito de parámetros $\theta$. La calidad de la aproximación se obtiene optimizando dichos parámetros con el fin de minimizar una función de costo, generalmente denominada $\mathcal{L}$, la cual cuantifica la discrepancia entre las predicciones del modelo y los valores reales observados. Para cuantizar estos errores se utilizan diferentes métricas, las cuales se detallaran en la sección \ref{sec:metricas}.
 
-La definición de valores cuantitativos para evaluar que tan bien el modelo se ajusta al sistema real es fundamental para el proceso de validación del modelo. Estos valores se llaman métricas de evaluación y permiten cuantificar el desempeño del modelo en función de los objetivos específicos del mismo.
+La definición formal de la función de costo $\mathcal{L}$ y los métodos empleados para su optimización se presentarán más adelante en la sección \ref{sec:funcion_de_costo}.
+
+% El modelado de sistemas y de relaciones entre variables es una tarea fundamental en múltiples áreas de la ingeniería y la ciencia. Un sistema puede definirse como una relación funcional entre variables de entrada $x}$ y salida $y$, donde la salida es una función de las entradas $y = f(x)$ como se muestra en la \reffig{system}.
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}
+%         \node (input) at (0, 0) [] {$x}$};
+%         \node[rectangle, draw, minimum width=2cm, minimum height=1cm, right=of input] (system) {$f$};
+%         \node (output) [right=of system] {$y$};
+%         \draw[-stealth] (input) -- (system);
+%         \draw[-stealth] (system) -- (output);
+%     \end{tikzpicture}
+%     \caption{Sistema a modelar.}
+%     \label{fig:system}
+% \end{figure}
+
+% En el caso general, la salida observada $y$ puede estar afectada por ruido, lo que dificulta la tarea de modelado, ya que agrega incertidumbre a la relación entre las variables de entrada y salida \cite{Bishop2006}.
+
+%     \begin{figure}[H]
+%         \centering
+%         \begin{tikzpicture}
+%             \node (input) at (0, 0) [] {$x}$};
+%             \node[rectangle, draw, minimum width=2cm, minimum height=1cm, right=of input] (system) {$f$};
+%             \node (output) [right=of system] {$y$};
+%             \node[circle, draw, minimum size=0.8cm, right=of output] (add) {$+$};
+%             \node (final_output) [right=of add] {$y + n$};
+%             \node (noise) [below=of add] {$n$};
+%             \draw[-stealth] (input) -- (system);
+%             \draw[-stealth] (system) -- (output);
+%             \draw[-stealth] (output) -- (add);
+%             \draw[-stealth] (noise) -- (add);
+%             \draw[-stealth] (add) -- (final_output);
+%         \begin{pgfonlayer}{background}
+%             \node [
+%                 draw,
+%                 dotted,
+%                 blue,
+%                 rounded corners,
+%                 fit=(system) (add) (noise) (output),
+%                 inner sep=0.5cm
+%             ] {};
+%         \end{pgfonlayer}
+%         \end{tikzpicture}
+%         \caption{Sistema observado con ruido.}
+%         \label{fig:system_noise}
+%     \end{figure}
+
+% En este contexto, modelar un sistema consiste en encontrar una función $f$ que aproxime la relación $y = f(x)$ mediante un modelo $\hat{f}$, con parámetros $\theta$, que permita estimar la salida $\hat{y}$ a partir de una entrada $x}$, como se muestra en la \refeq{system_approximation} y la \reffig{system_model}.
+
+% \begin{equation}
+%     \label{eq:system_approximation}
+%     \hat{y} = \hat{f}(x; \theta) \approx f(x)
+% \end{equation}
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}
+%         \node (input) at (0, 0) [] {$x}$};
+%         \node (output) at (4, 0) [] {$\hat{y}$};
+%         \node[rectangle, draw, minimum width=2cm, minimum height=1cm] (system) at (2, 0) {$\hat{f}$};
+%         \draw[-stealth] (input) -- (system);
+%         \draw[-stealth] (system) -- (output);
+%     \end{tikzpicture}
+%     \caption{Modelo del sistema.}
+%     \label{fig:system_model}
+% \end{figure}
+
+% En primer lugar, para hallar $\hat{f}$, se debe definir el tipo de modelo a utilizar, es decir, la forma funcional de $\hat{f}$. Lo cual dependerá de la naturaleza del sistema a modelar. Existen dos principales clases de problemas de modelado: regresión y clasificación. La diferencia radica en el espacio de salida $y$. En los problemas de regresión, la variable de salida es continua, mientras que en los problemas de clasificación, la variable de salida es discreta y representa categorías o clases.
+
+% En segundo lugar, los parámetros $\theta$, para ajustar estos parámetros, se emplean técnicas de optimización que buscan minimizar la diferencia entre las salidas reales $y$ y las salidas estimadas $\hat{y}$ del modelo.
+
+% Tanto para la definición del modelo como para el ajuste de los parámetros, se depende en tener un conjunto de datos representativo del sistema a modelar, que contenga pares de entradas y salidas conocidas $(x_i, y_i)$. Es a partir de estos datos que se puede realizar un analisis de la relación entre las variables para definir la forma funcional del modelo $\hat{f}$ y luego, ajustar los parámetros para que el modelo se aproxime lo mejor posible al comportamiento del sistema real.
+
+% La definición de valores cuantitativos para evaluar que tan bien el modelo se ajusta al sistema real es fundamental para el proceso de validación del modelo. Estos valores se llaman métricas de evaluación y permiten cuantificar el desempeño del modelo en función de los objetivos específicos del mismo.
