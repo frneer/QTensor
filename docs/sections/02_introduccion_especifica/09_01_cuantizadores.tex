@@ -52,9 +52,9 @@ El cuantizador uniforme resulta sencillo de implementar tanto en hardware como e
 
 No obstante, existen escenarios en los que la cuantización uniforme no resulta adecuada.
 
-Una aplicación donde los datos presentan una distribución no uniforme, esta puede no captar la variabilidad de los datos, lo que conduce a una pérdida significativa de información y a niveles en desuso. Si la aplicación exige alta precisión en determinadas regiones del rango, la cuantización uniforme puede no ofrecer la resolución necesaria en esas zonas críticas; este caso aparece con frecuencia en la distribución de los pesos de redes neuronales.
+Una aplicación donde los datos presentan una distribución no uniforme, esta puede no captar la variabilidad de los datos, lo que conduce a una pérdida significativa de información y a niveles en desuso. Si la aplicación exige alta precisión en determinadas regiones del rango, la cuantización uniforme puede no ofrecer la resolución necesaria en esas zonas críticas, este caso aparece con frecuencia en la distribución de los pesos de redes neuronales.
 
-La cuantización uniforme resulta ineficiente al combinar rangos amplios con requisitos de alta precisión, puesto que la misma representación debe cubrir valores muy pequeños y muy grandes. Este enfoque puede ser viable con aritmética de punto flotante; no obstante, para aritmética entera o de punto fijo no es eficiente.
+La cuantización uniforme resulta ineficiente al combinar rangos amplios con requisitos de alta precisión, puesto que la misma representación debe cubrir valores muy pequeños y muy grandes. Este enfoque puede ser viable con aritmética de punto flotante, no obstante, para aritmética entera o de punto fijo no es eficiente.
 
 \subsubsection{Cuantizador no uniforme}
 \label{sec:non_uniform}
@@ -118,6 +118,6 @@ La función de cuantización flexible se define en la \refeq{flexible_quantizer}
 
 La \reffig{flexible_signed_q} muestra, en amarillo, los niveles previos a la aplicación del cuantizador uniforme y, en azul, los niveles finales tras aplicar dicho cuantizador.
 
-La principal diferencia respecto al uniforme es que los niveles $n$ no dependen de la cantidad de bits; tanto $\mathbf{l}$ como $\mathbf{t}$ son parámetros del cuantizador. En otras palabras, se desacoplan los niveles de cuantización de la cantidad de bits.
+La principal diferencia respecto al uniforme es que los niveles $n$ no dependen de la cantidad de bits, tanto $\mathbf{l}$ como $\mathbf{t}$ son parámetros del cuantizador. En otras palabras, se desacoplan los niveles de cuantización de la cantidad de bits.
 
-Este cuantizador aproxima la cuantización no uniforme mediante una función cuyos valores de salida son compatibles con la aritmética de punto fijo; por ello, permite una implementación eficiente en hardware.
+Este cuantizador aproxima la cuantización no uniforme mediante una función cuyos valores de salida son compatibles con la aritmética de punto fijo, por ello, permite una implementación eficiente en hardware en conjunto con la flexibilidad para adaptarse a distintas distribuciones de datos.

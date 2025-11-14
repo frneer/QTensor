@@ -30,72 +30,48 @@ model.fit(x_train, y_train, epochs=5)
 \end{lstlisting}
 
 \subsubsection{Grafo de ejecución}
-El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph}. Este grafo está compuesto principalmente por dos tipos de nodos: tensores (\texttt{tf.Tensor} o \texttt{tf.Variable}) y operaciones (\texttt{tf.Operation}), como muestra la \reffig{tensorflow_graph} con un ejemplo de una convolución. Los tensores representan los datos que circulan por el grafo, y las operaciones representan las transformaciones matemáticas aplicadas a esos datos. Esta arquitectura permite optimizaciones automáticas y facilita la ejecución en diferentes dispositivos, además, al tratarse de una estructura de datos, el grafo puede serializarse y exportarse a otras plataformas sin depender de Python.
+El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph}. Este grafo está compuesto principalmente por los siguientes componentes:
+% las aristas representan tensores: (\texttt{tf.Tensor} o \texttt{tf.Variable}) y operaciones (\texttt{tf.Operation})
 
-\defaultdiagram{tensorflow/graph}{Ejemplo de un \texttt{tf.Graph} de una sola capa}{tensorflow_graph}{1}
+\begin{itemize}
+    \item Tensores (\texttt{tf.Tensor} o \texttt{tf.Variable}): son las aristas del grafo y representan los datos que fluyen a través de las operaciones. Los tensores son estructuras multidimensionales que almacenan datos numéricos.
+    \item Operaciones (\texttt{tf.Operation}): son los nodos del grafo y representan las transformaciones matemáticas que se aplican a los tensores. Cada operación toma uno o más tensores como entrada y produce uno o más tensores como salida.
+\end{itemize}
+
+Esta arquitectura permite optimizaciones automáticas y facilita la ejecución en diferentes dispositivos, además, al tratarse de una estructura de datos, el grafo puede serializarse y exportarse a otras plataformas sin depender de Python. En resumen, utilizar el grafo permite portabilidad, velocidad y paralelización en la ejecución.
+
+Sin embargo, la construcción y gestión explícita de grafos puede resultar compleja para los usuarios, en especial si se estan desarrollando modelos o capas personalizadas. Por ello, \texttt{TensorFlow} ofrece dos modos de ejecución: el modo basado en grafos y el modo \textit{eager} (ejecución inmediata). En el modo \textit{eager}, las operaciones se ejecutan inmediatamente y devuelven resultados concretos, lo que facilita la depuración y el desarrollo interactivo. No obstante, el modo basasdo en grafos es preferible dadas sus ventajas en optimización y serialización.
+
+Una desventaja del modo basado en grafos es la dificultad para implementar ciertas operaciones que no se ajustan bien a la estructura del grafo. Por ejemplo, la indexación condicional o las operaciones que dependen de valores dinámicos pueden ser complicadas de expresar en un grafo estático. Para abordar estas limitaciones, se utiliza \texttt{tf.function}, una herramienta que permite convertir funciones de Python en grafos computacionales.
+
+Un ejemplo de \texttt{tf.function} es el multiplexor condicional \texttt{tf.where}, que selecciona elementos de dos tensores según una condición booleana. En el código \ref{code:tensorflow_where}, se muestra un ejemplo de uso de \texttt{tf.where} que ilustra cómo seleccionar elementos de dos listas basándose en una lista de condiciones.
+
+\begin{lstlisting}[language=Python,label=code:tensorflow_where,caption=Ejemplo de uso de tf.where en TensorFlow.]
+>>>    tf.where([True, False, False, True],
+...         [1, 2, 3, 4],
+...         [100, 200, 300, 400]).numpy()
+array([  1, 200, 300,   4], dtype=int32)
+\end{lstlisting}
 
 \subsubsection{TensorFlow Model Optimization}
 \label{sec:tensorflow_model_optimization}
-Para abordar la optimización de modelos, el ecosistema de \texttt{TensorFlow} incluye la biblioteca \texttt{TensorFlow Model Optimization} (en adelante \texttt{TFMOT}). \texttt{TFMOT} ofrece herramientas destinadas a optimizar modelos de cara al despliegue y la distribución. Proporciona funcionalidades para diversas técnicas de compresión, como \textit{weight clustering}, \textit{weight pruning} y cuantización.
+Para abordar la compresión de modelos y otras optimizaciones, el ecosistema de \texttt{TensorFlow} incluye la biblioteca \texttt{TensorFlow Model Optimization} (en adelante \texttt{TFMOT}). \texttt{TFMOT} ofrece herramientas destinadas a optimizar modelos de cara al despliegue y la distribución. Proporciona funcionalidades para diversas técnicas de compresión, como \textit{weight clustering}, \textit{weight pruning} y cuantización.
 
-Esta biblioteca admite QAT mediante la modificación del grafo computacional para incorporar operaciones de cuantización durante el entrenamiento, añadiendo un nodo de \textit{fake quantization} después de cada operación que deba cuantizarse. De este modo se simula el efecto de la cuantización en los pesos y activaciones durante el entrenamiento, como ilustra la \reffig{tensorflow_graph_q}, donde $q_w$, $q_b$ y $q_\phi$ representan las operaciones de cuantización para pesos, sesgos y activaciones, respectivamente.
-
-\defaultdiagram{tensorflow/graph_q}{Ejemplo de un \texttt{tf.Graph} de una sola capa con \textit{fake quantization}}{tensorflow_graph_q}{1}
+Esta biblioteca admite QAT mediante la modificación del grafo computacional para incorporar operaciones de cuantización durante el entrenamiento, añadiendo un nodo de \textit{fake quantization} después de cada operación que deba cuantizarse. De este modo se simula el efecto de la cuantización en los pesos y activaciones durante el entrenamiento, similar al \textit{forward pass} desarrollado en la figura \reffig{single_layer_training_quantizer}.
 
 Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte nativo de \texttt{TFMOT} incluye únicamente cuantizadores uniformes a enteros de 8 bits, con signo o sin signo.
 
 \subsubsection{Diferenciación automática y backpropagation}
 \label{sec:autodiff}
-La diferenciación automática es una técnica computacional que permite calcular de forma eficiente las derivadas de funciones matemáticas complejas. En el contexto del aprendizaje profundo, resulta fundamental para entrenar redes neuronales mediante el algoritmo de retropropagación. Este algoritmo, descrito en la sección \ref{sec:entrenamiento_redes_neuronales}, se basa en la regla de la cadena para calcular derivadas parciales de manera eficiente; \texttt{TensorFlow} implementa esta funcionalidad mediante \texttt{tf.autodiff} y emplea el grafo computacional para ejecutar el algoritmo de retropropagación.
+La diferenciación automática es una técnica computacional que permite calcular de forma eficiente las derivadas de funciones matemáticas complejas. En el contexto del aprendizaje profundo, resulta fundamental para entrenar redes neuronales mediante el algoritmo de retropropagación. Este algoritmo, descrito en la sección \ref{sec:entrenamiento_redes_neuronales}, se basa en la regla de la cadena para calcular derivadas parciales de manera eficiente. \texttt{TensorFlow} implementa esta funcionalidad mediante \texttt{tf.autodiff} y emplea el grafo computacional para ejecutar el algoritmo de retropropagación.
 
-	exttt{TensorFlow} registra todas las operaciones ejecutadas a partir de la clase \texttt{tf.\allowbreak{}GradientTape}; cada operación dispone de su regla de derivación. A partir de este registro se construye automáticamente un grafo de gradientes asociado al grafo directo. Para calcular la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo.
-
-Por ejemplo, para el caso definido en la \reffig{tensorflow_graph}, la salida del modelo se describe en la ecuación \ref{eq:tensorflow_forward_fp}.
-
-\begin{equation}
-    \label{eq:tensorflow_forward_fp}
-    \begin{aligned}
-        z &= w \cdot x + b \\
-        y &= \phi(z)
-    \end{aligned}
-\end{equation}
-
-La derivada con respecto a los parámetros entrenables $w$ y $b$ se calcula como en la ecuación \ref{eq:tensorflow_backward}.
-
-\begin{equation}
-    \label{eq:tensorflow_backward}
-    \begin{aligned}
-        \frac{\partial y}{\partial w} &= \frac{\partial y}{\partial z}\,\frac{\partial z}{\partial w} = \frac{\partial y}{\partial z}\,x \\
-        \frac{\partial y}{\partial b} &= \frac{\partial y}{\partial z}\,\frac{\partial z}{\partial b} = \frac{\partial y}{\partial z}
-    \end{aligned}
-\end{equation}
-
-Para el grafo con \textit{fake quantization} mostrado en la \reffig{tensorflow_graph_q}, la salida del modelo se expresa en la ecuación \ref{eq:tensorflow_forward_q}.
-
-\begin{equation}
-    \label{eq:tensorflow_forward_q}
-    \begin{aligned}
-        z &= q_w(w) \cdot x + q_b(b) \\
-        a &= \phi(z) \\
-        y &= q_\phi(a)
-    \end{aligned}
-\end{equation}
-
-La derivada con respecto a los parámetros entrenables $w$ y $b$ se obtiene como se muestra en la ecuación \ref{eq:tensorflow_backward_q}.
-
-\begin{equation}
-    \label{eq:tensorflow_backward_q}
-    \begin{aligned}
-        \frac{\partial y}{\partial w} &= \frac{\partial y}{\partial a}\,\frac{\partial a}{\partial z}\,\frac{\partial z}{\partial w} = q'_\phi(a) \cdot \phi'(z) \cdot (q'_w(w) \cdot x) \\
-        \frac{\partial y}{\partial b} &= \frac{\partial y}{\partial a}\,\frac{\partial a}{\partial z}\,\frac{\partial z}{\partial b} = q'_\phi(a) \cdot \phi'(z) \cdot q'_b(b)
-    \end{aligned}
-\end{equation}
+\texttt{TensorFlow} registra todas las operaciones ejecutadas a partir de la clase \texttt{tf.\allowbreak{}GradientTape}, cada operación dispone de su regla de derivación. A partir de este registro se construye automáticamente un grafo de gradientes asociado al grafo directo. Para calcular la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo, similar a lo que se ejemplifico en las figuras \ref{fig:single_layer_training} y \ref{fig:single_layer_training_quantizer}.
 
 \subsubsection{Gradientes personalizados}
 \label{sec:gradientes_personalizados}
 Una funcionalidad relevante para esta tesis es la posibilidad de intervenir en la definición automática de los gradientes de determinadas operaciones. Esta capacidad se ofrece mediante las denominadas \textit{custom gradients}, que permiten definir una operación matemática y su derivada de forma independiente. Dicha posibilidad resulta útil para operaciones que no disponen de una derivada bien definida o cuya derivada automática no resulta adecuada para el proceso de entrenamiento.
 
-En Python, un \texttt{decorador} es una función o clase que envuelve otra función o clase (\textit{wrapper}) para modificar su comportamiento. En el caso de la definición de gradientes personalizados, la implementación utiliza el decorador \texttt{@tf.custom\_gradient} aplicado sobre una función que define una operación matemática en el grafo computacional.
+% En Python, un \texttt{decorador} es una función o clase que envuelve otra función o clase (\textit{wrapper}) para modificar su comportamiento. En el caso de la definición de gradientes personalizados, la implementación utiliza el decorador \texttt{@tf.custom\_gradient} aplicado sobre una función que define una operación matemática en el grafo computacional.
 
 Por ejemplo, en la multiplicación de dos tensores \texttt{a} y \texttt{b} del fragmento de código \ref{code:custom_gradient}, la función \texttt{mul} define la operación de multiplicación y \texttt{TensorFlow} calcula automáticamente los gradientes correspondientes. En este caso, el gradiente calculado es $\nabla=\begin{bmatrix}\frac{\partial y}{\partial a} \\ \frac{\partial y}{\partial b} \end{bmatrix} = \begin{bmatrix} b \\ a \end{bmatrix}$.
 
@@ -145,4 +121,4 @@ da_custom = tape2.gradient(y_custom, a)  # = 8.0 (dy/da = 2b)
 db_custom = tape2.gradient(y_custom, b)  # = 6.0 (dy/db = 2a)
 \end{lstlisting}
 
-Esta funcionalidad resulta clave para implementar las derivadas de los cuantizadores desarrollados en la sección \ref{sec:gradientes}, ya que permite elegir la derivada más adecuada para el entrenamiento con QAT; por ejemplo, mediante el \textit{Straight-Through Estimator} (STE) explicado en la sección \ref{sec:qat}.
+Esta funcionalidad resulta clave para implementar las derivadas de los cuantizadores desarrollados en la sección \ref{sec:gradientes}, ya que permite elegir la derivada más adecuada para el entrenamiento con QAT, por ejemplo, mediante el \textit{Straight-Through Estimator} (STE) explicado en la sección \ref{sec:qat}.

@@ -1,0 +1,126 @@
+% Load saved quantizer plots (defines \quantizerexample and \quantizerexampleste)
+\input{diagrams/cuantizacion/uniform_quantizer.tex}
+\input{diagrams/cuantizacion/uniform_quantizer_ste.tex}
+
+\begin{tikzpicture}[
+    tensor/.style={rectangle, draw, fill=white, text width=2em, text centered, minimum height=2em},
+    % % --- NUEVOS ESTILOS PARA ETIQUETAS ---
+    lbl_fwd/.style={above, pos=0.5, font=\footnotesize}, % 'pos=0.5' centra la etiqueta
+    lbl_bwd/.style={below, pos=0.5, font=\footnotesize},
+    lbl_left/.style={left, pos=0.5, font=\footnotesize},
+    lbl_right/.style={right, pos=0.5, font=\footnotesize},
+    layer_function/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    operation/.style={circle, draw, fill=white, minimum size=0.1em, font=\tiny},
+    arrow/.style={-latex, thick}
+]
+
+\tikzset{node distance=1.75cm and 1.5cm}
+
+%%%% FORWARD %%%%
+% draw linear block z()
+\node[layer_function] (z) at (0,0) {$z()$};
+
+% --- MODIFIED: Changed from (-2,0) to (-3,0) ---
+\draw[arrow] ($(z)+(-6,0)$) -- node[lbl_fwd, pos=0.15] {$a_{m-1}$} (z.west);
+
+% draw activation layer_function phi()
+\node[layer_function, right=of z] (phi) {$\phi()$};
+\node[inner sep=0pt, right=of phi] (qphi) {\scalebox{0.2}{\usebox{\quantizerexample}}};
+% overlay label in the top-left corner of the quantizer plot
+\node[font=\footnotesize, anchor=north west, xshift=1mm, yshift=-1mm] at (qphi.north west) {$q_{\phi}()$};
+\draw[arrow] (phi) -- (qphi.west);
+
+% draw output activation a_m (Already 3cm, no change needed)
+\draw[arrow] (qphi.east) -- node[lbl_fwd, pos=0.75] {$a_{m}$} ($(qphi)+(3,0)$);
+
+% draw arrow from z to phi
+% annotate it as $z_m$
+\draw[arrow] (z.east) -- node[lbl_fwd] {$z_{m}$} (phi.west);
+
+% draw theta parameters: place them below-left of z instead of directly below
+\node[inner sep=0pt, below left=of z] (qtheta) {\scalebox{0.2}{\usebox{\quantizerexample}}};
+% overlay label for q_theta placed at the top-left corner
+\node[font=\footnotesize, anchor=north west, xshift=1mm, yshift=-1mm] at (qtheta.north west) {$q_{\theta}()$};
+\node[tensor, below=of qtheta] (theta) {$\theta$};
+
+% theta to z
+\draw[arrow] (theta) -- (qtheta);
+\draw[arrow] (qtheta) -| (z);
+
+
+% % --- DEFINE PARAMETER UPDATE CHAIN FIRST --- % %
+\def\updateopspacing{0.5cm}
+\node[operation, below=\updateopspacing of theta] (mult_eta) {$\times$};
+\node[right=0.5cm of mult_eta] (eta) {$-\eta$};
+
+
+%%%% BACKWARD (NOW POSITIONED RELATIVE TO UPDATE CHAIN) %%%%
+
+% Place gradient of q_theta just below theta (use STE plot)
+\node[inner sep=0pt, below=of theta] (dqtheta) {\scalebox{0.2}{\usebox{\quantizerexampleste}}};
+% overlay label for dq_theta (STE) placed at the top-left corner
+\node[font=\footnotesize, anchor=north west, xshift=1mm, yshift=-1mm] at (dqtheta.north west) {$\nabla_{q_{\theta}}$};
+
+% draw z gradient to the right of dqtheta so it lines up with dqtheta
+\node[layer_function, right=of dqtheta] (dz) {$\nabla_z$};
+
+% draw phi gradiente to the right of dz
+\node[layer_function, right=of dz] (dphi) {$\nabla_\phi$};
+
+% draw q_phi gradient to the right of dphi
+\node[inner sep=0pt, right=of dphi] (dqphi) {\scalebox{0.2}{\usebox{\quantizerexampleste}}};
+% overlay label for dq_phi (STE) placed at the top-left corner
+\node[font=\footnotesize, anchor=north west, xshift=1mm, yshift=-1mm] at (dqphi.north west) {$\nabla_{q_{\phi}}$};
+
+% Theres a multication between upstream and dphi (below dphi)
+\node[operation, below=of dphi] (mult) {$\times$};
+\draw[arrow] (dphi) -- (mult);
+
+\node[operation, below=of dqphi] (mult_qphi) {$\times$};
+\draw[arrow] (dqphi) -- (mult_qphi);
+\draw[arrow] ($(mult_qphi)+(3,0)$) -- (mult_qphi.east) node[lbl_bwd,pos=0.25] {$\frac{\partial \mathcal{L}}{\partial a_{m}}$};
+\draw[arrow] (mult_qphi) -- (mult);
+
+
+% draw a circle with $\times in the midle of dz and dphi (below dz)
+\node[operation, below=of dz] (mult2) {$\times$};
+\draw[arrow] (mult) -- (mult2);
+\draw[arrow] (dz) -- (mult2);
+% \draw[arrow] (mult2.west) -- (dz.east);
+
+% --- MODIFIED: Changed from (-2,0) to (-3,0) ---
+\draw[arrow] (mult2) -- node[lbl_bwd, pos=0.85] {$\frac{\partial \mathcal{L}}{\partial a_{m-1}}$} ($(mult2)+(-6,0)$);
+
+% % --- CONNECT ALL THE NODES --- % %
+\draw[arrow] (eta) -- (mult_eta);
+\draw[arrow] (mult_eta.north) -- (theta.south);
+% \draw[arrow] (negative.north) -- (mult_eta.south);
+
+% --- MODIFIED: Added name (dtheta) to the label node ---
+% start the arrow directly under dqtheta by using the vertical projection
+\draw[arrow] (dqtheta |- mult2) -- node[lbl_left] (dtheta) {$\frac{\partial \mathcal{L}}{\partial \theta}$} (dqtheta);
+
+\draw[arrow] (dqtheta) -- (mult_eta);
+
+% % --- BACKGROUND LAYER BOX --- % %
+\begin{pgfonlayer}{background}
+    \node [
+        draw,
+        dotted,
+        thick,
+        orange,
+        rounded corners,
+        % --- MODIFIED: Added (dtheta) to fit list ---
+        fit=(z) (phi) (theta) (mult_eta) (dz) (dphi) (mult) (mult2) (dtheta) (qphi) (dqphi) (dqtheta) (mult_qphi),
+        % --- MODIFIED: Reduced inner sep for better spacing ---
+        inner sep=0.25cm
+    ] (layer_box) {};
+    % Add horizontal line through the box at theta level (background so it sits behind nodes)
+    \draw [gray, dashed, thin] ($(theta)+(-3,0)$) -- ($(theta)+(13,0)$);
+\end{pgfonlayer}
+
+% --- Placed your label relative to the box's corner ---
+\node[font=\footnotesize, orange, above right, xshift=2mm] at (layer_box.north east) {$L_m$};
+
+
+\end{tikzpicture}

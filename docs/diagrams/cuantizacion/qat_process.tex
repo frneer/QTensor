@@ -8,7 +8,7 @@
     % Node definitions
     \node (model) [block] {Modelo pre-entrenado (FP32)};
 
-    \node (fine-tunning) [block, below=of model] {Re-entrenamiento};
+    \node (fine-tunning) [block, below=of model] {Re-entrenamiento con \textit{fake-quantization}};
     \node (train_data) [small_block, left=of fine-tunning] {Datos de entrenamiento};
     % The rest of the vertical flow
 

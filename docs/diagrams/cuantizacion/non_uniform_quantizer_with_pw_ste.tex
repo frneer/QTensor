@@ -1,0 +1,42 @@
+\begin{tikzpicture}
+        % Define the axis environment
+    \draw[-{Stealth}] (-4.5,0) -- (4.5,0); % x-axis
+    \draw[-{Stealth}] (0,-4.5) -- (0,4.5); % y-axis
+
+    % x-axis ticks and labels
+    \foreach \x in {-4, -3, -2, -1, 1, 2, 3, 4}
+        \draw (\x,0.1) -- (\x,-0.1) node[below] {$\x$};
+    \foreach \x in {-4, -3, -2, -1, 0,  1, 2, 3, 4}
+        \fill (\x,0) circle (1.5pt); % Dots on x-axis
+
+    % y-axis ticks and labels
+    \foreach \y in {-4, -3, -2, -1, 1, 2, 3, 4}
+        \draw (0.1,\y) -- (-0.1,\y) node[left] {$\y$};
+    \foreach \y in {-4, -3, -2, -1, 0, 1, 2, 3, 4}
+        \fill (0,\y) circle (1.5pt); % Dots on y-axis
+
+    % Non-uniform quantizer function plot (green stepped line)
+    % The x-intervals and output levels are intentionally non-uniform here.
+    \draw[green, thick]
+        (-4.0,-4.0) -- (-3.5,-4.0)
+        -- (-3.5,-3.7) -- (-2.6,-3.7)
+        -- (-2.6,-2.8) -- (-1.9,-2.8)
+        -- (-1.9,-1.6) -- (-0.6,-1.6)
+        -- (-0.6,-0.2) -- (0.4,-0.2)
+        -- (0.4,0.8)  -- (1.7,0.8)
+        -- (1.7,1.9)  -- (2.9,1.9)
+        -- (2.9,3.1)  -- (4.0,3.1);
+
+    % Piecewise STE: diagonal segments spanning each quantization step
+    % Connect first -> third node within each triple (no skipping)
+    \draw[red, thick, dashed] (-4.0,-4.0) -- (-3.5,-3.7);
+    \draw[red, thick, dashed] (-3.5,-3.7) -- (-2.6,-2.8);
+    \draw[red, thick, dashed] (-2.6,-2.8) -- (-1.9,-1.6);
+    \draw[red, thick, dashed] (-1.9,-1.6) -- (-0.6,-0.2);
+    \draw[red, thick, dashed] (-0.6,-0.2) -- (0.4,0.8);
+    \draw[red, thick, dashed] (0.4,0.8) -- (1.7,1.9);
+    \draw[red, thick, dashed] (1.7,1.9) -- (2.9,3.1);
+    \draw[red, thick, dashed] (2.9,3.1) -- (4.0,3.1);
+
+
+\end{tikzpicture}

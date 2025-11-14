@@ -1,0 +1,97 @@
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    arrow/.style={-latex, thick},
+    % --- NUEVOS ESTILOS PARA ETIQUETAS ---
+    lbl_fwd/.style={above, pos=0.5, font=\footnotesize}, % 'pos=0.5' centra la etiqueta
+    lbl_bwd/.style={below, pos=0.5, font=\footnotesize}
+]
+
+\tikzset{node distance=1cm and 1cm}
+
+% --- Definición de Nodos (sin cambios) ---
+% Leftmost layer
+\node[block] (layer_0) at (0,0) {$L_1$};
+% left ellipsis
+\node[right=of layer_0, minimum height=2em] (left_ellipsis) {$\cdots$};
+% middle layers
+\node[block, right=of left_ellipsis] (layer_m_1) {$L_{m-1}$};
+\node[block, right=of layer_m_1] (layer_m) {$L_m$};
+\node[block, right=of layer_m] (layer_m_2) {$L_{m+1}$};
+% right ellipsis
+\node[right=of layer_m_2, minimum height=2em] (right_ellipsis) {$\cdots$};
+% Rightmost layer
+\node[block, right=of right_ellipsis] (layer_n) {$L_N$};
+
+\node[block, right=of layer_n] (loss_function) {$\mathcal{L}$};
+
+\node[above=of layer_0] (input_data) {$x$};
+\node[above=of loss_function] (output_data) {$y$};
+
+% --- Conexiones de datos de entrada y salida ---
+\draw[arrow] (input_data.south) -- (layer_0.north);
+\draw[arrow] (output_data.south) -- (loss_function.north);
+
+% layer for dataset
+% Label
+\node[right=of input_data, font=\footnotesize, green] (dataset_label) {\textit{dataset}};
+\begin{pgfonlayer}{background}
+    \node [
+        draw,                   % <-- Add this to draw the border
+        dotted,                 % <-- Add this for the dotted style
+        thick,                  % (Optional) Make the dots thicker
+        green,                   % (Optional) Color for the dots
+        rounded corners,
+        fit=(input_data) (output_data),
+        inner sep=0.25cm
+    ] {};
+\end{pgfonlayer}
+
+% --- Conexiones con etiquetas ---
+
+% --- L1 <-> ... ---
+\draw[arrow] (layer_0.north east) -- node[lbl_fwd] {$a_1$} (left_ellipsis.north west);
+\draw[arrow] (left_ellipsis.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_1}$} (layer_0.south east);
+
+% --- ... <-> Lm-1 ---
+\draw[arrow] (left_ellipsis.north east) -- node[lbl_fwd] {$a_{m-2}$} (layer_m_1.north west);
+\draw[arrow] (layer_m_1.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_{m-2}}$} (left_ellipsis.south east);
+
+% --- Lm-1 <-> Lm ---
+\draw[arrow] (layer_m_1.north east) -- node[lbl_fwd] {$a_{m-1}$} (layer_m.north west);
+\draw[arrow] (layer_m.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_{m-1}}$} (layer_m_1.south east);
+
+% --- Lm <-> Lm+1 ---
+\draw[arrow] (layer_m.north east) -- node[lbl_fwd] {$a_m$} (layer_m_2.north west);
+\draw[arrow] (layer_m_2.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_m}$} (layer_m.south east);
+
+% --- Lm+1 <-> ... ---
+\draw[arrow] (layer_m_2.north east) -- node[lbl_fwd] {$a_{m+1}$} (right_ellipsis.north west);
+\draw[arrow] (right_ellipsis.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_{m+1}}$} (layer_m_2.south east);
+
+% --- ... <-> LN ---
+\draw[arrow] (right_ellipsis.north east) -- node[lbl_fwd] {$a_{N-1}$} (layer_n.north west);
+\draw[arrow] (layer_n.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial a_{N-1}}$} (right_ellipsis.south east);
+
+% --- LN <-> Output ---
+\draw[arrow] (layer_n.north east) -- node[lbl_fwd] {$\hat{y}$} (loss_function.north west);
+\draw[arrow] (loss_function.south west) -- node[lbl_bwd] {$\frac{\partial \mathcal{L}}{\partial \hat{y}}$} (layer_n.south east);
+
+% layer for model
+% Label
+\node[below=of layer_m, font=\footnotesize, blue] (model_label) {\textit{model}};
+\begin{pgfonlayer}{background}
+    \node [
+        draw,                   % <-- Add this to draw the border
+        dotted,                 % <-- Add this for the dotted style
+        thick,                  % (Optional) Make the dots thicker
+        blue,                   % (Optional) Color for the dots
+        rounded corners,
+        % fit tightly horizontally just after L1 and LN, allow a different
+        % vertical padding. Use anchors so the fit is tight on the left/right
+        fit=(layer_0.north west) (layer_n.south east),
+        inner xsep=0.25cm,     % horizontal padding (small -> cut close after L1/LN)
+        inner ysep=0.75cm         % vertical padding
+    ] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
