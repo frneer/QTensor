@@ -612,7 +612,7 @@ La clase \texttt{Stage} representa un paso del flujo de trabajo. Esta clase perm
 Es importante destacar que para guardar y cargar los modelos deben ser serializables y deserializables. Para esto, se utilizó la funcionalidad de Keras para guardar y cargar modelos en formato \texttt{keras}. Todo objeto desarrollado por la biblioteca que forme parte del modelo como la configuracion (\texttt{GenerateConfig}) o los cuantizadores personalizados (\texttt{UniformQuantizer}, \texttt{FlexQuantizer}) implementan el método \texttt{get\_config} y el método de clase \texttt{from\_config}, para poder ser serializados y deserializados correctamente \cite{tensorflow_serialization_guide}.
 
 \subsubsection{Clase \texttt{Pipeline}}
-\section{sec:pipeline}
+\label{sec:pipeline}
 
 La clase \texttt{Pipeline} es un orquestador de etapas. Esta clase permite definir un flujo de trabajo a partir de una lista de \texttt{Stage}, y ejecutar cada una de estas etapas en orden. La clase \texttt{Pipeline} se encarga de gestionar la ejecución de cada etapa, pasando los resultados intermedios entre las etapas, y guardando los resultados intermedios.
 

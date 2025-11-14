@@ -4,20 +4,20 @@ El objetivo de los ensayos es presentar un ejemplo completo del uso de la biblio
 
 El experimento consistió en definir un modelo, entrenarlo con el conjunto de datos CIFAR-10, aplicar dos esquemas de cuantización (uno que utiliza el cuantizador uniforme y otro el flexible), reentrenarlo mediante QAT y, finalmente, evaluar los modelos cuantizados en términos de precisión y tamaño.
 
-Los resultados mostraron que el cuantizador flexible alcanzó tasas de compresión elevadas sin degradar de manera significativa el desempeño del modelo, mientras que la cuantización uniforme presentó pérdidas de precisión notables a altas tasas de compresión.
+Los resultados demuestran que el cuantizador flexible alcanzó tasas de compresión elevadas sin degradar de manera significativa el desempeño del modelo, mientras que la cuantización uniforme presentó pérdidas de precisión notables a altas tasas de compresión.
 
 \subsection{Conjunto de datos: CIFAR-10}
 Para los ensayos se empleó el conjunto CIFAR-10 \cite{krizhevsky2009learning}, compuesto por $60000$ imágenes a color de $32\times32$ píxeles, clasificadas en 10 categorías (avión, automóvil, pájaro, gato, ciervo, perro, rana, caballo, barco y camión). La partición utilizada fue de $50000$ imágenes para entrenamiento y $10000$ para prueba.
 
-CIFAR-10 se consideró adecuado por su tamaño moderado y por la diversidad de clases, lo que permitió evaluar técnicas de cuantización sin requerir recursos computacionales excesivos. En la \reffig{fig:cifar10} se mostraron ejemplos representativos de cada clase del conjunto.
+El \textit{dataset} CIFAR-10 se consideró adecuado por su tamaño moderado y por la diversidad de clases, lo que permitió evaluar técnicas de cuantización sin requerir recursos computacionales excesivos. En la \reffig{cifar10} se muestran ejemplos representativos de cada clase del conjunto.
 
 \defaultfigurecustomsize{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}{0.85}
 
 \subsection{Modelo}
 \label{sec:model}
-El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{LeCun1998}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa 0.5 y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con $2175626$ parámetros entrenables.
+El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{LeCun1998}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) con una ventana de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa $0.5$ y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con \num{2175626} parámetros entrenables.
 
-La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y \reffig{model_architecture} ilustra la misma.
+La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y la \reffig{model_architecture} ilustra la misma.
 
 \begin{table}[H]
     \centering
@@ -47,7 +47,7 @@ La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizad
 A continuación se exponen las funciones principales de los tipos de capa empleados:
 
 \begin{itemize}
-    \item Capas convolucionales (\texttt{Conv2D}): Extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas. \cite{Krizhevsky2012}.
+    \item Capas convolucionales (\texttt{Conv2D}): Extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas \cite{Krizhevsky2012}.
 
     \item Capas de submuestreo (\texttt{MaxPool2D}): reducen la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo en ventanas locales, lo que genera invarianza a pequeñas traslaciones y reduce el costo computacional \cite{LeCun1998}.
 
@@ -55,15 +55,15 @@ A continuación se exponen las funciones principales de los tipos de capa emplea
 
     \item Capas densas (\texttt{Dense}): implementan una capa totalmente conectada como se describió en la sección \ref{sec:redes_neuronales}, realiza combinaciones lineales seguidas de funciones de activación no lineales, con la función de producir representaciones de alto nivel y llevar a cabo la clasificación final. Los parámetros de esta capa son los pesos y los \textit{biases} asociados a cada neurona \cite{Goodfellow2016}.
 
-    \item \texttt{Dropout}: durante el entrenamiento, desactiva aleatoriamente un porcentaje de conexiones (50\%), lo que ayuda a prevenir el sobreajuste \cite{Srivastava2014}.
+    \item Capa de desactivación aleatoria (\texttt{Dropout}): durante el entrenamiento, desactiva aleatoriamente un porcentaje de conexiones (50\%), lo que ayuda a prevenir el sobreajuste \cite{Srivastava2014}.
 \end{itemize}
 
 Las funciones de activación empleadas fueron las siguientes:
 
 \begin{itemize}
-    \item \texttt{ReLU} (\textit{Rectified Linear Unit}): definida como $f(x)=\max(0,x)$, se utiliza por su eficiencia computacional y para mitigar el problema del gradiente desvaneciente \cite{Nair2010}.
+    \item Unidad lineal rectificada (\texttt{ReLU}): (\textit{Rectified Linear Unit}) se define como $f(x)=\max(0,x)$, se utiliza por su eficiencia computacional y para mitigar el problema del gradiente desvaneciente \cite{Nair2010}.
 
-    \item \texttt{Softmax}: función aplicada en la capa de salida de un modelo de clasificación. Transforma el vector de activaciones en una distribución de probabilidad sobre las clases, donde cada valor representa la probabilidad estimada de que la muestra pertenezca a esa clase. La suma de todas las probabilidades es igual a 1. \cite{Bridle1990}.
+    \item Función softmax (\texttt{Softmax}): función aplicada en la capa de salida de un modelo de clasificación. Transforma el vector de activaciones en una distribución de probabilidad sobre las clases, donde cada valor representa la probabilidad estimada de que la muestra pertenezca a esa clase. La suma de todas las probabilidades es igual a 1. \cite{Bridle1990}.
 \end{itemize}
 
 \subsection{Esquemas de cuantización}
@@ -80,7 +80,9 @@ La diferencia entre los grupos radica en la cuantización de los pesos de las ca
 
 Para estas capas, el primer esquema utiliza cuantización uniforme signada con la misma resolución de bits por capa. Se exploraron distintas configuraciones de bits para evaluar el impacto en la precisión y el tamaño del modelo, en particular se evaluaron 10 configuraciones con diferentes resoluciones de bits.
 
-El segundo esquema emplea cuantización flexible signada, para las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), donde se definieron configuraciones variables de bits y niveles, mientras que las capas de entrada y salida mantuvieron configuraciones fijas.
+El segundo esquema emplea cuantización flexible signada para las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), donde se definieron múltiples configuraciones combinando número de bits y niveles, mientras que las capas de entrada y salida mantuvieron configuraciones fijas.
+
+La elección de no modificar los parámetros de cuantización para la primera y última capa se justifica en que se evaluó empíricamente que la precisión del modelo es altamente sensible a la cuantización de estas capas. Sumado a esto, las capas intermedias concentran, como se puede observan en la tabla \ref{tab:model_architecture}, un $\approx 99.8\%$ de los parámetros del modelo, mientras que la primera y última capa contienen una proporción muy pequeña de los mismos ($\approx 0.2\%$). Por lo tanto, los beneficios en términos de reducción del tamaño no justifican la perdida de precisión para estas capas y por ende, se utiliza una cuantización poco agresiva.
 
 Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final}.
 
@@ -107,25 +109,25 @@ Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final
 \textbf{Capa} & \textbf{Componente} & \textbf{Tipo} & \textbf{Parámetros} & \textbf{Tipo} & \textbf{Parámetros} \\
 \midrule
 %
-\multirow{3}{*}{\texttt{conv2d}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
+\multirow{3}{*}{\texttt{conv2d}} & kernel & Uniforme & $b \in \mathbb{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
 \cmidrule(lr){2-6}
 & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
 \cmidrule(lr){2-6}
 & activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\multirow{3}{*}{\texttt{conv2d\_1}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
+\multirow{3}{*}{\texttt{conv2d\_1}} & kernel & Uniforme & $b \in \mathbb{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
 \cmidrule(lr){2-6}
  & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
 \cmidrule(lr){2-6}
  & activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\multirow{3}{*}{\texttt{dense}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
+\multirow{3}{*}{\texttt{dense}} & kernel & Uniforme & $b \in \mathbb{B}^*$ & Flexible & \(b\in\{4,6,8\}\) \newline \(n_{l}\in\mathbb{L}^{**}\) \\
 \cmidrule(lr){2-6}
  & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
 \cmidrule(lr){2-6}
  & activation & Uniforme & $b=16$ & Uniforme & $b=16$ \\
 \midrule
-\multirow{3}{*}{\texttt{dense\_1}} & kernel & Uniforme & $b \in \mathcal{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
+\multirow{3}{*}{\texttt{dense\_1}} & kernel & Uniforme & $b \in \mathbb{B}^*$ & Flexible & \(b=8\) \newline \(n_{l}=16\) \\
 \cmidrule(lr){2-6}
 & bias & Uniforme & $b=8$ & Uniforme & $b=8$ \\
 \cmidrule(lr){2-6}
@@ -133,7 +135,7 @@ Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final
 \bottomrule
 %
 \multicolumn{6}{@{}l}{\textit{$b$: resolución de bits. $n_{l}$: número de niveles de cuantización.}} \\
-\multicolumn{6}{@{}l}{\textit{*Conjunto $\mathcal{B} = \{1,2,3,4,5,6,8,10,16,24\}$.}} \\
+\multicolumn{6}{@{}l}{\textit{*Conjunto $\mathbb{B} = \{1,2,3,4,5,6,8,10,16,24\}$.}} \\
 \multicolumn{6}{@{}l}{\textit{**Conjunto $\mathbb{L} = \{2,3,4,6,8,10,16\}$.}} \\
 \end{tabularx}
 \end{table}
@@ -146,13 +148,13 @@ Los pipelines generados para ambos esquemas poseen las mismas etapas, que se ilu
 % \TODO{Este diagrama se puede mejorar}
 \defaultdiagram{ensayos/pipeline}{Diagrama del \texttt{Pipeline} experimental.}{experimental_pipeline}{0.7}
 
-La única diferencia entre ambos pipelines radicó en la etapa de cuantización, donde se aplicó el esquema correspondiente (uniforme o flexible) con la configuración definida en la tabla \ref{tab:quant_layouts_final}. Para cada esquema se generaron pipelines para cada configuración de bits y niveles. A su vez, cada configuración se ejecutó tres veces con diferentes semillas aleatorias para obtener resultados estadísticos.
+La única diferencia entre ambos pipelines radicó en la etapa de cuantización, donde se aplicó el esquema correspondiente (uniforme o flexible) con la configuración definida en la tabla \ref{tab:quant_layouts_final}. Para cada esquema se generaron pipelines para cada configuración de bits y niveles. A su vez, cada configuración se ejecutó múltiples veces con diferentes semillas aleatorias para obtener resultados estadísticos.
 
 La tabla \ref{tab:pipeline_stages} describe las etapas y las configuraciones de hiperparámetros utilizada en los ensayos.
 
 \begin{table}[H]
     \centering
-    \caption{Etapas del pipeline experimental y parámetros relevantes. Los nombres entre \texttt{} corresponden a las claves usadas en el script de experimentos.}
+    \caption{Etapas del pipeline experimental y parámetros relevantes.}
     \label{tab:pipeline_stages}
     \footnotesize
     \renewcommand{\arraystretch}{1.2}

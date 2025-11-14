@@ -8,15 +8,15 @@ Los resultados se enfocan en el análisis de la relación entre la complejidad d
 \subsection{Resultados para el esquema de cuantización uniforme}
 \label{sec:uniform_results}
 
-En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en Kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado. La figura muestra tres curvas, cada una compuesta por la coleccion dentro de todas las ejecuciones con diferentes semillas aleatorias, mostrando el valor máximo, medio y mínimo de precisión alcanzada para cada configuración de bits.
+En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en Kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado. La figura muestra tres curvas, cada una compuesta por la coleccion dentro de todas las ejecuciones con diferentes semillas aleatorias, mostrando el valor máximo, medio y mínimo de precisión alcanzada para cada configuración de bits. La tabla \ref{tab:uniform_results} presenta los valores máximos obtenidos con el esquema de cuantización uniforme para las diferentes configuraciones de bits.
 
 \defaultfigure{resultados/complexity_vs_quantized_uniform_stats.png}{Resultados de la cuantización uniforme.}{uniform_results}
-
-La tabla \ref{tab:uniform_results} presenta los valores máximos obtenidos con el esquema de cuantización uniforme para las diferentes configuraciones de bits.
 
 \input{sections/04_ensayos_y_resultados/tab_uniform}
 
 Los resultados mostraron que el esquema de cuantización uniforme presenta capacidad de compresión aceptable hasta compresiones de $\approx8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $102.51\%$ en comparación con el modelo original, con una tasa de compresión de $4.00\times$. Con $10$ y $16$ bits se obtuvieron valores relativos de precisión de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuye, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
+
+También a medida que se incrementa la cantidad de bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de precisión para configuraciones a partir de $5$ o $6$ bits. Con lo cual se puede concluir que existe una alta variabilidad de la precisión en la zona de bajas cantidades de bits, mientras que para configuraciones con más bits la precisión se estabiliza cerca del valor del modelo original.
 
 Algunas configuraciones superaron la precisión del modelo original. En estos casos, el ruido introducido por la cuantización actúa como una forma de regularización, ayudando al modelo a generalizar mejor y evitar el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
 
@@ -24,10 +24,9 @@ Algunas configuraciones superaron la precisión del modelo original. En estos ca
 \label{sec:flexible_results}
 
 En segundo lugar, se presentan los resultados obtenidos con el esquema de cuantización flexible en la \reffig{flexible_results}.
+A continuación, se presenta la tabla \ref{tab:flexible_results} que expone los resultados cuantitativos obtenidos con el esquema de cuantización flexible para las diferentes combinaciones de bits y niveles. Este esquema permite un control más fino del balance entre precisión y complejidad, lo que habilita configuraciones con alta compresión y pérdidas de precisión acotadas.
 
 \defaultfigure{resultados/complexity_vs_quantized_flex_stats2.png}{Resultados de la cuantización flexible.}{flexible_results}
-
-A continuación, la tabla \ref{tab:flexible_results} expone los resultados cuantitativos obtenidos con el esquema de cuantización flexible para las diferentes combinaciones de bits y niveles. Este esquema permite un control más fino del balance entre precisión y complejidad, lo que habilita configuraciones con alta compresión y pérdidas de precisión acotadas.
 
 \input{sections/04_ensayos_y_resultados/tab_flexible}
 
