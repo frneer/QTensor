@@ -18,22 +18,27 @@
 
     % --- Títulos alineados ---
     \def\titleY{2.5}
-    \node[font=\bfseries] at (\inputX, \titleY) {Capa de Entrada};
-    % Título general para las capas ocultas
-    \node[font=\bfseries] at ({(\hiddenX+\dotsX)/2}, \titleY) {Capas Ocultas};
-    \node[font=\bfseries] at (\outputX, \titleY) {Capa de Salida};
 
     % --- CAPA DE ENTRADA (Alineada en x = \inputX) ---
-    \node[neuron] (input-1) at (\inputX, 0) {$x_1$};
-    \node[neuron] (input-2) [below=of input-1] {$x_2$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (input-1) at (\inputX, 0) {$h_{\text{in}_1}$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (input-2) [below=of input-1] {$h_{\text{in}_2}$};
     \node (input-dots) [below=0.7cm of input-2] {$\vdots$};
-    \node[neuron] (input-n) [below=0.7cm of input-dots] {$x_n$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (input-n) [below=0.7cm of input-dots] {$h_{\text{in}_n}$};
+
+    \node[left=of input-1] (x1) {$x_1$};
+    \node[left=of input-2] (x2) {$x_2$};
+    \node[left=of input-dots, xshift=0.5cm] (xdots) {$\vdots$};
+    \node[left=of input-n] (xn) {$x_n$};
+
+    \draw[conn] (x1) -- (input-1);
+    \draw[conn] (x2) -- (input-2);
+    \draw[conn] (xn) -- (input-n);
 
     % --- PRIMERA CAPA OCULTA (Alineada en x = \hiddenX) ---
-    \node[neuron] (hidden-1) at (\hiddenX, 0) {$h_1$};
-    \node[neuron] (hidden-2) [below=of hidden-1] {$h_2$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (hidden-1) at (\hiddenX, 0) {$h_1$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (hidden-2) [below=of hidden-1] {$h_2$};
     \node (hidden-dots) [below=0.7cm of hidden-2] {$\vdots$};
-    \node[neuron] (hidden-m) [below=0.7cm of hidden-dots] {$h_m$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (hidden-m) [below=0.7cm of hidden-dots] {$h_m$};
 
     % ==========================================================
     % NUEVO: Nodos para representar capas intermedias
@@ -43,10 +48,19 @@
     \node (dots-3) [below=1.5cm of dots-2] {$\cdots$};
 
     % --- CAPA DE SALIDA (Alineada en x = \outputX) ---
-    \node[neuron] (output-1) at (\outputX, 0) {$y_1$};
-    \node[neuron] (output-2) [below=of output-1] {$y_2$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (output-1) at (\outputX, 0) {$h_{\text{out}_1}$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (output-2) [below=of output-1] {$h_{\text{out}_2}$};
     \node (output-dots) [below=0.7cm of output-2] {$\vdots$};
-    \node[neuron] (output-k) [below=0.7cm of output-dots] {$y_k$};
+    \node[neuron, pattern=north east lines, pattern color=orange!20] (output-k) [below=0.7cm of output-dots] {$h_{\text{out}_k}$};
+
+    \node[right=of output-1] (y1) {$y_1$};
+    \node[right=of output-2] (y2) {$y_2$};
+    \node[right=of output-dots, xshift=0.5cm] (ydots) {$\vdots$};
+    \node[right=of output-k] (yk) {$y_k$};
+
+    \draw[conn] (output-1) -- (y1);
+    \draw[conn] (output-2) -- (y2);
+    \draw[conn] (output-k) -- (yk);
 
     % --- CONEXIONES ---
     % Conexiones de Entrada -> 1ra Capa Oculta
@@ -69,5 +83,23 @@
             \draw[conn] (dots-\i) -- (output-\j);
         }
     }
+
+    \node[font=\bfseries, above=of input-1, yshift=-0.75cm] {Capa de Entrada};
+    % Título general para las capas ocultas
+    \node[font=\bfseries, above=of hidden-1, yshift=-0.75cm] {Capas Ocultas};
+    \node[font=\bfseries, above=of output-1, yshift=-0.75cm] {Capa de Salida};
+
+    \begin{pgfonlayer}{background}
+        \node [
+            draw,
+            dotted,
+            thick,
+            red,
+            rounded corners,
+            fit=(input-1)(output-k),
+            inner sep=0.25cm
+            ] (layer_box) {};
+    \end{pgfonlayer}
+    \node[below right=of layer_box, font=\footnotesize, red, xshift=-1cm, yshift=1.5cm] (model_label) {MLP};
 
 \end{tikzpicture}

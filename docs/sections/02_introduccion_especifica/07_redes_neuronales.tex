@@ -5,11 +5,11 @@ Una red neuronal es un modelo matemático inspirado en la estructura y el funcio
 \subsection{Perceptrón}
 \label{sec:perceptron}
 
-El perceptrón \cite{rosenblatt1958perceptron} es una unidad de procesamiento que recibe múltiples entradas $\mathbf{x} = [x_1, x_2, \ldots, x_n]$ y produce una salida $y_j$. Esta se obtiene como resultado de una combinación lineal de las entradas ponderadas por sus respectivos pesos $\mathbf{w} = [w_{1_j}, w_{2_j}, \ldots, w_{n_j}]$, a la que se añade un sesgo $b_j$. Dicha combinación se transforma mediante una función de activación no lineal $\varphi$, lo que introduce la capacidad de modelar relaciones complejas en los datos \cite{cybenko1989approximation}. \eqref{eq:perceptron} describe matemáticamente el funcionamiento de un perceptrón y la \reffig{perceptron} ilustra su estructura.
+El perceptrón \cite{rosenblatt1958perceptron} es una unidad de procesamiento que recibe múltiples entradas $\mathbf{x} = [x_1, x_2, \ldots, x_n]$ y produce una salida $y_j$. Esta se obtiene como resultado de una combinación lineal de las entradas ponderadas por sus respectivos pesos $\mathbf{w} = [w_{1_j}, w_{2_j}, \ldots, w_{n_j}]$, a la que se añade un sesgo $b_j$. Dicha combinación se transforma mediante una función de activación no lineal $\phi$, lo que introduce la capacidad de modelar relaciones complejas en los datos \cite{cybenko1989approximation}. \eqref{eq:perceptron} describe matemáticamente el funcionamiento de un perceptrón y la \reffig{perceptron} ilustra su estructura.
 
 \begin{equation}
     \label{eq:perceptron}
-    y_j = \varphi\left(\sum_{i=1}^{n} w_{i_j} x_i + b_j\right)
+    y_j = \phi\left(\sum_{i=1}^{n} w_{i_j} x_i + b_j\right)
 \end{equation}
 
 % \input{diagrams/neuron}
@@ -22,7 +22,7 @@ No obstante, la funcionalidad del modelo de perceptrón es limitada, ya que solo
 
 Un MLP está formado por varias capas de perceptrones conectadas entre sí. Gracias a la mezcla de combinaciones lineales y funciones de activación no lineales en cada capa, la red puede modelar relaciones no lineales complejas y aprender representaciones jerárquicas de los datos \cite{cybenko1989approximation}.
 
-El MLP consta de tres etapas: una capa de entrada, una o más capas ocultas y una capa de salida. Cada capa está formada por un conjunto de neuronas que reciben entradas de la capa anterior y envían sus salidas a la siguiente. La \reffig{mlp} ilustra la estructura de un perceptrón multicapa. Estas capas suelen denominarse densas o totalmente conectadas, porque cada neurona de una capa está conectada a todas las neuronas de la capa siguiente.
+El MLP consta de tres etapas: una capa de entrada, una o más capas ocultas y una capa de salida. Cada capa está formada por un conjunto de neuronas que reciben entradas de la capa anterior y envían sus salidas a la siguiente. La \reffig{mlp} ilustra la estructura de un perceptrón multicapa. Estas capas suelen denominarse densas o totalmente conectadas, porque cada neurona $h_i$ de una capa está conectada a todas las neuronas de la capa siguiente. Notar que cada neurona sigue el modelo descrito en la sección \ref{sec:perceptron}.
 
 En este paradigma, cada capa adicional aprende representaciones de mayor abstracción. Las capas iniciales extraen características simples, las capas profundas combinan esas características para identificar patrones complejos. Por tanto, aumentar la profundidad incrementa la capacidad expresiva de la red y su habilidad para resolver problemas más complejos \cite{lecun:hal-04206682}.
 
