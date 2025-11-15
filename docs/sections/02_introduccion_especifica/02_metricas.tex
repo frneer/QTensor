@@ -48,22 +48,22 @@ En problemas de clasificación, las métricas se definen a partir de la matriz d
 \end{table}
 
 \begin{itemize}
-    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define como en la \refeq{accuracy} \cite{bishop2006pattern}.
+    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define como \eqref{eq:accuracy} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:accuracy}
         \text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
     \end{equation}
-    \item Precisión (\textit{precision} en inglés): mide la proporción de predicciones positivas correctas sobre el total de predicciones positivas. Se calcula como en la \refeq{precision} \cite{bishop2006pattern}.
+    \item Precisión (\textit{precision} en inglés): mide la proporción de predicciones positivas correctas sobre el total de predicciones positivas. Se calcula como \eqref{eq:precision} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:precision}
         \text{precision} = \frac{TP}{TP + FP}
     \end{equation}
-    \item Sensibilidad (\textit{recall} en inglés): mide la proporción de verdaderos positivos sobre el total de positivos reales. Se expresa como en la \refeq{recall} \cite{bishop2006pattern}.
+    \item Sensibilidad (\textit{recall} en inglés): mide la proporción de verdaderos positivos sobre el total de positivos reales. Se expresa como \eqref{eq:recall} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:recall}
         \text{recall} = \frac{TP}{TP + FN}
     \end{equation}
-    \item Puntaje F1 (\textit{F1-score} en inglés): es la media armónica entre la precisión y la sensibilidad, y proporciona un balance entre ambas métricas. Se obtiene como en la \refeq{f1_score} \cite{bishop2006pattern}.
+    \item Puntaje F1 (\textit{F1-score} en inglés): es la media armónica entre la precisión y la sensibilidad, y proporciona un balance entre ambas métricas. Se obtiene como \eqref{eq:f1_score} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:f1_score}
         \text{F1-score} = 2 \cdot \frac{\text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}

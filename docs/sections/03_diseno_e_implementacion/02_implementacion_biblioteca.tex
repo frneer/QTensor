@@ -196,7 +196,7 @@ La definición del método \texttt{build} se muestra en el fragmento de código 
 
 \subsubsection{Cuantizador uniforme}
 
-La implementación de la función de cuantización uniforme definida en la \refeq{uniform_quantizer} se muestra en el fragmento de código \ref{code:uniform_quantizer}.
+La implementación de la función de cuantización uniforme definida \eqref{eq:uniform_quantizer} se muestra en el fragmento de código \ref{code:uniform_quantizer}.
 
 \begin{lstlisting}[language=Python,label=code:uniform_quantizer,caption=Definición de la función de cuantización uniforme.]
   def uniform_quantizer(x):
@@ -208,7 +208,7 @@ La implementación de la función de cuantización uniforme definida en la \refe
 
 Para implementar los gradientes se utilizan las definiciones de la sección \ref{sec:uniform_quantizer_gradient}, y se utilizan en la función \texttt{grad} dentro del método \texttt{quantize}.
 
-El gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida en la \refeq{uniform_quantizer_ste_signed} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_x}.
+El gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida \eqref{eq:uniform_quantizer_ste_signed} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_x}.
 
 \begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_x,caption=Definición del gradiente de la función de cuantización uniforme con respecto a la entrada $x$.]
   dq_dx = tf.where(
@@ -221,7 +221,7 @@ El gradiente de la función de cuantización uniforme con respecto a la entrada 
   )
 \end{lstlisting}
 
-El gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definida en la \refeq{uniform_quantizer_dq_dalpha} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_alpha}. Donde \texttt{upstream} es el gradiente acumulado.
+El gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definida \eqref{eq:uniform_quantizer_dq_dalpha} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_alpha}. Donde \texttt{upstream} es el gradiente acumulado.
 
 \begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_alpha,caption=Definición del gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$.]
   dq_dalpha = tf.reduce_sum(q / alpha * upstream)
@@ -233,7 +233,7 @@ Es importante notar la utilización de \texttt{tf.reduce\_sum} en la implementac
 
 \subsubsection{Cuantizador flexible}
 
-La implementación de la función de cuantización flexible definida en la \refeq{flexible_quantizer} se muestra en el fragmento de código \ref{code:flexible_quantizer}.
+La implementación de la función de cuantización flexible definida \eqref{eq:flexible_quantizer} se muestra en el fragmento de código \ref{code:flexible_quantizer}.
 
 \begin{lstlisting}[language=Python,label=code:flexible_quantizer,caption=Definición de la función de cuantización flexible.]
   def flexible_quantizer(x):
@@ -255,7 +255,7 @@ La implementación de la función de cuantización flexible definida en la \refe
 
 El gradiente de la función de cuantización flexible con respecto a la entrada $x$, $\frac{\partial q_{f}}{\partial x}$, es idéntico al del cuantizador uniforme, al ser un STE. Lo mismo ocurre con el gradiente con respecto a $\alpha$, $\frac{\partial q_{f}}{\partial \alpha}$.
 
-El gradiente de la función de cuantización flexible con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descripta en la \refeq{flexible_quantizer_dq_dl} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_levels}.
+El gradiente de la función de cuantización flexible con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descripta \eqref{eq:flexible_quantizer_dq_dl} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_levels}.
 
 \begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_levels,caption=Definición del gradiente de la función de cuantización flexible con respecto a los niveles $l$.]
   bin_indices = tf.searchsorted(
@@ -270,7 +270,7 @@ El gradiente de la función de cuantización flexible con respecto a los niveles
 
 En este caso, la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los niveles $l$. Por ende, se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Para esto, se utiliza \texttt{tf.searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego se utiliza \texttt{tf.one\_hot} para crear una matriz one-hot con estos índices, y finalmente se utiliza \texttt{tf.matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}).
 
-El gradiente de la función de cuantización flexible con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descripta en la \refeq{flexible_quantizer_dq_dt} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_thresholds}.
+El gradiente de la función de cuantización flexible con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descripta \eqref{eq:flexible_quantizer_dq_dt} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_thresholds}.
 
 \begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_thresholds,caption=Definición del gradiente de la función de cuantización flexible con respecto a los umbrales $t$.]
   dq_dthresholds = tf.zeros_like(thresholds)
@@ -498,14 +498,14 @@ De esta manera no solo se desacopla la definición del esquema de cuantización 
 \subsection{Implementación de computos de complejidad espacial (módulo \texttt{utils})}
 % Para calcular la complejidad espacial de un modelo cuantizado, se implementaron las funciones necesarias para calcular la complejidad espacial de modelos sin cuantizar y cuantizados, tanto para el caso de cuantización uniforme como para el esquema de cuantización flexible.
 
-La complejidad espacial de un modelo $S_{M}$, se calcula acumulando la complejidad espacial de cada capa, como se muestra en la \refeq{space_complexity_model}, con $N_{L}$ la cantidad de capas del modelo.
+La complejidad espacial de un modelo $S_{M}$, se calcula acumulando la complejidad espacial de cada capa, como se muestra \eqref{eq:space_complexity_model}, con $N_{L}$ la cantidad de capas del modelo.
 
 \begin{equation}
   \label{eq:space_complexity_model}
   S_{M} = \sum_{i=1}^{N_{L}} S_{L_i}
 \end{equation}
 
-A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, como se muestra en la \refeq{space_complexity_layer}, con $N_{\theta}$ la cantidad de parámetros de la capa.
+A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, como se muestra \eqref{eq:space_complexity_layer}, con $N_{\theta}$ la cantidad de parámetros de la capa.
 
 \begin{equation}
   \label{eq:space_complexity_layer}
@@ -514,7 +514,7 @@ A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula 
 
 Como se desarrollo anteriormente, la granularidad de los esquemas de cuantización es a nivel de parámetro. Y la complejidad espacial depende del tipo de cuantización aplicada.
 
-En el caso de un parámetro sin cuantización, la complejidad espacial, en bits se calcula como el tamaño del tipo de dato del parámetro, multiplicado por la cantidad de elementos del tensor, como se muestra en la \refeq{space_complexity_no_quantized}.
+En el caso de un parámetro sin cuantización, la complejidad espacial, en bits se calcula como el tamaño del tipo de dato del parámetro, multiplicado por la cantidad de elementos del tensor, como se muestra \eqref{eq:space_complexity_no_quantized}.
 
 \begin{equation}
   \label{eq:space_complexity_no_quantized}
@@ -523,7 +523,7 @@ En el caso de un parámetro sin cuantización, la complejidad espacial, en bits 
 
 donde $P$ es el tamaño en bits del tipo de dato del parámetro, y $k$ es la cantidad de elementos del tensor.
 
-En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es la misma que la de un parámetro sin cuantización, pero en este caso $P$ es el número de bits utilizado en la cuantización $b$, como se muestra en la \refeq{space_complexity_uniform}.
+En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es la misma que la de un parámetro sin cuantización, pero en este caso $P$ es el número de bits utilizado en la cuantización $b$, como se muestra \eqref{eq:space_complexity_uniform}.
 
 \begin{equation}
   \label{eq:space_complexity_uniform}
@@ -538,21 +538,21 @@ La codificación de Huffman es un esquema de codificación sin pérdida que asig
 
 Para implementar esta codificación, es necesario almacenar los niveles de cuantización en la memoria del hardware, y los índices de los niveles asignados a cada parámetro cuantizado.
 
-La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra en la \refeq{space_complexity_flexible_levels}.
+La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra \eqref{eq:space_complexity_flexible_levels}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible_levels}
     S_{l} = N_{l} \cdot b
 \end{equation}
 
-La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad nominal de la codificación de Huffman: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador, como se muestra en la \refeq{space_complexity_flexible_indices}.
+La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad nominal de la codificación de Huffman: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador, como se muestra \eqref{eq:space_complexity_flexible_indices}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible_indices}
     S_{\mathcal{I}} = k \cdot H
 \end{equation}
 
-Por lo tanto, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra en la \refeq{space_complexity_flexible}.
+Por lo tanto, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra \eqref{eq:space_complexity_flexible}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible}

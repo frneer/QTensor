@@ -1,36 +1,30 @@
 \subsection{Regresión lineal}
 \label{sec:regresion_lineal}
-El modelo de regresión lineal es uno de los modelos más simples utilizados en el modelado de sistemas. Este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en la \refeq{linear_regression} \cite{Bishop2006}.
+El modelo de regresión lineal es uno de los modelos más simples utilizados en el modelado de sistemas. Este modelo provee una estimación de una variable continua $y$ a partir de una variable independiente $x$, cuya relación se modela con una recta, como se muestra en \eqref{eq:linear_regression} \cite{Bishop2006}.
 
 \begin{equation}
     \label{eq:linear_regression}
     \hat{y} = \theta_0 + \theta_1 x
 \end{equation}
 
-En el caso general de la regresión lineal, se busca modelar la relación entre una variable dependiente $y$ y una o más variables independientes $x_j$ mediante una combinación lineal de estas últimas, como se muestra en la \refeq{linear_regression_general}.
+En el caso general de la regresión lineal, se busca modelar la relación entre una variable dependiente $y$ y una o más variables independientes $x_j$ mediante una combinación lineal de estas últimas, como se muestra en \eqref{eq:linear_regression_multivariable}.
 
 \begin{equation}
     \label{eq:linear_regression_multivariable}
     \hat{y} = \theta_0 + \sum_{j=1}^{m} \theta_j x_j
 \end{equation}
 
-Una elección común para la métrica utilizada en problemas de regresión lineal es el error cuadrático medio explicado en la sección \ref{sec:metricas_regresion}, definida en la \refeq{mse}. En este caso, la función de costo $\mathcal{L}$ a minimizar es directamente la métrica MSE, como se muestra en la \refeq{mse_regression}.
+Una elección común para la métrica utilizada en problemas de regresión lineal es el error cuadrático medio explicado en la sección \ref{sec:metricas_regresion}, definida \eqref{eq:mse}. En este caso, la función de costo $\mathcal{L}$ a minimizar es directamente la métrica MSE, como se muestra \eqref{eq:mse_regression}.
 
 \begin{equation}
     \label{eq:mse_regression}
     \mathcal{L}(\theta, \mathcal{D}) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
 \end{equation}
 
-Para este problema particular, es posible deducir analíticamente los valores de $\mathbf{\theta}$ que minimizan la función de costo definida en la \refeq{mse_regression}.
+Para este problema particular, es posible deducir analíticamente los valores de $\mathbf{\theta}$ que minimizan la función de costo definida \eqref{eq:mse_regression}
+derivando $\mathcal{L}$ con respecto a $\mathbf{\theta}$ e igualando a cero el resultado obtenido.
 
-Si se deriva la función de costo con respecto a los parámetros y se iguala a cero como se muestra en la \refeq{mse_derivative}.
-
-\begin{equation}
-    \label{eq:mse_derivative}
-    \frac{\partial \mathcal{L}}{\partial \theta} = 0
-\end{equation}
-
-Se obtiene la fórmula conocida como OLS (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos $\hat{\theta}$ de manera directa, como se muestra en la \refeq{ols}, donde $X$ es la matriz de características, $\hat{\theta}$ es el vector de parámetros, y $y$ es el vector de salidas reales, como se muestra en la \refeq{ols_matrices} \cite{Bishop2006}
+Al realizar este procedimiento, se obtiene la fórmula conocida como OLS (por sus siglas en inglés \textit{Ordinary Least Squares}), que permite calcular los parámetros óptimos $\hat{\theta}$ de manera directa, como se muestra \eqref{eq:ols}, donde $X$ es la matriz de características, $\hat{\theta}$ es el vector de parámetros, y $y$ es el vector de salidas reales, como se muestra \eqref{eq:ols_matrices} \cite{Bishop2006}
 
 \begin{equation}
     \label{eq:ols}

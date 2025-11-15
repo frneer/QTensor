@@ -4,7 +4,7 @@ En definitiva, obtener modelos que cumplan con los objetivos planteados, es equi
 
 En ciertos casos optimizar la métrica de evaluación es suficiente para obtener la funcionalidad deseada. Sin embargo, en la mayoría de los casos se quiere ponderar más de un aspecto del desempeño del modelo, incluso múltiples métricas de evaluación. Por ende, es común definir una función que combine estos diferentes aspectos en un solo valor cuantitativo que refleje el desempeño global del modelo. Esta función a optimizar es denominada función de costo $\mathcal{L}$.
 
-El problema fundamental que se busca resolver en el modelado de sistemas: encontrar los parámetros óptimos $\theta$ que minimicen la función de costo $\mathcal{L}$. Este proceso suele denominarse entrenamiento del modelo.
+Como se mencionó en la sección \ref{sec:modelado_de_sistemas} el problema fundamental que se busca resolver en el modelado de sistemas: encontrar los parámetros óptimos $\theta$ que minimicen la función de costo $\mathcal{L}$. Este proceso suele denominarse entrenamiento del modelo.
 
 Existen múltiples técnicas de optimización empleadas para este tipo de problemas, \cite{Nocedal2006} describe una revisión exhaustiva de métodos de optimización numérica. En algunos casos, se dispone de soluciones cerradas que pueden calcularse analíticamente. Sin embargo, en la mayoría de los problemas se debe acudir a métodos numéricos iterativos para aproximar la solución óptima.
 
@@ -16,7 +16,7 @@ Un desafío intrínseco de desconocer la naturaleza de la distribución de los d
 
 Para ello, es común dividir el conjunto de datos en subconjuntos de entrenamiento, validación y prueba, con el fin de evaluar el desempeño del modelo en datos no utilizados durante el proceso de ajuste de parámetros.
 
-Como se mencionó anteriormente, la función de costo $\mathcal{L}$ raramente tiene un único término, el componente principal suele ser el término de pérdida $\mathcal{L}_{l}$, que mide la discrepancia entre las predicciones del modelo ($\hat{y}$) y los valores reales ($y$) del conjunto de entrenamiento. Sin embargo, como se mencionó, también se desea ponderar otros aspectos. Por ello, es muy común añadir términos de regularización a la función de costo $\mathcal{L}_{r}$, que penalizan ciertas características del modelo, como la complejidad o la magnitud de los parámetros \cite{Goodfellow2016}. La forma típica de la función de costo se expresa como en la \refeq{cost_function}.
+Como se mencionó anteriormente, la función de costo $\mathcal{L}$ raramente tiene un único término, el componente principal suele ser el término de pérdida $\mathcal{L}_{l}$, que mide la discrepancia entre las predicciones del modelo ($\hat{y}$) y los valores reales ($y$) del conjunto de entrenamiento. Sin embargo, como se mencionó, también se desea ponderar otros aspectos. Por ello, es muy común añadir términos de regularización a la función de costo $\mathcal{L}_{r}$, que penalizan ciertas características del modelo, como la complejidad o la magnitud de los parámetros \cite{Goodfellow2016}. La forma típica de la función de costo se expresa como \eqref{eq:cost_function}.
 
 \begin{equation}
 \label{eq:cost_function}

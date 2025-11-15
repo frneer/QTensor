@@ -1,22 +1,22 @@
 \begin{tikzpicture}[
-    block/.style={rectangle, draw, fill=white, text width=4.5em, text centered, rounded corners, minimum height=2em},
+    block/.style={rectangle, draw, fill=white, text width=6em, text centered, rounded corners, minimum height=2em, minimum width=6em, font=\footnotesize},
     arrow/.style={-latex, thick}
 ]
-    \tikzset{node distance = 1cm and 2cm}
+    \tikzset{node distance = 1.5cm and 1.5cm}
     % Nodes
-    \node (x_input) at (0, 0) [block] {$x$};
-    \node (w_input) [below=of x_input] [block] {$\theta$};
-    \node (forward_pass) [right=of w_input] [block] {\textit{forward pass}};
-    \node (loss) [below=of forward_pass] [block] {Loss};
+    \node (w_input) at (0,0) [block] {Actualización de parámetros};
+    \node (forward_pass) [right=of w_input] [block] {Inferencia};
+    \node (loss) [below=of forward_pass] [block] {Calculo del costo};
+    \node (gradient) [left=of loss] [block] {Cálculo del gradiente};
+    \node (x_input) [above=of forward_pass] [block] {$x$};
     \node (y_input) [below=of loss] [block] {$y$};
-    \node (gradient) [left=of loss] [block] {\textit{backward pass}};
 
     % % Arrows
-    \draw [arrow] (x_input) -| (forward_pass);
-    \draw [arrow] (w_input) -- (forward_pass); % Connect W to forward pass
+    \draw [arrow] (x_input) -- (forward_pass);
+    \draw [arrow] (w_input) -- node[midway, above] {$\theta$} (forward_pass); % Connect W to forward pass
     \draw [arrow] (y_input) -- (loss);
-    \draw [arrow] (forward_pass) -- node[below=of forward_pass, yshift = 1.5cm, xshift = -0.2cm] {$\hat{y}$} (loss);
-    \draw [arrow] (loss) -- (gradient);
-    \draw [arrow] (gradient) --  node[below=of w_input, yshift = 1.25cm, xshift = -0.5cm] {SGD} (w_input); % Gradient updates W
+    \draw [arrow] (forward_pass) -- node[midway, right] {$\hat{y}$} (loss);
+    \draw [arrow] (loss) -- node[midway, above] {$\mathcal{L}$} (gradient);
+    \draw [arrow] (gradient) -- node[midway, left] {$\frac{\partial \mathcal{L}}{\partial \theta}$} (w_input); % Gradient updates W
 
 \end{tikzpicture}
