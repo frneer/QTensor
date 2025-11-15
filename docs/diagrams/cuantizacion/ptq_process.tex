@@ -18,9 +18,9 @@
 
     \node (apply) [block, below=of define] {Cuantización};
 
-    \node (quant_model) [block, below=of apply] {Modelo cuantizado (INT8)};
+    % \node (quant_model) [block, below=of apply] {Modelo cuantizado (INT8)};
 
-    \node (eval) [block, below=of quant_model] {Evaluación};
+    \node (eval) [block, below=of apply] {Evaluación};
     \node (eval_data) [small_block, left=of eval] {Datos de evaluación};
 
     % Arrow drawing

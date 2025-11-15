@@ -21,7 +21,7 @@
 
 % draw activation layer_function phi()
 \node[layer_function, right=of z] (phi) {$\phi()$};
-\node[layer_function, right=of phi] (qphi) {$q_\phi()$};
+\node[layer_function, right=of phi, pattern=north east lines, pattern color=gray!20] (qphi) {$q_\phi()$};
 \draw[arrow] (phi) -- (qphi);
 
 % draw output activation a_m (Already 3cm, no change needed)
@@ -32,7 +32,7 @@
 \draw[arrow] (z.east) -- node[lbl_fwd] {$z_{m}$} (phi.west);
 
 % draw theta parameters: place them below-left of z instead of directly below
-\node[layer_function, below left=of z] (qtheta) {$q_{\theta}()$};
+\node[layer_function, below left=of z, pattern=north east lines, pattern color=gray!20] (qtheta) {$q_{\theta}()$};
 \node[tensor, below=of qtheta] (theta) {$\theta$};
 
 % theta to z
@@ -49,7 +49,7 @@
 %%%% BACKWARD (NOW POSITIONED RELATIVE TO UPDATE CHAIN) %%%%
 
 % Place gradient of q_theta just below theta (slightly left to avoid overlapping the update op)
-\node[layer_function, below=of theta] (dqtheta) {$\nabla_{q_{\theta}}$};
+\node[layer_function, below=of theta, pattern=north east lines, pattern color=gray!20] (dqtheta) {$\nabla_{q_{\theta}}$};
 
 % draw z gradient to the right of dqtheta so it lines up with dqtheta
 \node[layer_function, right=of dqtheta] (dz) {$\nabla_z$};
@@ -58,7 +58,7 @@
 \node[layer_function, right=of dz] (dphi) {$\nabla_\phi$};
 
 % draw q_phi gradient to the right of dphi
-\node[layer_function, right=of dphi] (dqphi) {$\nabla_{q_\phi}$};
+\node[layer_function, right=of dphi, pattern=north east lines, pattern color=gray!20] (dqphi) {$\nabla_{q_\phi}$};
 
 % Theres a multication between upstream and dphi (below dphi)
 \node[operation, below=of dphi] (mult) {$\times$};

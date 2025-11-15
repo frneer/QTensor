@@ -73,7 +73,7 @@ La derivada con respecto a los niveles $\frac{\partial q_f}{\partial l_i}$ se pu
 \frac{\partial q_f}{\partial l_i} \left(x; \alpha, t, l\right) = \mathbbm{1}_{\left[t_i, t_{i+1}\right]} \left(x_j\right)
 \end{equation}
 
-La derivada con respecto a los umbrales  $\frac{\partial q_f}{\partial t_i}$ se aproximará utilizando una variante del STE, denominada STE por partes o \textit{Piece-wise STE} en inglés. En lugar de asumir que la derivada es 1 en todo el rango, se estima una pendiente local alrededor de cada umbral $t_i$ basándose en los niveles y umbrales adyacentes.
+La derivada con respecto a los umbrales  $\frac{\partial q_f}{\partial t_i}$ se aproximará utilizando PW-STE. En lugar de asumir que la derivada es 1 en todo el rango, se estima una pendiente local alrededor de cada umbral $t_i$ basándose en los niveles y umbrales adyacentes.
 
 En la \reffig{flexible_signed_dq_dt} se muestra la proyección de la función de cuantización sobre el i-ésimo umbral $t_i$, para un $x$ fijo, se tiene un dominio que esta limitado por los umbrales circundantes $t_{i-1}$ y $t_{i+1}$, y un rango limitado por los niveles adyacentes $l_{i-1}$ y $l_i$. Entonces, se puede definir una pendiente local como la razón entre el cambio en el rango y el cambio en el dominio, como se muestra en la \reffig{flexible_signed_dq_dt}.
 

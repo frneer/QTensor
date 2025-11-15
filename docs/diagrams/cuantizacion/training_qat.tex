@@ -1,40 +1,24 @@
 \begin{tikzpicture}[
-    block/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
-    rectangular_block/.style={rectangle, draw, fill=white, text width=4em, text centered, minimum height=2em},
+    block/.style={rectangle, draw, fill=white, text width=6em, text centered, rounded corners, minimum height=3em, minimum width=6em, font=\footnotesize},
     arrow/.style={-latex, thick}
 ]
-    \tikzset{node distance = 1cm and 2cm}
+    \tikzset{node distance = 1.5cm and 1.5cm}
     % Nodes
-    \node (x_input) at (0, 0) [rectangular_block] {$x$};
-    \node (w_input) [below=of x_input] [rectangular_block] {$\theta$};
-    \node (quantizer) [right=of w_input] [block] {$q\left(\ldots\right)$};
-    \node (forward_pass) [right=of quantizer] [block] {\textit{forward pass}};
-    \node (loss) [below=of forward_pass] [block] {$\mathcal{L}$};
-    \node (y_input) [below=of loss] [rectangular_block] {$y$};
-    % \node (gradient_q) [left=of loss] [block] {$\nabla_q$};
-    \node (gradient) [below=of w_input] [block] {\textit{backward pass}};
+    \node (w_input) at (0,0) [block] {Actualización de parámetros};
+    \node (quant) [right=of w_input] [block, pattern=north east lines, pattern color=gray!20] {\textit{fake-quantization}};
+    \node (forward_pass) [right=of quant] [block] {Inferencia};
+    \node (loss) [below=of forward_pass] [block] {Calculo del costo};
+    \node (gradient) [below=of w_input] [block] {Cálculo del gradiente};
+    \node (x_input) [above=of forward_pass, yshift=-0.5cm] [block] {$x$};
+    \node (y_input) [below=of loss, yshift=0.5cm] [block] {$y$};
 
     % % Arrows
-    \draw [arrow] (x_input) -| (forward_pass);
-    \draw [arrow] (w_input) -- (quantizer); % Connect W to quantizer
-    \draw [arrow] (quantizer) -- node[right=of quantizer, xshift = -2.5cm, yshift = 0.2cm]{$q(\theta)$}(forward_pass); % Connect W to forward pass
+    \draw [arrow] (x_input) -- (forward_pass);
+    \draw [arrow] (w_input) -- node[midway, above] {$\theta$} (quant); % Connect W to quantization
+    \draw [arrow] (quant) -- node[midway, above] {$q(\theta)$} (forward_pass);
     \draw [arrow] (y_input) -- (loss);
-    \draw [arrow] (forward_pass) -- node[below=of forward_pass, yshift = 1.5cm, xshift = -0.2cm] {$\hat{y}$} (loss);
-    \draw [arrow] (loss) -- (gradient);
-    % \draw [arrow] (gradient_q) -- (gradient);
-    \draw [arrow] (gradient) -- (w_input); % Gradient updates W
-
-% This version creates a dotted outline instead of a fill
-\begin{pgfonlayer}{background}
-    \node [
-        draw,                   % <-- Add this to draw the border
-        dotted,                 % <-- Add this for the dotted style
-        thick,                  % (Optional) Make the dots thicker
-        blue,                   % (Optional) Color for the dots
-        rounded corners,
-        fit=(w_input) (forward_pass) (loss) (gradient),
-        inner sep=0.5cm
-    ] {};
-\end{pgfonlayer}
+    \draw [arrow] (forward_pass) -- node[midway, right] {$\hat{y}$} (loss);
+    \draw [arrow] (loss) -- node[midway, above] {$\mathcal{L}$} (gradient);
+    \draw [arrow] (gradient) -- node[midway, left] {$\frac{\partial \mathcal{L}}{\partial \theta}$} (w_input); % Gradient updates W
 
 \end{tikzpicture}

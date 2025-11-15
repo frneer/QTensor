@@ -12,7 +12,7 @@
     \node (train_data) [small_block, left=of fine-tunning] {Datos de entrenamiento};
     % The rest of the vertical flow
 
-    \node (quant_model) [block, below=of fine-tunning] {Modelo cuantizado (INT8)};
+    \node (quant_model) [block, below=of fine-tunning] {Cuantización};
 
     \node (eval) [block, below=of quant_model] {Evaluación};
     \node (eval_data) [small_block, left=of eval] {Datos de evaluación};
