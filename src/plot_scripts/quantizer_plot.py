@@ -289,9 +289,9 @@ def plot_non_uniform_quantizer(fig_path):
     ax.grid(which="both", alpha=0.3, linestyle=":")
     ax.legend(loc="upper left", fontsize=10)
 
-    x_labels = [rf"$t_0 = -\alpha$"]
+    x_labels = [rf"$t_0$"]
     x_labels += [rf"$t_{i}$" for i in range(1, len(thresholds) - 1)]
-    x_labels += [rf"$t_{len(thresholds) - 1} = \alpha$"]
+    x_labels += [rf"$t_{len(thresholds) - 1}$"]
 
     plt.xticks(thresholds, labels=x_labels)
     plt.yticks(levels, labels=[rf"$l_{i}$" for i in range(len(levels))])

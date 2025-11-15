@@ -61,24 +61,19 @@ La cuantización uniforme resulta ineficiente al combinar rangos amplios con req
 
 El cuantizador no uniforme comprende una serie de $n$ niveles $\mathbf{l}$ cuyos límites están determinados por los umbrales $\mathbf{t}$. En este esquema no existen restricciones sobre la posición de umbrales y niveles, ni la noción de bits.
 
-Al igual que en el caso del cuantizador uniforme, el rango del cuantizador depende del tipo de cuantización:
-
-\begin{itemize}
-    \item En el caso signado, el rango es $r(\alpha) = 2\alpha$, abarcando el intervalo $[-\alpha, \alpha].$
-    \item En el caso no signado, el rango es $r(\alpha) = \alpha$, abarcando el intervalo $[0, \alpha].$
-\end{itemize}
-
 La función de cuantización no uniforme se define como \eqref{eq:non_uniform_quantizer} y su representación gráfica se muestra en la \reffig{non_uniform_signed_q}.
 
 \begin{equation}
     \label{eq:non_uniform_quantizer}
-    q_{nu}\left(x; \alpha, \mathbf{t}, \mathbf{l}\right) =
+    q_{nu}\left(x; \mathbf{t}, \mathbf{l}\right) =
     \begin{cases}
         l_{0} & \text{si $x \leq m$} \\
         l_{i} & \text{si } t_i < x < t_{i+1}, i = 0, 1, \ldots, n-2 \\
         l_{n-1} & \text{si } x \geq M
     \end{cases}
 \end{equation}
+
+donde $m$ y $M$ representan los límites del rango, es decir, $m = t_0$ y $M = t_{n-1}$.
 
 \defaultfigure{quantizers/non_uniform/q.png}{Función de cuantización no uniforme signada.}{non_uniform_signed_q}
 
