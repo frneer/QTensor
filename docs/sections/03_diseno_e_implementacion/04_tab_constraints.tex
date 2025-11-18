@@ -1,0 +1,21 @@
+% in the preamble:
+% \usepackage{array,tabularx,booktabs}
+
+\renewcommand\tabularxcolumn[1]{m{#1}}% make X columns use m{..} (vertical centering)
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Restricciones implementadas para parámetros entrenables de cuantizadores.}
+\label{tab:quantizer_constraints}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}m{2cm}>{\raggedright\arraybackslash}m{1.2cm}>{\raggedright\arraybackslash}m{4cm}X@{}}
+\toprule
+\textbf{Constraint} & \textbf{Parámetro} & \textbf{Restricción} & \textbf{Descripción} \\
+\midrule
+{\fontfamily{pcr}\selectfont\small Positive\-Constraint} & $\alpha$ & $\epsilon \leq \alpha \leq \infty$ & Evita divisiones por cero y asegura estabilidad numérica. \\
+\addlinespace
+{\fontfamily{pcr}\selectfont\small Level\-Constraint} & $\mathbf{l}$ & $l_0 = m, \, l_i \leq l_{i+1}, \, l_n \leq M$ & Asegura niveles ordenados dentro del rango $[m, M]$ con extremo inferior fijo. \\
+\addlinespace
+{\fontfamily{pcr}\selectfont\small Threshold\-Constraint} & $\mathbf{t}$ & $t_0 = m, \, t_i \leq t_{i+1}, \, t_n = M$ & Asegura umbrales ordenados con ambos extremos fijos en $[m, M]$. \\
+\bottomrule
+\end{tabularx}
+\end{table}

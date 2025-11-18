@@ -1,21 +1,42 @@
 \begin{tikzpicture}[
     stage/.style={rectangle, draw, fill=white, text width=4em, text centered, rounded corners, minimum height=2em},
+    stage split/.style={rectangle, draw, text width=4em, text centered, rounded corners, minimum height=2em, path picture={
+        \fill[green!20] (path picture bounding box.south west) rectangle (path picture bounding box.north);
+        \fill[red!20] (path picture bounding box.south) rectangle (path picture bounding box.north east);
+    }},
     arrow/.style={-latex, thick}
 ]
 
     \tikzset{node distance = 1cm and 1cm}
-    % Nodes
-    \node (create_model) [stage, fill=green!20, text=black] at (0, 0) {$1$};
-    \node (pre-train) [stage, fill=green!20, right=of create_model, text=black] {$2$};
-    \node (evaluate) [stage, fill=green!20, right=of pre-train, text=black] {$3$};
-    \node (quantize) [stage, fill=red!20, right=of evaluate, text=black] {$4$};
-    \node (train_qat) [stage, fill=red!20, right=of quantize, text=black] {$5$};
-    \node (final_evaluate) [stage, fill=red!20, right=of train_qat, text=black] {$6$};
+    % Nodes primera fila (1, 2, 3 con mitad verde/mitad rojo)
+    \node (create_model) [stage split, text=black] at (0, 0) {$1$};
+    \node (pre-train) [stage split, right=of create_model, text=black] {$2$};
+    \node (evaluate) [stage split, right=of pre-train, text=black] {$3$};
 
+    % Rama superior (verde - cached)
+    \node (quantize_old) [stage, fill=green!20, right=2cm of evaluate, yshift=1.5cm, text=black] {$4$};
+    \node (train_qat_old) [stage, fill=green!20, right=of quantize_old, text=black] {$5$};
+    \node (final_evaluate_old) [stage, fill=green!20, right=of train_qat_old, text=black] {$6$};
+
+    % Rama inferior (rojo - invalidado)
+    \node (quantize_new) [stage, fill=red!20, right=2cm of evaluate, yshift=-1.5cm, text=black] {$4$};
+    \node (train_qat_new) [stage, fill=red!20, right=of quantize_new, text=black] {$5$};
+    \node (final_evaluate_new) [stage, fill=red!20, right=of train_qat_new, text=black] {$6$};
+
+    % Arrows primera parte
     \draw [arrow] (create_model) -- (pre-train);
     \draw [arrow] (pre-train) -- (evaluate);
-    \draw [arrow] (evaluate) -- (quantize);
-    \draw [arrow] (quantize) -- (train_qat);
-    \draw [arrow] (train_qat) -- (final_evaluate);
+
+    % Bifurcación
+    \draw [arrow] (evaluate.east) -- ++(0.5,0) |- (quantize_old.west);
+    \draw [arrow] (evaluate.east) -- ++(0.5,0) |- (quantize_new.west);
+
+    % Rama superior
+    \draw [arrow] (quantize_old) -- (train_qat_old);
+    \draw [arrow] (train_qat_old) -- (final_evaluate_old);
+
+    % Rama inferior
+    \draw [arrow] (quantize_new) -- (train_qat_new);
+    \draw [arrow] (train_qat_new) -- (final_evaluate_new);
 
 \end{tikzpicture}

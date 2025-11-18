@@ -93,13 +93,13 @@ annotated_layer = quantize_annotate_layer(
 
 Este enfoque obliga a crear, para cada configuración de cuantización, una clase que implemente \texttt{QuantizeConfig} y describa explícitamente los cuantizadores para pesos, activaciones y salidas de manera estática. Como resultado, se genera código repetitivo y se encarecen las tareas de definición de nuevas configuraciones, escritura de pruebas y experimentación.
 
-Ante estas limitaciones, se introdujo la clase \texttt{GenerateConfig}, la cual permite la definición de esquemas de cuantización mediante diccionarios de Python, mejorando significativamente la ergonomía del proceso.
+Para abordar estas limitaciones y cumplir con los requisitos funcionales RF1.1 y RF1.2, se introdujo la clase \texttt{GenerateConfig}, la cual permite la definición de esquemas de cuantización mediante diccionarios de Python, mejorando significativamente la ergonomía del proceso.
 
 \subsubsection{Clase \texttt{GenerateConfig}}
 \label{sec:generate_config}
 La clase \texttt{GenerateConfig} permite definir configuraciones de cuantización de manera dinámica mediante el uso de diccionarios para mapear los atributos de una capa a los cuantizadores correspondientes.
 
-\texttt{GenerateConfig} hereda de \texttt{QuantizeConfig} y define una lógica genérica para los métodos de la interfaz. Esto permite definir el esquema del fragmento de código \ref{code:quantize_config} de manera concisa y dinámica con el uso de diccionarios para especificar los cuantizadores a utilizar para cada atributo de la capa, como se muestra en el fragmento de código \ref{code:generate_config_usage}.
+\texttt{GenerateConfig} hereda de \texttt{QuantizeConfig} y define una lógica genérica para los métodos de la interfaz. Esto permite definir el esquema del fragmento de código \ref{code:quantize_config} de manera concisa y dinámica con el uso de diccionarios para especificar los cuantizadores a utilizar para cada atributo de la capa, como se muestra en el fragmento de código \ref{code:generate_config}.
 
 \begin{lstlisting}[language=Python,label=code:generate_config,caption=Definición de la clase \texttt{GenerateConfig}.]
 my_quantize_config = GenerateConfig(
@@ -259,7 +259,7 @@ A continuación, se ejecuta un proceso de validación que verifica la existencia
 
 La figura \ref{fig:qtensor_pattern} muestra el flujo simplificado del patrón de uso de \texttt{QTensor}, donde el usuario solo necesita proveer el modelo y un diccionario de configuración a la función \texttt{apply\_quantization}, la cual se encarga de toda la complejidad interna. En contraste con el flujo de \texttt{TFMOT} mostrado en la figura \ref{fig:tfmot_pattern}, este enfoque elimina la necesidad de definir múltiples clases, anotar capas individualmente y gestionar manualmente el proceso de aplicación de cuantización.
 
-\defaultdiagram{implementacion/qtensor_pattern}{Patrón simplificado de uso de QTensor con el módulo \texttt{qmodel}.}{qtensor_pattern}{0.8}
+\defaultdiagram{implementacion/qtensor_pattern}{Patrón simplificado de uso de QTensor con el módulo \texttt{qmodel}.}{qtensor_pattern}{0.9}
 
 En síntesis, la combinación de la clase \texttt{GenerateConfig} y el submódulo \texttt{qmodel} constituye una solución integral que transforma radicalmente la forma de definir y aplicar esquemas de cuantización personalizados en \texttt{TensorFlow}. Esta arquitectura ofrece tres ventajas fundamentales:
 

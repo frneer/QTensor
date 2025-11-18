@@ -1,0 +1,69 @@
+\begin{tikzpicture}[
+    umlclass/.style={
+        rectangle,
+        draw=black,
+        thick,
+        minimum width=4cm,
+        align=left,
+        font=\small,
+        % Add padding inside the node for better aesthetics
+        inner sep=3pt
+    },
+    association/.style={
+        thick,
+    }
+]
+
+% =========================================================
+% 1. NODE DEFINITIONS (Classes)
+% =========================================================
+
+% Pipeline (arriba)
+\node[umlclass] (pipeline) at (0, 0) {
+    \begin{tabular}{l}
+        \multicolumn{1}{c}{\textbf{Pipeline}} \\ % Header (centered)
+        \hline
+        - stages: List[Stage] \\ % Attributes
+        \hline
+        + run(model): Model \\ % Methods
+    \end{tabular}
+};
+
+% Stage (centro, debajo de Pipeline)
+\node[umlclass, below=of pipeline] (stage) {
+    \begin{tabular}{l}
+        \multicolumn{1}{c}{\textbf{Stage}} \\
+        \hline
+        - metadata: StageConfig \\
+        - output\_dir: str \\ % Use single underscore if compiling with T1 font encoding
+        \hline
+        + run(model): Model \\
+    \end{tabular}
+};
+
+% StageConfig (abajo izquierda)
+\node[umlclass, left=of stage] (metadata) {
+    \begin{tabular}{l}
+        \multicolumn{1}{c}{\textbf{StageConfig}} \\
+        \hline
+        name: str \\
+        seed: int \\
+        function: Callable \\
+        parameters: dict \\
+        previous\_hash: str \\
+        \hline
+        + to\_hash(): str \\
+    \end{tabular}
+};
+
+% =========================================================
+% 2. ASSOCIATIONS (Relationships)
+% =========================================================
+
+% % Agregación: Pipeline contiene múltiples Stage (diamante vacío)
+\draw[association, -{Diamond}] (pipeline.south) -- (stage.north);
+
+% % Composición: Stage contiene StageConfig (diamante relleno)
+\draw[association, -{Diamond[fill=black]}] (stage.west) -- (metadata.east);
+
+\end{tikzpicture}

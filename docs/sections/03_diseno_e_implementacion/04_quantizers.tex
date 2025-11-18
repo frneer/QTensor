@@ -2,52 +2,32 @@
 \label{sec:implementation_quantizers}
 
 \subsubsection{Clase \texttt{Quantizer}}
-
-La interfaz de \texttt{TFMOT} \texttt{Quantizer} \cite{tensorflow_quantizer_api} define las operaciones matemáticas que transforman tensores durante la cuantización, la cual define dos métodos principales.
+La interfaz de \texttt{TFMOT} \texttt{Quantizer} \cite{tensorflow_quantizer_api} define las operaciones matemáticas que transforman tensores durante la cuantización, mediante dos métodos:
 
 \begin{enumerate}
-    \item \texttt{build}, que construye las variables de estado necesarias para el algoritmo de cuantización.
-    \item \texttt{\_\_call\_\_}, que aplica la operación de cuantización a los tensores de entrada.
+    \item \texttt{build}: construye las variables de estado necesarias para el algoritmo de cuantización.
+    \item \texttt{\_\_call\_\_}: aplica la operación de cuantización a los tensores de entrada.
 \end{enumerate}
 
 El método \texttt{build} se llama una vez que se conoce la forma de los tensores de entrada, y permite inicializar las variables de estado. El método \texttt{\_\_call\_\_} se llama cada vez que se aplica la cuantización, y debe implementar la lógica de cuantización, esta es la que se coloca en el grafo computacional explicado en la sección \ref{sec:tensorflow_model_optimization}, para ejecutarse durante el \textit{forward pass}, las operaciones realizadas en este método deben tener definidas sus derivadas para permitir el cálculo de gradientes durante el \textit{backward pass}.
 
 \subsubsection{Modificaciones a la clase \texttt{Quantizer}}
-Para la implementación de cuantizadores con parámetros entrenables y gradientes personalizados, se realizaron algunas modificaciones sobre la clase \texttt{Quantizer} de \texttt{TFMOT}.
 
-Para permitir definir gradientes personalizados, se define un método adicional \texttt{quantize} decorado con \texttt{@tf.custom\_gradient}, explicado en la sección \ref{sec:gradientes_personalizados}, donde se define la función de cuantización y su gradiente. El método \texttt{\_\_call\_\_} llama a \texttt{quantize} para aplicar la cuantización con el gradiente personalizado. Este mecanismo es el que se muestra en el fragmento de código \ref{code:quantizer_custom_gradient}.
+Para la implementación de cuantizadores con parámetros entrenables y gradientes personalizados, se implementaron clases que heredan de la clase \texttt{Quantizer} de \texttt{TFMOT}, para permitir la definición de funciones de cuantización con gradientes personalizados y parámetros entrenables.
 
-\begin{lstlisting}[language=Python,label=code:quantizer_custom_gradient,caption=Definición de un cuantizador con gradiente personalizado.]
-  class MyQuantizer(Quantizer):
-    def __call__(self, inputs, training, weights, **kwargs):
-      return self.quantize(inputs, **kwargs)
-
-    @tf.custom_gradient
-    def quantize(self, x, **kwargs):
-      # Operacion de cuantizacion
-      y = ... # Cuantizacion de x
-
-      def grad(dy):
-        # Gradiente personalizado
-        return dy * ... # Derivada de la operacion de cuantizacion
-
-      return y, grad
-\end{lstlisting}
+Para permitir definir gradientes personalizados, se define un método adicional \texttt{quantize} decorado con \texttt{@tf.custom\_gradient} \cite{tensorflow_custom_gradient}, explicado en la sección \ref{sec:gradientes_personalizados}, donde se define la función de cuantización y su gradiente. El método \texttt{\_\_call\_\_} llama a \texttt{quantize} para aplicar la cuantización con el gradiente personalizado.
 
 Para definir parámetros entrenables, se modificó el método \texttt{build} para declarar las variables de estado como tensores entrenables de Keras (\texttt{tf.Variable}). Esto permite que las variables de estado se entrenen junto con el modelo, y se actualicen durante el proceso de entrenamiento a partir de los gradientes calculados.
 
-Por otro lado, los parámetros entrenables de los cuantizadores tiene restricciones específicas, por ejemplo los niveles y umbrales de la cuantización deben siempre estar ordenados, el parámetro que define el rango $\alpha$ debe ser siempre positivo, entre otros.
+\paragraph{Restricciones para parámetros entrenables (módulo \texttt{constraints})}
 
-Para definir este comportamiento se implementaron restricciones en los parámetros entrenables utilizando la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define una operación de restricción que se aplica a los tensores entrenables durante el entrenamiento, como parte de la actualización de los mismos. Se implementaron las siguientes restricciones personalizadas en el módulo \texttt{constraints}:
+Los parámetros entrenables de los cuantizadores tienen restricciones específicas que garantizan la validez matemática de las operaciones de cuantización. Por ejemplo, los niveles y umbrales de la cuantización deben mantenerse siempre ordenados, y el parámetro que define el rango $\alpha$ debe ser estrictamente positivo.
 
-\begin{itemize}
-    \item \texttt{PositiveConstraint} que asegura que un tensor sea siempre positivo.
-    \item \texttt{LevelConstraint} que asegura que los niveles sean siempre ordenados, esten dentro del rango de cuantización definido por $\alpha$ y que el primer nivel esta fijado al mínimo del rango $m$.
-    \item \texttt{ThresholdConstraint} que asegura lo mismo que \texttt{LevelConstraint} pero fijando el ultimo nivel a el máximo del rango $M$.
-\end{itemize}
+Para implementar este comportamiento se utilizó la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define operaciones de restricción que se aplican a los tensores durante el entrenamiento, como parte de su actualización. Se implementaron tres restricciones personalizadas en el módulo \texttt{constraints} \cite{qtensor_constraints}, cuyos detalles se resumen en la tabla \ref{tab:quantizer_constraints}.
 
-%\TODO{Quizas agregar todo el codigo en apendice}
-En el fragmento de código \ref{code:quantizer_constraints} se muestra la implementación de la restricción \texttt{PositiveConstraint}. Donde se utiliza la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value} para limitar los valores del tensor entre un valor mínimo (en este caso, un valor muy pequeño positivo definido por \texttt{tf.keras.backend.epsilon()} \cite{tensorflow_epsilon_api}) y el infinito positivo. Es necesario utilizar un valor mínimo mayor a cero para evitar divisiones por cero en los cálculos posteriores y asegurar la estabilidad numérica.
+\input{sections/03_diseno_e_implementacion/04_tab_constraints}
+
+Como ejemplo, en el fragmento de código \ref{code:quantizer_constraints} se muestra la implementación de la restricción \texttt{PositiveConstraint}. Donde se utiliza la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value} para limitar los valores del tensor entre un valor mínimo (en este caso, un valor muy pequeño positivo definido por \texttt{tf.keras.backend.epsilon()} \cite{tensorflow_epsilon_api}) y el infinito positivo. Es necesario utilizar un valor mínimo mayor a cero para evitar divisiones por cero en los cálculos posteriores y asegurar la estabilidad numérica.
 
 \begin{lstlisting}[language=Python,label=code:quantizer_constraints,caption=Definición de restricciones para parámetros entrenables.]
   class PositiveConstraint(tf.keras.constraints.Constraint):
@@ -55,128 +35,116 @@ En el fragmento de código \ref{code:quantizer_constraints} se muestra la implem
         return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 \end{lstlisting}
 
-Además los cuantizadores implementados exponen los inicializadores de los parámetros entrenables. Los parametros entrenables se agregan a la capa y se permite que el usuario pueda elegir como inicializar los parámetros entrenables de los cuantizadores a traves del argumento \texttt{initializer} \cite{tensorflow_initializers_api} del método \texttt{add\_weight} \cite{tensorflow_add_weight_api}. También se exponen los regularizadores en el módulo \texttt{regularizers}, para permitir que el usuario pueda elegir como regularizar los parámetros entrenables de los cuantizadores, también a traves del argumento \texttt{regularizer} \cite{tensorflow_regularizers_api} del método \texttt{add\_weight}.
+\paragraph{Inicialización y regularización}
 
-La definición del método \texttt{build} se muestra en el fragmento de código \ref{code:quantizer_build}.
+Además de la definición de gradientes personalizados y parámetros entrenables, los cuantizadores implementados exponen mecanismos para controlar la inicialización y regularización de dichos parámetros.
 
-\begin{lstlisting}[language=Python,label=code:quantizer_build,caption=Definición del método build de un cuantizador con parámetros entrenables.]
-  class MyQuantizer(Quantizer):
-    def build(self, tensor_shape, name, layer):
-      alpha = layer.add_weight(
-          name.join("_alpha"),
-          initializer=self.initializer,
-          trainable=True,
-          dtype=tf.float32,
-          regularizer=self.regularizer,
-          constraint=PositiveConstraint(),
-        )
-        return {"alpha": alpha}
+Para ello, los parámetros entrenables se agregan a la capa mediante el método \texttt{add\_weight} \cite{tensorflow_add_weight_api}, el cual permite especificar tanto el inicializador como el regularizador. En consecuencia, el usuario puede elegir cómo inicializar los parámetros mediante el argumento \texttt{initializer} \cite{tensorflow_initializers_api}, así como también definir estrategias de regularización a través del argumento \texttt{regularizer} \cite{tensorflow_regularizers_api}.
+
+La figura \ref{fig:quantizer_comparison} ilustra las diferencias entre un cuantizador tradicional de \texttt{TFMOT} y los cuantizadores implementados en \texttt{QTensor}.
+
+\defaultdiagram{implementacion/quantizer_comparison}{Comparación entre un cuantizador de \texttt{TFMOT} y un cuantizador de QTensor.}{quantizer_comparison}{1}
+
+\subsubsection{Implementaciones de cuantizadores}
+
+\paragraph{Cuantizador uniforme}
+
+La implementación de la función de cuantización uniforme definida en la sección \ref{sec:uniform}, en \eqref{eq:uniform_quantizer}, limita primero los valores de entrada al rango definido por los niveles mínimo y máximo mediante la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value}, y luego aplica la cuantización mediante la operación de piso (\texttt{tf.math.floor} \cite{tensorflow_math_floor}).
+
+Para implementar los gradientes definidos en la sección \ref{sec:uniform_quantizer_gradient}, se utiliza la función \texttt{grad} dentro del método \texttt{quantize}. El gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida en \eqref{eq:uniform_quantizer_ste_signed}, emplea la función \texttt{tf.where} \cite{tensorflow_where} descrita en la sección \ref{sec:tensorflow_graph} para aplicar el STE.
+
+Por otra parte, el gradiente con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definida en \eqref{eq:uniform_quantizer_dq_dalpha}, utiliza \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum}, donde \texttt{upstream} representa el gradiente acumulado. Es importante notar que esta función suma todos los elementos de un tensor a lo largo de las dimensiones especificadas, y en este caso se utiliza para sumar los gradientes parciales de cada elemento del tensor de entrada $x$ con respecto al escalar $\alpha$.
+
+El fragmento de código \ref{code:uniform_quantizer_full} muestra la implementación completa de la función de cuantización uniforme y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_uniform_quantizer}.
+
+\begin{lstlisting}[language=Python,label=code:uniform_quantizer_full,caption=Implementación completa del cuantizador uniforme con gradientes personalizados.]
+def quantize(x, alpha):
+  clipped_x = tf.clip_by_value(x, self.levels[0], self.levels[-1])
+  q = self.delta() * tf.math.floor(clipped_x / self.delta())
+
+  def grad(upstream):
+    dq_dx = tf.where(
+        tf.logical_and(
+            tf.greater_equal(x, levels[0]),
+            tf.less_equal(x, levels[-1]),
+        ),
+        upstream,
+        tf.zeros_like(x),
+    )
+
+    dq_dalpha = tf.reduce_sum(q / alpha * upstream)
+
+    return dq_dx, dq_dalpha
+
+  return q, grad
 \end{lstlisting}
-
-\subsubsection{Cuantizador uniforme}
-
-La implementación de la función de cuantización uniforme definida \eqref{eq:uniform_quantizer} se muestra en el fragmento de código \ref{code:uniform_quantizer}.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer,caption=Definición de la función de cuantización uniforme.]
-  def uniform_quantizer(x):
-    clipped_x = tf.clip_by_value(x, levels[0], levels[-1])
-    q = self.delta() * tf.math.floor(clipped_x / self.delta())
-\end{lstlisting}
-
-\TODO{Considerar agregar el histograma input/output de la función de cuantizacion}
-
-Para implementar los gradientes se utilizan las definiciones de la sección \ref{sec:uniform_quantizer_gradient}, y se utilizan en la función \texttt{grad} dentro del método \texttt{quantize}.
-
-El gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida \eqref{eq:uniform_quantizer_ste_signed} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_x}.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_x,caption=Definición del gradiente de la función de cuantización uniforme con respecto a la entrada $x$.]
-  dq_dx = tf.where(
-      tf.logical_and(
-          tf.greater_equal(x, levels[0]),
-          tf.less_equal(x, levels[-1]),
-      ),
-      upstream,
-      tf.zeros_like(x),
-  )
-\end{lstlisting}
-
-El gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definida \eqref{eq:uniform_quantizer_dq_dalpha} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_alpha}. Donde \texttt{upstream} es el gradiente acumulado.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_alpha,caption=Definición del gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$.]
-  dq_dalpha = tf.reduce_sum(q / alpha * upstream)
-\end{lstlisting}
-
-Es importante notar la utilización de \texttt{tf.reduce\_sum} en la implementación del gradiente con respecto a $\alpha$. Esto se debe a que $\alpha$ es un escalar, y la función de cuantización se aplica elemento a elemento sobre el tensor de entrada $x$. Por lo tanto, para calcular el gradiente total con respecto a $\alpha$, es necesario sumar los gradientes parciales de cada elemento del tensor de entrada.
 
 \TODO{Mostrar entrenamiento, gif copado y evolucion comun}
 
-\subsubsection{Cuantizador flexible}
+\paragraph{Cuantizador flexible}
 
-La implementación de la función de cuantización flexible definida \eqref{eq:flexible_quantizer} se muestra en el fragmento de código \ref{code:flexible_quantizer}.
+La implementación de la función de cuantización flexible definida en \eqref{eq:flexible_quantizer} cuantiza primero los niveles utilizando el cuantizador uniforme definido anteriormente, y luego cuantiza la entrada $x$ asignándole el nivel correspondiente según los umbrales definidos mediante la función \texttt{tf.where}.
 
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer,caption=Definición de la función de cuantización flexible.]
-  def flexible_quantizer(x):
-    # Quantize the levels using uniform quantization
-    qlevels = uniform_quantizer(self.levels)
+El gradiente de la función de cuantización flexible con respecto a la entrada $x$, $\frac{\partial q_{f}}{\partial x}$, es idéntico al del cuantizador uniforme al ser un STE. Lo mismo ocurre con el gradiente con respecto a $\alpha$, $\frac{\partial q_{f}}{\partial \alpha}$.
 
-    # Quantize input
-    q = tf.zeros_like(x)
-    for i in range(self.thresholds.shape[0] - 1):
-        q = tf.where(
-            tf.logical_and(
-                tf.greater_equal(x, self.thresholds[i]),
-                tf.less_equal(x, self.thresholds[i + 1]),
-            ),
-            qlevels[i],
-            q,
-        )
-\end{lstlisting}
+Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descripta en \eqref{eq:flexible_quantizer_dq_dl}, requiere considerar que la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los niveles $l$. Por ende, se utiliza la acumulación de los gradientes para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$, es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Para esto, se utiliza \texttt{tf.searchsorted} \cite{tensorflow_searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego \texttt{tf.one\_hot} \cite{tensorflow_one_hot} para crear una matriz one-hot \cite{one_hot_encoding} con estos índices, y finalmente \texttt{tf.matmul} \cite{tensorflow_matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}).
 
-El gradiente de la función de cuantización flexible con respecto a la entrada $x$, $\frac{\partial q_{f}}{\partial x}$, es idéntico al del cuantizador uniforme, al ser un STE. Lo mismo ocurre con el gradiente con respecto a $\alpha$, $\frac{\partial q_{f}}{\partial \alpha}$.
+De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descripta en \eqref{eq:flexible_quantizer_dq_dt}, también requiere la acumulación de gradientes debido a la discrepancia dimensional entre $x$ y $t$. En este caso, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo aquellos valores de $x$ que caen dentro del rango definido por los umbrales $t_{i-1}$ y $t_{i+1}$, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar los gradientes correspondientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
-El gradiente de la función de cuantización flexible con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descripta \eqref{eq:flexible_quantizer_dq_dl} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_levels}.
+El fragmento de código \ref{code:flexible_quantizer_full} muestra la implementación completa de la función de cuantización flexible y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_flexible_quantizer}.
 
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_levels,caption=Definición del gradiente de la función de cuantización flexible con respecto a los niveles $l$.]
-  bin_indices = tf.searchsorted(
-      qlevels, tf.reshape(q, (-1,)), side="left"
-  )
-  q_one_hot = tf.one_hot(bin_indices, depth=qlevels.shape[0])
-  dq_dlevel = tf.matmul(
-                  tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1))
-              )
-              dq_dlevel = tf.reshape(dq_dlevel, (-1,))
-\end{lstlisting}
+\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados.]
+def quantize(x, alpha, levels, thresholds):
+  # Cuantizar los niveles usando cuantizacion uniforme
+  qlevels = uniform_quantizer(levels)
 
-En este caso, la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los niveles $l$. Por ende, se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Para esto, se utiliza \texttt{tf.searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego se utiliza \texttt{tf.one\_hot} para crear una matriz one-hot con estos índices, y finalmente se utiliza \texttt{tf.matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}).
-
-El gradiente de la función de cuantización flexible con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descripta \eqref{eq:flexible_quantizer_dq_dt} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_thresholds}.
-
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_thresholds,caption=Definición del gradiente de la función de cuantización flexible con respecto a los umbrales $t$.]
-  dq_dthresholds = tf.zeros_like(thresholds)
-  for i in range(1, self.thresholds.shape[0] - 1):
-      delta_y = qlevels[i - 1] - qlevels[i]
-      delta_x = thresholds[i + 1] - thresholds[i - 1]
-
-      # Only those associated with the 'x' values that
-      # Fall within the range of the two borderline levels
-      masked_upstream = tf.where(
+  # Cuantizar la entrada
+  q = tf.zeros_like(x)
+  for i in range(thresholds.shape[0] - 1):
+      q = tf.where(
           tf.logical_and(
-              tf.greater_equal(x, self.thresholds[i - 1]),
-              tf.less_equal(x, self.thresholds[i + 1]),
+              tf.greater_equal(x, thresholds[i]),
+              tf.less_equal(x, thresholds[i + 1]),
           ),
-          upstream,
-          tf.zeros_like(x),
+          qlevels[i],
+          q,
       )
 
-      update_value = (
-          delta_y / delta_x * tf.reduce_sum(masked_upstream)
-      )
+  def grad(upstream):
+    dq_dx = tf.where(...)  # Igual que uniform quantizer
+    dq_dalpha = tf.reduce_sum(q / alpha * upstream)
 
-      dq_dthresholds = tf.tensor_scatter_nd_update(
-          dq_dthresholds, indices=[[i]], updates=[update_value]
-      )
+    # dq_dlevel
+    bin_indices = tf.searchsorted(qlevels, tf.reshape(q, (-1,)), side="left")
+    q_one_hot = tf.one_hot(bin_indices, depth=qlevels.shape[0])
+    dq_dlevel = tf.matmul(
+        tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1))
+    )
+    dq_dlevel = tf.reshape(dq_dlevel, (-1,))
+
+    # dq_dthresholds
+    dq_dthresholds = tf.zeros_like(thresholds)
+    for i in range(1, thresholds.shape[0] - 1):
+        delta_y = qlevels[i - 1] - qlevels[i]
+        delta_x = thresholds[i + 1] - thresholds[i - 1]
+
+        masked_upstream = tf.where(
+            tf.logical_and(
+                tf.greater_equal(x, thresholds[i - 1]),
+                tf.less_equal(x, thresholds[i + 1]),
+            ),
+            upstream,
+            tf.zeros_like(x),
+        )
+
+        update_value = delta_y / delta_x * tf.reduce_sum(masked_upstream)
+        dq_dthresholds = tf.tensor_scatter_nd_update(
+            dq_dthresholds, indices=[[i]], updates=[update_value]
+        )
+
+    return dq_dx, dq_dalpha, dq_dlevel, dq_dthresholds
+
+  return q, grad
 \end{lstlisting}
-
-En este caso también se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ pues la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los umbrales $t$. Para esto, se utiliza \texttt{tf.where} para crear una máscara que seleccione solo aquellos valores de $x$ que caen dentro del rango definido por los umbrales $t_{i-1}$ y $t_{i+1}$, luego se utiliza \texttt{tf.reduce\_sum} para sumar los gradientes correspondientes a estos valores, y finalmente se utiliza \texttt{tf.tensor\_scatter\_nd\_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
 \TODO{Mostrar entrenamiento, gif copado y evolucion comun}

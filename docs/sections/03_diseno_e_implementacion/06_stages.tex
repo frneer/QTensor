@@ -1,59 +1,88 @@
 \subsection{Implementación del módulo de flujo de trabajo (módulo \texttt{stages})}
+\label{sec:implementation_stages}
 
-Un flujo típico de trabajo utilizado durante el desarrollo de este trabajo, y que se busca facilitar con la implementación de este módulo, consta de los siguientes pasos:
+Como parte de la arquitectura modular de \texttt{QTensor} descrita en la sección \ref{sec:implementation_arquitectura}, el módulo \texttt{stages} proporciona componentes para definir y orquestar las etapas del flujo de trabajo de entrenamiento y cuantización. Este módulo surge de la necesidad de gestionar eficientemente los experimentos de cuantización, donde es común probar múltiples esquemas sobre un mismo modelo pre-entrenado, lo que representa un desafío computacional significativo si no se implementa un sistema de gestión adecuado.
+
+Para comprender mejor esta problemática, conviene primero describir el flujo típico de trabajo en QAT con cuantizadores personalizados, el cual consta de los siguientes pasos:
 
 \begin{enumerate}
     \item Definir el modelo a cuantizar.
-    \item Pre-entrenar el modelo.
+    \item Pre-entrenar el modelo sin cuantización.
     \item Evaluar el modelo pre-entrenado.
-    \item Cuantizar el modelo con un esquema de cuantización.
-    \item Entrenar el modelo cuantizado.
+    \item Cuantizar el modelo con un esquema de cuantización específico.
+    \item Entrenar el modelo cuantizado (fine-tuning con QAT).
     \item Evaluar el modelo cuantizado.
 \end{enumerate}
 
-Es común querer probar diferentes esquemas de cuantización sobre un mismo modelo, y comparar los resultados obtenidos. Para comparar entre diferentes esquemas de cuantización, es necesario partir desde el mismo modelo pre-entrenado. Otro punto a considerar es que algunos de estos pasos son computacionalmente costosos, como el pre-entrenamiento y el entrenamiento del modelo cuantizado. A su vez, si se quiere extraer información adicional, como otras métricas de evaluación, distribuciones de pesos, activaciones, u otros. Es necesario volver a ejecutar estos pasos.
+Experimentar con diferentes esquemas de cuantización requiere comparar múltiples configuraciones partiendo del mismo modelo pre-entrenado. No obstante, algunos de estos pasos resultan computacionalmente costosos, en particular el pre-entrenamiento y el entrenamiento del modelo cuantizado. Por otra parte, si se desea extraer información adicional como otras métricas de evaluación, distribuciones de pesos o activaciones, resulta necesario volver a ejecutar todo el flujo de trabajo, lo que incrementa significativamente el tiempo total de experimentación.
 
-Por ejemplo, en la \reffig{typical_workflow} se muestra un experimento ejecutado donde cada etapa ya fue ejecutada previamente.
+Dado este contexto, la \reffig{workflow_comparison} ilustra tanto el problema identificado como la solución implementada mediante tres escenarios. En el primer escenario (\reffig{workflow_comparison}(a)), todas las etapas del flujo de trabajo se ejecutan exitosamente, representadas en verde. Por el contrario, el segundo escenario (\reffig{workflow_comparison}(b)) muestra la situación al modificar el esquema de cuantización: todos los pasos posteriores al cambio quedan invalidados (indicados en rojo), lo que implica descartar el trabajo computacional previo y volver a ejecutar el entrenamiento cuantizado y la evaluación.
 
-\defaultdiagram{stages/pipeline_first_run}{Diagrama de un flujo de trabajo típico.}{typical_workflow}{0.7}
+Para abordar esta ineficiencia, el módulo \texttt{stages} implementa un sistema de caché de resultados intermedios, como se ilustra en el tercer escenario (\reffig{workflow_comparison}(c)). Este sistema permite reutilizar las etapas no modificadas (pasos 1-3, almacenados en caché y representados con bloques bicolor verde-rojo), mientras que solo las etapas afectadas por el cambio (pasos 4-6) se bifurcan en dos ramas: la rama superior (verde) representa el esquema anterior almacenado, y la rama inferior (roja) corresponde al nuevo esquema a ejecutar.
 
-Ahora, si se quiere probar un nuevo esquema de cuantización, es necesario volver a ejecutar todos los pasos del flujo de trabajo, se invalida todo el trabajo previo. Esto se muestra en la \reffig{typical_workflow_rerun}.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.75\textwidth}
+        \centering
+        \scalebox{0.7}{\input{diagrams/stages/pipeline_first_run}}
+        \caption{Flujo de trabajo completado exitosamente.}
+        \label{fig:workflow_completed}
+    \end{subfigure}
 
-\defaultdiagram{stages/pipeline_first_run_invalidated}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización.}{typical_workflow_rerun}{0.7}
+    \vspace{0.5em}
 
-La solución a este problema es guardar los resultados intermedios de cada paso del flujo de trabajo, para poder reutilizarlos en futuras ejecuciones. Esto permite ahorrar tiempo y recursos computacionales, al no tener que volver a ejecutar todos los pasos del flujo de trabajo cada vez que se quiere probar un nuevo esquema de cuantización o extraer información adicional.
+    \begin{subfigure}[b]{0.75\textwidth}
+        \centering
+        \scalebox{0.7}{\input{diagrams/stages/pipeline_first_run_invalidated}}
+        \caption{Flujo invalidado al modificar el esquema de cuantización.}
+        \label{fig:workflow_invalidated}
+    \end{subfigure}
 
-Cada paso queda definido principalmente por el modelo inicial del cual se parte (su entrada), una función que define el proceso a ejecutar, y los parámetros de esta función. A esto se le suma la semilla para la generación de números aleatorios, para asegurar que los resultados de procesos no determinísticos sean reproducibles.
+    \vspace{0.5em}
 
-Al quedar definido cada paso por estos elementos, es posible identificar de manera única cada paso del flujo de trabajo. Esto se realizo generando un hash único a partir de estos elementos, y utilizando este hash para guardar los resultados intermedios de cada paso del flujo de trabajo. Permitiendo invalidar solo los pasos que dependen de un paso que ha cambiado, y reutilizar los resultados intermedios de los pasos que no han cambiado como se muestra en la \reffig{typical_workflow_rerun_optimized} donde ahora el ejemplo anterior se puede ejecutar sin necesidad de volver a ejecutar el pre-entrenamiento.
+    \begin{subfigure}[b]{0.75\textwidth}
+        \centering
+        \scalebox{0.7}{\input{diagrams/stages/pipeline_hashed}}
+        \caption{Flujo con sistema de caché: reutilización de etapas 1-3 (bloques bicolor) y bifurcación para comparar esquemas.}
+        \label{fig:workflow_cached}
+    \end{subfigure}
 
-\defaultdiagram{stages/pipeline_hashed}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización, reutilizando resultados intermedios.}{typical_workflow_rerun_optimized}{0.7}
+    \caption{Comparación de estrategias de ejecución del flujo de trabajo en QAT.}
+    \label{fig:workflow_comparison}
+\end{figure}
 
-La \texttt{dataclass} \texttt{StageMetadata} define los siguientes atributos:
+El sistema de caché se fundamenta en la capacidad de identificar unívocamente cada etapa del flujo de trabajo. Para ello, cada etapa queda definida por los siguientes elementos: el modelo inicial del cual se parte (entrada), la función que define el proceso a ejecutar, los parámetros de dicha función, y la semilla para la generación de números aleatorios (que asegura la reproducibilidad de procesos no determinísticos).
+
+A partir de estos elementos, se genera un \textit{hash} único \cite{gauravaram2010cryptographic} que identifica cada etapa del flujo de trabajo. Este \textit{hash} se utiliza como clave para almacenar y recuperar los resultados intermedios. En consecuencia, al modificar un paso del flujo de trabajo, solo se invalidan las etapas que dependen de dicho paso, mientras que las etapas anteriores no afectadas pueden reutilizar sus resultados previamente calculados, como se ilustró en la \reffig{workflow_comparison}(c).
+
+Desde el punto de vista arquitectónico, este sistema consta de tres componentes principales: \texttt{StageConfig}, que identifica cada etapa mediante hashing; \texttt{Stage}, que ejecuta y cachea los resultados; y \texttt{Pipeline}, que coordina el flujo de trabajo completo. La \reffig{stages_architecture} ilustra las relaciones entre estos componentes. \texttt{Pipeline} orquesta múltiples objetos \texttt{Stage}, cada uno de los cuales contiene un objeto \texttt{StageConfig} mediante composición. El \textit{hash} generado por \texttt{StageConfig} permite encadenar etapas estableciendo dependencias, ya que cada etapa registra el \textit{hash} de la etapa anterior.
+
+\defaultdiagram{stages/architecture}{Arquitectura del módulo \texttt{stages}: relaciones entre \texttt{StageConfig}, \texttt{Stage} y \texttt{Pipeline}.}{stages_architecture}{0.8}
+
+A continuación, se describe cada uno de estos componentes en detalle. En primer lugar, la clase \texttt{StageConfig} \cite{qtensor_stage} encapsula los metadatos necesarios para identificar una etapa del flujo de trabajo. Esta \texttt{dataclass} \cite{python_dataclasses} define los siguientes atributos:
 
 \begin{enumerate}
-    \item \texttt{name}: Nombre del paso del flujo de trabajo.
-    \item \texttt{seed}: Semilla para la generación de números aleatorios.
-    \item \texttt{function}: Función que define el proceso a ejecutar en este paso.
-    \item \texttt{parameters}: Parámetros a pasar a la función.
-    \item \texttt{previous\_hash}: Hash del paso anterior, para definir el modelo original del cual se parte.
+    \item \texttt{name}: nombre descriptivo de la etapa.
+    \item \texttt{seed}: semilla para la generación de números aleatorios, garantizando reproducibilidad.
+    \item \texttt{function}: función que define el proceso a ejecutar en esta etapa.
+    \item \texttt{parameters}: diccionario de parámetros a pasar a la función.
+    \item \texttt{previous\_hash}: \textit{hash} de la etapa anterior, estableciendo la dependencia con el modelo de entrada.
 \end{enumerate}
 
-Esta clase permite generar un hash único a partir de estos atributos, utilizando la función \texttt{to\_hash}, que permite identificar unívocamente cada paso del flujo de trabajo.
+Esta clase implementa el método \texttt{to\_hash} \cite{qtensor_stage}, que genera un \textit{hash} único a partir de estos atributos mediante una función hash criptográfica \cite{gauravaram2010cryptographic}, permitiendo así identificar unívocamente cada etapa y detectar cambios en cualquiera de sus componentes.
 
-\subsubsection{Clase \texttt{Stage}}
+En segundo lugar, la clase \texttt{Stage} \cite{qtensor_stage} representa una etapa individual del flujo de trabajo, añadiendo la lógica de ejecución y gestión de caché. Esta clase permite ejecutar el proceso definido por la función y los parámetros, gestionar el almacenamiento de resultados intermedios en disco, y recuperarlos cuando corresponda.
 
-La clase \texttt{Stage} representa un paso del flujo de trabajo. Esta clase permite ejecutar el proceso definido por la función y los parámetros, y guardar los resultados intermedios en disco. La clase \texttt{Stage} se compone con la clase \texttt{StageMetadata} y define el método \texttt{run}, cuyo diagrama de flujo se muestra en la figura \ref{fig:stage_flow}.
+La clase \texttt{Stage} utiliza composición con \texttt{StageConfig} para encapsular los metadatos de identificación, y define el método \texttt{run}, cuya lógica de ejecución se ilustra en la \reffig{stage_flow}. Este método verifica primero si existe un resultado previamente calculado con el mismo \textit{hash}. En caso afirmativo, lo recupera del disco, evitando la re-ejecución. En caso negativo, ejecuta la función definida, almacena el resultado, y lo retorna.
 
-\defaultdiagram{stages/stage}{Diagrama de la clase Stage.}{stage_flow}{0.7}
+\defaultdiagram{stages/stage}{Diagrama de flujo del método \texttt{run} de la clase \texttt{Stage}.}{stage_flow}{0.7}
 
-Es importante destacar que para guardar y cargar los modelos deben ser serializables y deserializables. Para esto, se utilizó la funcionalidad de Keras para guardar y cargar modelos en formato \texttt{keras}. Todo objeto desarrollado por la biblioteca que forme parte del modelo como la configuracion (\texttt{GenerateConfig}) o los cuantizadores personalizados (\texttt{UniformQuantizer}, \texttt{FlexQuantizer}) implementan el método \texttt{get\_config} y el método de clase \texttt{from\_config}, para poder ser serializados y deserializados correctamente \cite{tensorflow_serialization_guide}.
+\paragraph{Serialización de modelos}
 
-\subsubsection{Clase \texttt{Pipeline}}
-\label{sec:pipeline}
+Para que el sistema de caché funcione correctamente, resulta fundamental que los modelos sean serializables y deserializables. Con este fin, se utiliza la funcionalidad de \texttt{Keras} para guardar y cargar modelos en formato \texttt{.keras} \cite{tensorflow_serialization_guide}. Para esto, es necesario que todo objeto desarrollado por la biblioteca que forme parte del modelo, como la configuración (\texttt{GenerateConfig}) y los cuantizadores personalizados (\texttt{UniformQuantizer}, \texttt{FlexQuantizer}), implemente el método \texttt{get\_config} y el método de clase \texttt{from\_config}, lo que permite su correcta serialización y deserialización.
 
-La clase \texttt{Pipeline} es un orquestador de etapas. Esta clase permite definir un flujo de trabajo a partir de una lista de \texttt{Stage}, y ejecutar cada una de estas etapas en orden. La clase \texttt{Pipeline} se encarga de gestionar la ejecución de cada etapa, pasando los resultados intermedios entre las etapas, y guardando los resultados intermedios.
+Por último, la clase \texttt{Pipeline} \cite{qtensor_stage} actúa como orquestador de etapas, coordinando la ejecución secuencial de un flujo de trabajo completo. Esta clase permite definir un flujo de trabajo a partir de una lista de objetos \texttt{Stage} y gestiona la ejecución de cada etapa en orden, pasando los resultados intermedios entre ellas.
 
-Implementa el método \texttt{run}, que ejecuta cada una de las etapas del flujo de trabajo. Y también permite serializar y deserializar el flujo de trabajo, para poder guardar y cargar flujos de trabajo completos.
+El método principal \texttt{run} ejecuta cada una de las etapas del flujo de trabajo secuencialmente, verificando en cada paso si existe un resultado en caché válido o si es necesario ejecutar la etapa. Además, la clase \texttt{Pipeline} permite serializar y deserializar el flujo de trabajo completo, lo que posibilita guardar y cargar configuraciones experimentales completas para su reutilización.
 
-Es a partir de esta clase que se realiz\'o la definición y orquestación del flujo de trabajo realizado para el experimento cuyos resultados se muestran en el capítulo \ref{chap:resultados}.
+En definitiva, el módulo \texttt{stages} cumple con el requisito funcional RF4.4. La clase \texttt{Pipeline} constituye la base para la definición y orquestación del flujo de trabajo experimental cuyos resultados se presentan en el capítulo \ref{chap:resultados}. La implementación completa del módulo \texttt{stages}, incluyendo las clases \texttt{StageConfig}, \texttt{Stage} y \texttt{Pipeline}, se encuentra disponible en el repositorio de \texttt{QTensor} \cite{qtensor_stage}.

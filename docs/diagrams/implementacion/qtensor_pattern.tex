@@ -1,0 +1,29 @@
+% Diagrama del patrón simplificado de QTensor usando qmodel
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=8em, text centered, rounded corners, minimum height=3em, font=\footnotesize},
+    configblock/.style={rectangle, draw, text width=10em, text centered, rounded corners, minimum height=5em, font=\scriptsize},
+    arrow/.style={-latex, thick}
+]
+
+\tikzset{node distance=1.2cm and 2.5cm}
+
+% Model block
+\node[block] (model) {TensorFlow Model};
+
+% Config dictionary block
+\node[configblock, below=of model] (config_dict) {
+    \texttt{quantization\_config}\\ (diccionario)
+};
+
+% apply_quantization function
+\node[block, right=of config_dict, yshift=1.2cm] (apply_quantization) {\texttt{apply\_quantization}};
+
+% Arrows
+\draw[arrow] (model.east) -| (apply_quantization.north);
+\draw[arrow] (config_dict.east) -| (apply_quantization.south);
+
+% Output
+\draw[arrow] (apply_quantization.east) -- ++(3,0) node[midway, above, font=\footnotesize] {\texttt{quantized\_model}};
+
+
+\end{tikzpicture}

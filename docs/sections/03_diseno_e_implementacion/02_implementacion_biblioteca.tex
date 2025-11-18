@@ -83,7 +83,7 @@ Por otra parte, los cuantizadores provistos por \texttt{TFMOT} son estáticos, e
 Finalmente, \texttt{TFMOT} no presenta herramientas para el cómputo de complejidad espacial teórica de modelos cuantizados, funcionalidad que \texttt{QTensor} implementa, como se detalla en la sección \ref{sec:implementation_evaluation}.
 
 \subsection{Arquitectura de la biblioteca \texttt{QTensor}}
-
+\label{sec:implementation_arquitectura}
 Una vez analizadas las capacidades y limitaciones de \texttt{TFMOT}, se procedió al diseño de la arquitectura de \texttt{QTensor}. Como se desarrolló en la sección \ref{sec:tensorflow_model_optimization}, la biblioteca \texttt{TFMOT} disponibiliza herramientas para la cuantización de modelos de \texttt{TensorFlow/Keras} con soporte para QAT. Sin embargo, \texttt{TFMOT} no satisface completamente los requisitos funcionales planteados en la sección \ref{sec:requerimientos_funcionales} ni los atributos de calidad definidos en la sección \ref{sec:atributos_calidad}. Por consiguiente, se decidió desarrollar una nueva biblioteca, denominada \texttt{QTensor}, que extienda las funcionalidades de \texttt{TFMOT} y permita cumplir con los objetivos planteados.
 
 La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}. La \reffig{qtensor_modules} presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}, donde se observa que \texttt{QTensor} reutiliza las funcionalidades de \texttt{TFMOT} para la cuantización de modelos y las funcionalidades de \texttt{Keras} y \texttt{TensorFlow} para la definición, entrenamiento y evaluación de modelos.

@@ -1,0 +1,44 @@
+
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, thick, minimum width=6cm, minimum height=0.8cm, align=left},
+    header/.style={box, fill=gray!20, font=\bfseries},
+    method/.style={box, fill=white},
+    subitem/.style={font=\small\ttfamily},
+    node distance=0.1cm
+]
+
+    % TFMOT Column (left)
+    \node[header] (tfmot_header) at (0,0) {TFMOT Quantizer};
+
+    \node[method, below=of tfmot_header, minimum height=3cm] (tfmot_build) {
+        \texttt{build()}\\[0.2cm]
+        \hspace{0.5cm}$\hookrightarrow$ parámetros fijos
+    };
+
+    \node[method, below=of tfmot_build, minimum height=2.5cm] (tfmot_call) {
+        \texttt{\_\_call\_\_(x)}\\[0.2cm]
+        \hspace{0.5cm}$\hookrightarrow$ gradiente automático
+        % \hspace{0.5cm}$\hookrightarrow$ quantize\\[0.1cm]
+        % \\[0.1cm]
+        % \hspace{1.5cm}(STE genérico)
+    };
+
+    % QTensor Column (right)
+    \node[header, right=1.5cm of tfmot_header] (qtensor_header) {QTensor Quantizer};
+
+    \node[method, below=of qtensor_header, minimum height=3cm] (qtensor_build) {
+        \texttt{build()}\\[0.2cm]
+        \hspace{0.5cm}$\hookrightarrow$ \texttt{tf.Variable} (entrenable)\\[0.1cm]
+        \hspace{1cm}$\hookrightarrow$ \texttt{constraints}\\[0.1cm]
+        \hspace{1cm}$\hookrightarrow$ \texttt{initializers}\\[0.1cm]
+        \hspace{1cm}$\hookrightarrow$ \texttt{regularizers}
+    };
+
+    \node[method, below=of qtensor_build, minimum height=2.5cm] (qtensor_call) {
+        \texttt{\_\_call\_\_(x)}\\[0.2cm]
+        \hspace{0.5cm}$\hookrightarrow$ \texttt{quantize(x)}\\[0.1cm]
+        \hspace{1cm}\texttt{@tf.custom\_gradient}\\[0.1cm]
+        \hspace{1cm}$\hookrightarrow$ forward + \texttt{grad()}
+    };
+
+\end{tikzpicture}
