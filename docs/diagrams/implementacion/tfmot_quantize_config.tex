@@ -1,0 +1,38 @@
+% Diagrama: vista conceptual de la interfaz QuantizeConfig de TFMOT
+\begin{tikzpicture}[
+        block/.style={rectangle, draw, fill=white, text width=9em, text centered, rounded corners, minimum height=3em, font=\footnotesize},
+        smallblock/.style={rectangle, draw, fill=white, text width=6.5em, text centered, rounded corners, minimum height=2.4em, font=\scriptsize},
+        arrow/.style={-latex, thick},
+        note/.style={font=\footnotesize, align=left}
+]
+
+% usar una separación fija entre nodos
+	ikzset{node distance=1.2cm and 3cm}
+
+% Main blocks
+\node[block] (quantize_config) {\texttt{QuantizeConfig}\\(interfaz)};
+\node[smallblock, left=of quantize_config] (weights) {get\_weights\_and\_quantizers()\\set\_quantize\_weights()\\\footnotesize{(por atributo: kernel, bias, ...)}};
+\node[smallblock, below=of quantize_config] (activations) {get\_activations\_and\_quantizers()\\set\_quantize\_activations()};
+\node[smallblock, right=of quantize_config] (outputs) {set\_output\_quantizers()};
+
+% Layer and quantizers
+\node[block, above=of quantize_config] (layer) {\texttt{Layer}\\(atributos: kernel, bias, activation, ...)};
+\node[smallblock, left=of weights] (wq) {Cuantizadores de pesos};
+\node[smallblock, left=of activations] (aq) {Cuantizadores de activaciones};
+\node[smallblock, right=of outputs] (oq) {Cuantizadores de salidas};
+
+% Arrows: mapping
+\draw[arrow] (layer) -- node[midway, left, font=\scriptsize]{inspecciona} (quantize_config);
+\draw[arrow] (quantize_config) -- (weights);
+\draw[arrow] (quantize_config) -- (activations);
+\draw[arrow] (quantize_config) -- (outputs);
+
+\draw[arrow] (weights) -- node[midway, above, font=\scriptsize]{asigna} (wq);
+\draw[arrow] (activations) -- node[midway, above, font=\scriptsize]{asigna} (aq);
+\draw[arrow] (outputs) -- node[midway, above, font=\scriptsize]{asigna} (oq);
+
+% roundtrip: set_quantize_* devuelve tensores cuantizados a la capa
+% \draw[arrow] (wq) to[bend right=15] node[midway, below, font=\scriptsize]{quantized weights} (weights.south);
+% \draw[arrow] (aq) to[bend left=15] node[midway, below, font=\scriptsize]{quantized activations} (activations.south);
+
+\end{tikzpicture}

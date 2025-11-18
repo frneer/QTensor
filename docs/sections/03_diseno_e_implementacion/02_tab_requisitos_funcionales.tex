@@ -1,40 +1,35 @@
-% Reduce font size for the table content to improve fit
-% \begingroup
+\begin{longtable}{m{2.0cm} m{1.5cm} m{8.5cm}}
 
-\begin{longtable}{p{2.0cm} p{1.5cm} p{8.5cm}}
-
-% Caption on top for longtable
+% ... (tu cabecera de la tabla no cambia) ...
 \caption{Requisitos funcionales detallados de la biblioteca \texttt{QTensor}.}
 \label{tab:rf_detailed}\\
-% start local group: caption kept at normal size, rest of table in \small
-% \begingroup\small
 \toprule
 \textbf{Objetivo} & \textbf{ID} & \textbf{Descripción} \\
 \midrule
 \endfirsthead
 
-% \caption[]{Requisitos funciónales detallados de la biblioteca QTensor (continuación)} \\
 \toprule
 \textbf{Objetivo} & \textbf{ID} & \textbf{Descripción} \\
 \midrule
 \endhead
 \bottomrule
-% Footer for continued pages (no caption here since caption is on top)
 \endfoot
 
 % --- Objetivo 1: Diseño e Implementación de la biblioteca ---
-\multirow{4}{*}{\parbox{1.5cm}{\centering 1. Diseño y API}}
-    & RF1.1 & El sistema deberá permitir la definición de una estrategia de cuantización a partir de una configuración en un formato estructurado (e.g. diccionario en Python). \\
+% CAMBIO AQUÍ: de {=} a {2.0cm}
+\multirow[c]{4}{2.0cm}{\centering 1. Diseño y API}
+    & RF1.1 & El sistema deberá permitir la definición de una estrategia de cuantización a partir de una configuración en un formato estructurado (e.g. diccionario en Python \cite{python_dictionaries}). \\
     \cmidrule{2-3}
-    & RF1.2 & El sistema debe permitir una granularidad a nivel de atributo, posibilitando la asignación de cuantizadores distintos para cada parámetro del modelo. En particular, para cualquier peso (e.g. kernel, bias de capas densas) y cualquier activación de cada capa, incluyendo capas con parámetros anidados (ej. RNN). \\
+    & RF1.2 & El sistema debe permitir una granularidad a nivel de atributo, posibilitando la asignación de cuantizadores distintos para cada parámetro del modelo. En particular, para todo peso y toda activación de cada capa, incluyendo capas con parámetros anidados (e.g. RNN \cite{tensorflow_keras_rnn}). \\
     \cmidrule{2-3}
-    & RF1.3 & El sistema debe ser compatible con la API de modelos \texttt{Sequential} y \texttt{Functional} de Keras. \\
+    & RF1.3 & El sistema debe ser compatible con la API de modelos \texttt{Sequential} \cite{tensorflow_keras_sequential_api} y \texttt{Functional} \cite{tensorflow_keras_functional_api} de Keras. \\
     \cmidrule{2-3}
-    & RF1.4 & El sistema debe soportar la serialización y deserialización de modelos cuantizados (formato .keras o SavedModel), preservando el estado completo de los cuantizadores, incluyendo sus parámetros entrenables. \\
+    & RF1.4 & El sistema debe soportar la serialización y deserialización \cite{tensorflow_serialization_guide} de modelos cuantizados (formato .keras o SavedModel), preservando el estado completo de los cuantizadores, incluyendo sus parámetros entrenables. \\
 \midrule
 
 % --- Objetivo 2: Implementación de Cuantización Uniforme ---
-\multirow{4}{*}{\parbox{1.5cm}{\centering 2. Cuantizador Uniforme}}
+% CAMBIO AQUÍ: de {=} a {2.0cm}
+\multirow[c]{4}{2.0cm}{\centering 2. Cuantizador Uniforme}
     & RF2.1 & El sistema debe proveer una implementación de la cuantización uniforme y debe ser configurable en número de bits y en el modo de operación (signado o no signado). \\
     \cmidrule{2-3}
     & RF2.2 & La implementación de la cuantización uniforme debe permitir la definición de su rango de cuantización (parámetro $\alpha$) como una variable entrenable, permitiendo al modelo optimizar dicho rango durante el entrenamiento. \\
@@ -45,26 +40,27 @@
 \midrule
 
 % --- Objetivo 3: Implementación de Cuantización Flexible ---
-\multirow{4}{*}{\parbox{1.5cm}{\centering 3. Cuantizador Flexible}}
+% CAMBIO AQUÍ: de {=} a {2.0cm}
+\multirow[c]{4}{2.0cm}{\centering 3. Cuantizador Flexible}
     & RF3.1 & El sistema debe proveer una implementación de la cuantización flexible y debe ser configurable en número de bits, número de niveles y modo de operación (con signo o sin signo). \\
     \cmidrule{2-3}
-    & RF3.2 & La implementación de la cuantización flexible debe permitir la definición de su rango ($\alpha$), los valores de los niveles de cuantización ($l$) y los umbrales ($t$) como variables entrenables, permitiendo al modelo optimizar dichos parámetros durante el entrenamiento. \\
+    & RF3.2 & La implementación de la cuantización flexible debe permitir la definición de su rango ($\alpha$), los valores de los niveles de cuantización ($\mathbf{l}$) y los umbrales ($\mathbf{t}$) como variables entrenables, permitiendo al modelo optimizar dichos parámetros durante el entrenamiento. \\
     \cmidrule{2-3}
     & RF3.3 & La implementación de la cuantización flexible debe implementar un gradiente personalizado que permita el entrenamiento de los parámetros del modelo y del cuantizador (rango, niveles y umbrales). \\
     \cmidrule{2-3}
-    & RF3.4 & La implementación de la cuantización flexible debe permitir la inicialización de los parámetros del cuantizador ($\alpha$, $l$, $t$). \\
+    & RF3.4 & La implementación de la cuantización flexible debe permitir la inicialización de los parámetros del cuantizador ($\alpha$, $\mathbf{l}$ y $\mathbf{t}$). \\
 \midrule
 
 % --- Objetivo 4: Herramientas de Evaluación y Experimentación ---
-\multirow{5}{*}{\parbox{1.5cm}{\centering 4. Evaluación}}
+% CAMBIO AQUÍ: de {=} a {2.0cm}
+\multirow[c]{5}{2.0cm}{\centering 4. Evaluación}
     & RF4.1 & La biblioteca debe permitir recolectar y registrar la evolución de los parámetros entrenables de todos los cuantizadores del modelo en cada época de entrenamiento. \\
     \cmidrule{2-3}
     & RF4.2 & Se debe proporcionar utilidades para visualizar los datos recolectados, permitiendo generar gráficos del estado y la evolución de los parámetros de los cuantizadores. \\
     \cmidrule{2-3}
     & RF4.3 & La biblioteca debe permitir calcular la complejidad espacial teórica. Para cuantizadores uniformes, deberá basarse en el número de bits fijos. Para cuantizadores flexibles, se deberá basar en la entropía de los pesos cuantizados para simular una codificación de Huffman (explicada en el apéndice \ref{appendix:huffman}) \\
     \cmidrule{2-3}
-    & RF4.4 & El sistema debe permitir desarrollar experimentos de comparación entre distintas estrategias de cuantización y definir la ejecución de flujos de trabajo completos (pre-entrenamiento, evaluación, cuantización, QAT, evaluación final) de manera modular y reutilizable. \\
+    & RF4.4 & El sistema debe permitir desarrollar experimentos de comparación entre distintos esquemas de cuantización y definir la ejecución de flujos de trabajo de manera modular y reutilizable. \\
     \cmidrule{2-3}
     & RF4.5 & La biblioteca debe definir un ejemplo que demuestre el uso de la biblioteca, permitiendo configurar el modelo, el \textit{dataset} y la estrategia de cuantización, y comparar los resultados de diferentes configuraciones. \\
 \end{longtable}
-% \endgroup

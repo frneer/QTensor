@@ -4,618 +4,107 @@
 \subsection{Requerimientos funcionales}
 \label{sec:requerimientos_funcionales}
 
-El objetivo de la biblioteca es proporcionar una herramienta que permita realizar QAT con parámetros entrenables, que facilite la experimentación con diferentes esquemas de cuantización, y que permita la evaluación de los mismos.
+El objetivo de la biblioteca, como se describió en la sección \ref{sec:objetivos}, es proporcionar una herramienta que permita realizar QAT con cuantizadores personalizados de parámetros entrenables, con el fin de facilitar la experimentación con diferentes esquemas de cuantización y permitir la evaluación y comparación de los mismos en términos de precisión y eficiencia.
 
-Los requerimientos funciónales de la biblioteca se definieron en base a los objetivos planteados en la sección \ref{sec:objetivos}. Los mismos se detallan en la tabla \ref{tab:rf_detailed}, donde se especifica el objetivo al que pertenecen, el numero del requisito y una descripción detallada del mismo.
+Los requisitos funcionales son las funcionalidades que debe tener un sistema de software para cumplir con los objetivos planteados. En el caso de \texttt{QTensor}, se definieron 17 requisitos funcionales, asociados a los 4 objetivos planteados en la sección \ref{sec:objetivos}.
+
+A continuación, la tabla \ref{tab:rf_detailed} desarrolla cada uno de los requisitos funcionales definidos para la biblioteca \texttt{QTensor}, etiquetados mediante un identificador único (ID), asociado al objetivo al que pertenecen, y una descripción detallada del mismo.
+
+% Los requerimientos funciónales de la biblioteca se definieron en base a los objetivos planteados en la sección \ref{sec:objetivos}. Los mismos se detallan en la tabla \ref{tab:rf_detailed}, donde se especifica el objetivo al que pertenecen, el numero del requisito y una descripción detallada del mismo.
 
 \input{sections/03_diseno_e_implementacion/02_tab_requisitos_funcionales}
 
 \subsection{Atributos de calidad}
 \label{sec:atributos_calidad}
 
-Los atributos de calidad definidos en la ISO 25010 \cite{ISO25010} definen un modelo de calidad de software, donde se formaliza la definición de requisitos no funcionales. La importancia de los requerimientos no funcionales es que sin ellos, se puede llegar a una solución que cumple con los requisitos técnicos, pero que no satisface las necesidades del usuario. Este modelo se compone de dos partes, características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas de estas propiedades. Las mismas se muestran en la \reffig{iso_25010}.
+Los atributos de calidad definidos en la norma ISO 25010 \cite{ISO25010} constituyen un modelo de calidad de software donde se formaliza la definición de requisitos no funcionales. La importancia de los requerimientos no funcionales radica en que, sin ellos, se puede llegar a una solución que cumple con los requisitos funcionales pero no satisface las necesidades del usuario. Este modelo se compone de dos partes: características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas. La \reffig{iso_25010} ilustra las características y subcaracterísticas definidas en la norma ISO 25010.
 
 % Use \protect\footnotemark in the caption (moving argument) and place the footnote text
 % immediately after the figure to avoid fragility inside \caption.
 \defaultfigure{implementacion/iso_25010.png}{Modelo de calidad de software ISO 25010.\protect\footnotemark}{iso_25010}
 \footnotetext{Imagen tomada de \href{https://iso25000.com/index.php/en/iso-25000-standards/iso-25010}{iso25000.com}.}
 
-En el caso de \texttt{QTensor}, se buscó obtener una solución que permita a investigadores y desarrolladores trabajar de manera eficiente, intuitiva y directa. Que no requieran un entrenamiento extenso para poder utilizarlo. Por lo tanto, los atributos de calidad que se definieron pertenecen a las características adecuación funciónal, capacidad de interacción, y mantenibilidad. La definición de los atributos elegidos se muestra en la tabla \ref{tab:iso25010}.
+En el caso de \texttt{QTensor}, se buscó obtener una solución que permita a investigadores y desarrolladores trabajar de manera eficiente, intuitiva y directa, sin requerir un entrenamiento extenso. Asimismo, como se trata de una herramienta que facilita la experimentación con diferentes cuantizadores, resulta fundamental que el código sea modular y fácil de mantener y extender, de manera que se puedan agregar nuevos cuantizadores y funcionalidades sin afectar la estabilidad del sistema.
+
+En consecuencia, los atributos de calidad que se definieron pertenecen a las características de adecuación funcional, capacidad de interacción y mantenibilidad. La tabla \ref{tab:iso25010} presenta la definición de los atributos elegidos.
 
 \begin{table}[H]
 \centering
 % Make table body and header smaller while leaving caption at normal size
-\begin{tabularx}{\textwidth}{{l p{3cm} p{3cm} X}}
+\caption{Atributos de calidad elegidos}
+\begin{tabularx}{\textwidth}{{>{\centering\arraybackslash}m{1.2cm} >{\centering\arraybackslash}m{3cm} >{\centering\arraybackslash}m{3cm} >{\arraybackslash}m{6cm}}}
 \toprule
 \textbf{ID} & \textbf{Requisito} & \textbf{Característica} & \textbf{Descripción} \\ \hline
-RNF1.1 & Adecuación funcional & Pertinencia funciónal. & Capacidad del producto software para proporcionar un conjunto de funciones que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
-RNF2.1 & Capacidad de interacción & Auto-descriptividad. & Capacidad de un producto para presentar la información adecuada, haciendo su uso inmediatamente evidente para el usuario sin interacciones excesivas con el producto u otros recursos (documentación, \textit{help desks}, otros usuarios...). \\
+RNF1.1 & Adecuación funcional & Pertinencia funcional & Capacidad del producto software para proporcionar un conjunto de funciones que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
+RNF2.1 & Capacidad de interacción & Auto-descriptividad & Capacidad de un producto para presentar la información adecuada, haciendo su uso inmediatamente evidente para el usuario sin interacciones excesivas con el producto u otros recursos (documentación, \textit{help desks}, otros usuarios...). \\
 \hline
 RNF3.1 & Mantenibilidad & Capacidad para ser probado & Facilidad con la que se pueden establecer criterios de prueba para un sistema o componente y con la que se pueden llevar a cabo las pruebas para determinar si se cumplen dichos criterios. \\
 \hline
 RNF3.2 & Mantenibilidad & Modularidad & Capacidad de un producto para evitar que los cambios en un componente afecten a otros componentes.\\
 \bottomrule
 \end{tabularx}
-\caption{Atributos de calidad elegidos}
 \label{tab:iso25010}
 \end{table}
 
-\subsection{Herramientas existentes}
-
-Definidos los requerimientos funcionales y no funcionales, se procedió a analizar el estado del arte en cuanto a herramientas que permitan realizar \textit{quantization aware training}.
-
-Tanto en la industria como en los entornos académicos, existen dos bibliotecas de facto \texttt{Tensorflow} y \texttt{PyTorch}.
-
-Ambas tienen un framework de cuantización, \texttt{PyTorch} lo implementa en la misma biblioteca, a traves del módulo \texttt{quantization} \cite{pytorch_quantization_docs}, mientras que \texttt{Tensorflow} lo implementa a traves de una biblioteca secundaria \texttt{TFMOT} \cite{tensorflow_model_optimization}. Ambas bibliotecas proveen soporte nativo para 8 bits, pero no soportan la definición de esquemas de cuantización de manera directa, sin embargo ambas soportan definir cuantizadores personalizados e inyectarlos en el modelo a cuantizar.
-
-Debido a que ambas bibliotecas parecen tener un soporte similar, y no hay diferencias significativas en la cantidad de usuarios entre una y la otra. Se eligió tensorflow debido a que en el entorno del laboratorio de sistemas embebidos, en el que se desarrolla este trabajo, se utiliza principalmente esta biblioteca.
-
 \subsection{Metodología de trabajo}
 
-Para desarrollar la biblioteca, se eligió versionar el código en un repositorio de git \cite{torvalds2005git}, con un flujo de trabajo basado en \textit{Git Flow} \cite{driessen2010gitflow}. Este flujo de trabajo permite tener una rama principal estable, y ramas de desarrollo que permiten trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se fusionan a la rama principal una vez que se ha completado el desarrollo, la revision del codigo y se han realizado las pruebas unitarias necesarias para comprobar la funcionalidad agregada como su compatibilidad con funcionalidades existentes.
+Una vez definidos los requisitos funcionales y los atributos de calidad, se estableció la metodología de trabajo para el desarrollo de la biblioteca.
+
+Para el control de versiones, se eligió utilizar un repositorio de Git \cite{torvalds2005git} con un flujo de trabajo basado en \textit{Git Flow} \cite{driessen2010gitflow}. Este flujo de trabajo permite mantener una rama principal estable y ramas de desarrollo que posibilitan trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se fusionan con la rama principal solo después de completar tres etapas críticas: el desarrollo, la revisión del código y la ejecución exitosa de las pruebas unitarias necesarias para comprobar tanto la funcionalidad agregada como su compatibilidad con funcionalidades existentes.
 
 \subsubsection{Pruebas unitarias y de integración}
 
-Para la implementación de la biblioteca se utilizó el \textit{framework} de pruebas de  \texttt{unittest} de Python. Este framework permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática. Las pruebas se definen en archivos separados, y se pueden ejecutar de manera individual o en conjunto.
+Para garantizar la calidad del código, se implementó un sistema de pruebas mediante el \textit{framework} \texttt{unittest} de Python \cite{python_unittest}. Este \textit{framework} permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática.
 
-Para asegurar cumplir con el RNF3.1 se determinó la métrica de cobertura de código para evaluar la calidad del mismo. Esta métrica mide el porcentaje de código que se ha ejecutado durante las pruebas, y se puede utilizar para identificar áreas del código que no están siendo probadas. Particularmente, se utilizó la herramienta \texttt{coverage.py} \cite{coveragepy} para medir la cobertura de código, y se generaron informes en formato HTML para visualizar los resultados, los mismos se muestran en el apéndice \ref{appendix:coverage}.
+Con el objetivo de asegurar el cumplimiento del requisito RNF3.1, se adoptó la métrica de cobertura de código \cite{pressman2014software} para evaluar la calidad del mismo. Esta métrica mide el porcentaje de código que se ha ejecutado durante las pruebas y permite identificar áreas del código que no están siendo probadas. Específicamente, se utilizó la herramienta \texttt{coverage.py} \cite{coveragepy} para medir la cobertura de código y se generaron informes para visualizar los resultados, los cuales se presentan en el apéndice \ref{appendix:coverage}.
 
 % \TODO{Quizas esto en las conclusiones?}
-Se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está siendo probado adecuadamente, además, se identificaron algunas áreas del código que no estaban siendo probadas, y se agregaron pruebas adicionales para cubrir esas áreas.
+Como resultado, se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está siendo probado adecuadamente. Además, se identificaron algunas áreas del código que no estaban siendo probadas y se agregaron pruebas adicionales para cubrir esas áreas, como se observa en el apéndice \ref{appendix:coverage}.
 
 \subsubsection{Desarrollo con contenedores de \texttt{Docker}}
-Para asegurar la reproducibilidad del entorno de desarrollo y evitar problemas de compatibilidad entre diferentes versiones de bibliotecas, se utilizó \texttt{Docker} \cite{docker} para crear un contenedor con todas las dependencias necesarias para el desarrollo y ejecución de la biblioteca. El contenedor se define en un archivo \texttt{Dockerfile}, que especifica la imagen base, las dependencias a instalar y los comandos a ejecutar para configurar el entorno. A su vez se utilizó \texttt{docker-compose} \cite{docker_compose} para facilitar la gestión del contenedor y permitir la ejecución de comandos específicos dentro del mismo.
+Complementariamente al sistema de pruebas, se utilizó \texttt{Docker} \cite{docker} para asegurar la reproducibilidad del entorno de desarrollo y evitar problemas de compatibilidad entre diferentes versiones de bibliotecas o sistemas operativos. Esta herramienta permite crear un contenedor con todas las dependencias necesarias para el desarrollo y ejecución de la biblioteca.
 
-En particular, la biblioteca se beneficia ampliamente de la utilización de una GPU para acelerar el entrenamiento de los modelos, por lo que se utilizó la imagen oficial de \texttt{Tensorflow} con soporte para GPU como base del contenedor utilizando \texttt{nvidia container toolkit}\cite{nvidia_container_toolkit}.
+El contenedor se define en el archivo \texttt{Dockerfile} \cite{qtensor_dockerfile}, que especifica la imagen base, las dependencias a instalar y los comandos a ejecutar para configurar el entorno. Asimismo, se utilizó \texttt{docker-compose} \cite{docker_compose} para facilitar la gestión del contenedor y permitir la ejecución de comandos específicos dentro del mismo, así como versiones con y sin soporte para GPU \cite{qtensor_docker_compose_file}.
+
+Dado que la biblioteca se beneficia ampliamente del uso de una GPU para acelerar el entrenamiento de los modelos, se configuraron dos versiones del contenedor. En el desarrollo local se utiliza la versión con soporte para GPU, basada en la imagen oficial de \texttt{TensorFlow} con soporte para GPU mediante \texttt{nvidia container toolkit} \cite{nvidia_container_toolkit}, ya que permite acelerar significativamente el entrenamiento durante la experimentación. En contraste, para la integración continua (explicada en la sección \ref{sec:integracion_continua}), se utiliza la versión sin soporte para GPU, ya que las máquinas virtuales utilizadas no cuentan con GPU disponibles.
 
 \subsubsection{Integración continua}
-Para asegurar la calidad del código y la funcionalidad de la biblioteca, se implementó un \textit{pipeline} de integración continua (CI, por sus siglas en inglés \texttt{Continuous Integration}) utilizando \texttt{GitHub Actions} \cite{github_actions}. Este \textit{pipeline} se ejecuta automáticamente en \textit{pull requests} y es ejecutado automaticamente ante cualquier actualización en la rama de desarrollo. Y también es ejecutado al realizar un \textit{push} a la rama principal (\texttt{main}) para asegurar que la rama principal siempre esté en un estado funcional, y detectar condiciones de carrera al momento de fusionar ramas.
+\label{sec:integracion_continua}
+Para asegurar la calidad del código y la funcionalidad de la biblioteca, se implementó un \textit{pipeline} de integración continua (CI, por sus siglas en inglés \textit{Continuous Integration}) \cite{fowler2006ci} mediante \texttt{GitHub Actions} \cite{github_actions}. Este \textit{pipeline} se ejecuta automáticamente en \textit{pull requests} y ante cualquier actualización en la rama de desarrollo. También se ejecuta al realizar un \textit{push} a la rama principal (\texttt{main}) para asegurar que la rama principal siempre esté en un estado funcional y para detectar condiciones de carrera al momento de fusionar ramas.
 
-Este \textit{pipeline} construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración. Si alguna de estas etapas falla, el \textit{pipeline} marca el \textit{pull request} o el \textit{push} como fallido, y bloquea la fusión de la rama hasta que se resuelvan los problemas.
+Este \textit{pipeline} construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración como está descrito en \cite{qtensor_github_action}. Si alguna de estas etapas falla, el \textit{pipeline} marca el \textit{pull request} o el \textit{push} como fallido y bloquea la fusión de la rama hasta que se resuelvan los problemas.
 
 \subsection{Análisis de las capacidades y limitaciones de \texttt{TFMOT}}
-La cuantización de un modelo completo con un esquema uniforme de 8 bits puede realizarse como muestra el fragmento de código \ref{code:tfmot_quantization_simple}.
+\label{sec:analisis_tfmot}
+Como punto de partida para el diseño de \texttt{QTensor}, resulta fundamental comprender las capacidades y limitaciones de \texttt{TFMOT}. Si bien esta biblioteca satisface un caso básico de esquema de cuantización uniforme de 8 bits para todo el modelo, presenta limitaciones significativas y poca ergonomía para definir esquemas de cuantización personalizados (los cuales serán detallados en la sección \ref{sec:implementation_configs}). Esta limitación dificulta la experimentación con diferentes esquemas de cuantización, lo cual es uno de los objetivos principales de la biblioteca \texttt{QTensor}. No obstante, \texttt{TFMOT} presenta una interfaz que se ha adaptado en la biblioteca \texttt{QTensor} para permitir la definición de esquemas de cuantización personalizados de manera más sencilla e intuitiva, como se detalla en la sección \ref{sec:implementation_configs}.
 
-\begin{lstlisting}[language=Python,label=code:tfmot_quantization_simple,caption=Uso sencillo de TFMOT para cuantización uniforme de 8 bits.]
-quant_aware_model = tfmot.quantization.keras.quantize_model(base_model)
-\end{lstlisting}
+Por otra parte, los cuantizadores provistos por \texttt{TFMOT} son estáticos, es decir, no cuentan con parámetros entrenables, lo que impide la optimización conjunta de los pesos y los parámetros de cuantización durante el entrenamiento con QAT. A pesar de esta limitación, \texttt{TFMOT} ofrece una base sólida para la cuantización de modelos de \texttt{TensorFlow/Keras} y proporciona una serie de interfaces que es posible reutilizar y extender para implementar cuantizadores personalizados con parámetros entrenables, cuya implementación se detalla en la sección \ref{sec:implementation_quantizers}.
 
-Si se desea aplicar una configuración personalizada a una capa, debe emplearse el patrón que muestra el fragmento \ref{code:tfmot_quantization_custom_layer}. Donde se define una clase, \texttt{MyDenseQuantizeConfig}, que implementa la interfaz \texttt{QuantizeConfig}, la cual determina cómo se cuantizan los pesos, las activaciones y las salidas de la capa (como se desarrollará en la sección \ref{sec:generate_config}). A continuación, debe especificarse para cada capa la configuración personalizada (la biblioteca \texttt{TFMOT} denomina este proceso \texttt{annotate}) y, finalmente, aplicarse la cuantización al modelo completo mediante la función \texttt{quantize\_apply}.
-
-\begin{lstlisting}[language=Python,label=code:tfmot_quantization_custom_layer,caption=Uso de TFMOT para cuantización con configuración personalizada en una capa.]
-  quantize_config = MyDenseQuantizeConfig()
-
-  model = quantize_annotate_model(
-    keras.Sequential([
-      layers.Dense(10, activation='relu', input_shape=(100,)),
-      quantize_annotate_layer(
-          layers.Dense(2, activation='sigmoid'),
-          quantize_config=quantize_config)
-    ]))
-
-  quantized_model = quantize_apply(model)
-\end{lstlisting}
-%   Source https://github.com/tensorflow/model-optimization/blob/e2d531bfa2ce10916a1066c67b1438d17cc67dac/tensorflow_model_optimization/python/core/quantization/keras/quantize.py#L83
-
-Como resula evidente en el extracto anterior, la principal limitación de \texttt{TFMOT} es su baja ergonomía para definir esquemas de cuantización complejos. Si bien la biblioteca ofrece soporte nativo para cuantizadores uniformes de 8 bits (con y sin signo), para otros esquemas resulta necesario implementar y coordinar varias clases e interfaces, por ejemplo, cuantizadores, descripciones de cuantización y anotaciones. Esta necesidad de código adicional complica la interacción con la biblioteca, pues impide definir y aplicar de forma sencilla distintos esquemas a capas específicas. Además, la documentación oficial es limitada y no proporciona ejemplos claros sobre el uso de estas funcionalidades avanzadas.
-
-Cabe destacar que los cuantizadores incluidos en la biblioteca tampoco disponen de parámetros entrenables, son estáticos. En consecuencia, la adaptación durante el entrenamiento afecta únicamente a los parámetros del modelo y no al propio cuantizador, una capacidad que es un requerimiento para el desarrollo de esta librería como se definió en la sección \ref{sec:requerimientos_funcionales}.
+Finalmente, \texttt{TFMOT} no presenta herramientas para el cómputo de complejidad espacial teórica de modelos cuantizados, funcionalidad que \texttt{QTensor} implementa, como se detalla en la sección \ref{sec:implementation_evaluation}.
 
 \subsection{Arquitectura de la biblioteca \texttt{QTensor}}
 
-La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}. En la \reffig{qtensor_modules} se presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}.
+Una vez analizadas las capacidades y limitaciones de \texttt{TFMOT}, se procedió al diseño de la arquitectura de \texttt{QTensor}. Como se desarrolló en la sección \ref{sec:tensorflow_model_optimization}, la biblioteca \texttt{TFMOT} disponibiliza herramientas para la cuantización de modelos de \texttt{TensorFlow/Keras} con soporte para QAT. Sin embargo, \texttt{TFMOT} no satisface completamente los requisitos funcionales planteados en la sección \ref{sec:requerimientos_funcionales} ni los atributos de calidad definidos en la sección \ref{sec:atributos_calidad}. Por consiguiente, se decidió desarrollar una nueva biblioteca, denominada \texttt{QTensor}, que extienda las funcionalidades de \texttt{TFMOT} y permita cumplir con los objetivos planteados.
+
+La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}. La \reffig{qtensor_modules} presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}, donde se observa que \texttt{QTensor} reutiliza las funcionalidades de \texttt{TFMOT} para la cuantización de modelos y las funcionalidades de \texttt{Keras} y \texttt{TensorFlow} para la definición, entrenamiento y evaluación de modelos.
 
 \defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Grafo de dependencias entre las bibliotecas.}{qtensor_modules}{1}
 
-El diseño de \texttt{QTensor} es modular, se compone de módulos con funcionalidades específicas, lo que facilita la incorporación de nuevas características, mejora la mantenibilidad del código y favorece la adaptación a distintos casos de uso. Además, esta característica respalda el atributo de calidad RNF3.2 definido en la sección \ref{sec:atributos_calidad}.
+El diseño de \texttt{QTensor} es modular, es decir, se compone de módulos con funcionalidades específicas, lo que facilita la incorporación de nuevas características, mejora la mantenibilidad del código y favorece la adaptación a distintos casos de uso. Asimismo, esta característica respalda el atributo de calidad RNF3.2 definido en la sección \ref{sec:atributos_calidad}.
 
-En la \reffig{qtensor_overview} se muestra la estructura general de la biblioteca y sus módulos principales.
+La \reffig{qtensor_overview} presenta la estructura general de la biblioteca y sus módulos principales. Cada módulo se encarga de una funcionalidad específica y está diseñado para satisfacer un conjunto de requisitos funcionales definidos en la sección \ref{sec:requerimientos_funcionales}:
 
 \defaultdiagram{implementacion/qtensor_modules}{Módulos y dependencias de la biblioteca \texttt{QTensor}.}{qtensor_overview}{1}
 
 \begin{itemize}
-  \item \texttt{quantizers}: implementación de cuantizadores personalizados con parámetros entrenables y gradientes definidos.
-  \item \texttt{configs}: abstracciones para describir esquemas de cuantización mediante diccionarios.
-  \item \texttt{utils}: utilidades para evaluar el rendimiento y analizar modelos cuantizados.
-  \item \texttt{stages}: componentes para definir y orquestar las etapas del flujo de trabajo de entrenamiento y cuantización.
+  \item \texttt{configs}: proporciona abstracciones para describir esquemas de cuantización mediante diccionarios. Este módulo satisface los requisitos funcionales RF1.1, RF1.2, RF1.3 y RF1.4.
+  \item \texttt{quantizers}: implementa cuantizadores personalizados con parámetros entrenables y gradientes definidos. Este módulo satisface los requisitos funcionales RF2.1, RF2.2, RF2.3, RF2.4, RF3.1, RF3.2, RF3.3 y RF3.4.
+  \item \texttt{stages}: provee componentes para definir y orquestar las etapas del flujo de trabajo de entrenamiento y cuantización. Este módulo satisface el requisito funcional RF4.4.
+  \item \texttt{utils}: ofrece utilidades para evaluar el rendimiento y analizar modelos cuantizados. Este módulo satisface los requisitos funcionales RF4.1, RF4.2 y RF4.3.
 \end{itemize}
 
-\subsection{Implementación de los cuantizadores (módulo \texttt{quantizers})}
 
-\subsubsection{Clase \texttt{Quantizer}}
-
-La interfaz de \texttt{TFMOT} \texttt{Quantizer} \cite{tensorflow_quantizer_api} define las operaciones matemáticas que transforman tensores durante la cuantización, la cual define dos métodos principales.
-
-\begin{enumerate}
-    \item \texttt{build}, que construye las variables de estado necesarias para el algoritmo de cuantización.
-    \item \texttt{\_\_call\_\_}, que aplica la operación de cuantización a los tensores de entrada.
-\end{enumerate}
-
-El método \texttt{build} se llama una vez que se conoce la forma de los tensores de entrada, y permite inicializar las variables de estado. El método \texttt{\_\_call\_\_} se llama cada vez que se aplica la cuantización, y debe implementar la lógica de cuantización, esta es la que se coloca en el grafo computacional explicado en la sección \ref{sec:tensorflow_model_optimization}, para ejecutarse durante el \textit{forward pass}, las operaciones realizadas en este método deben tener definidas sus derivadas para permitir el cálculo de gradientes durante el \textit{backward pass}.
-
-\subsubsection{Modificaciones a la clase \texttt{Quantizer}}
-Para la implementación de cuantizadores con parámetros entrenables y gradientes personalizados, se realizaron algunas modificaciones sobre la clase \texttt{Quantizer} de \texttt{TFMOT}.
-
-Para permitir definir gradientes personalizados, se define un método adicional \texttt{quantize} decorado con \texttt{@tf.custom\_gradient}, explicado en la sección \ref{sec:gradientes_personalizados}, donde se define la función de cuantización y su gradiente. El método \texttt{\_\_call\_\_} llama a \texttt{quantize} para aplicar la cuantización con el gradiente personalizado. Este mecanismo es el que se muestra en el fragmento de código \ref{code:quantizer_custom_gradient}.
-
-\begin{lstlisting}[language=Python,label=code:quantizer_custom_gradient,caption=Definición de un cuantizador con gradiente personalizado.]
-  class MyQuantizer(Quantizer):
-    def __call__(self, inputs, training, weights, **kwargs):
-      return self.quantize(inputs, **kwargs)
-
-    @tf.custom_gradient
-    def quantize(self, x, **kwargs):
-      # Operacion de cuantizacion
-      y = ... # Cuantizacion de x
-
-      def grad(dy):
-        # Gradiente personalizado
-        return dy * ... # Derivada de la operacion de cuantizacion
-
-      return y, grad
-\end{lstlisting}
-
-Para definir parámetros entrenables, se modificó el método \texttt{build} para declarar las variables de estado como tensores entrenables de Keras (\texttt{tf.Variable}). Esto permite que las variables de estado se entrenen junto con el modelo, y se actualicen durante el proceso de entrenamiento a partir de los gradientes calculados.
-
-Por otro lado, los parámetros entrenables de los cuantizadores tiene restricciones específicas, por ejemplo los niveles y umbrales de la cuantización deben siempre estar ordenados, el parámetro que define el rango $\alpha$ debe ser siempre positivo, entre otros.
-
-Para definir este comportamiento se implementaron restricciones en los parámetros entrenables utilizando la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define una operación de restricción que se aplica a los tensores entrenables durante el entrenamiento, como parte de la actualización de los mismos. Se implementaron las siguientes restricciones personalizadas en el módulo \texttt{constraints}:
-
-\begin{itemize}
-    \item \texttt{PositiveConstraint} que asegura que un tensor sea siempre positivo.
-    \item \texttt{LevelConstraint} que asegura que los niveles sean siempre ordenados, esten dentro del rango de cuantización definido por $\alpha$ y que el primer nivel esta fijado al mínimo del rango $m$.
-    \item \texttt{ThresholdConstraint} que asegura lo mismo que \texttt{LevelConstraint} pero fijando el ultimo nivel a el máximo del rango $M$.
-\end{itemize}
-
-%\TODO{Quizas agregar todo el codigo en apendice}
-En el fragmento de código \ref{code:quantizer_constraints} se muestra la implementación de la restricción \texttt{PositiveConstraint}. Donde se utiliza la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value} para limitar los valores del tensor entre un valor mínimo (en este caso, un valor muy pequeño positivo definido por \texttt{tf.keras.backend.epsilon()} \cite{tensorflow_epsilon_api}) y el infinito positivo. Es necesario utilizar un valor mínimo mayor a cero para evitar divisiones por cero en los cálculos posteriores y asegurar la estabilidad numérica.
-
-\begin{lstlisting}[language=Python,label=code:quantizer_constraints,caption=Definición de restricciones para parámetros entrenables.]
-  class PositiveConstraint(tf.keras.constraints.Constraint):
-    def __call__(self, w):
-        return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
-\end{lstlisting}
-
-Además los cuantizadores implementados exponen los inicializadores de los parámetros entrenables. Los parametros entrenables se agregan a la capa y se permite que el usuario pueda elegir como inicializar los parámetros entrenables de los cuantizadores a traves del argumento \texttt{initializer} \cite{tensorflow_initializers_api} del método \texttt{add\_weight} \cite{tensorflow_add_weight_api}. También se exponen los regularizadores en el módulo \texttt{regularizers}, para permitir que el usuario pueda elegir como regularizar los parámetros entrenables de los cuantizadores, también a traves del argumento \texttt{regularizer} \cite{tensorflow_regularizers_api} del método \texttt{add\_weight}.
-
-La definición del método \texttt{build} se muestra en el fragmento de código \ref{code:quantizer_build}.
-
-\begin{lstlisting}[language=Python,label=code:quantizer_build,caption=Definición del método build de un cuantizador con parámetros entrenables.]
-  class MyQuantizer(Quantizer):
-    def build(self, tensor_shape, name, layer):
-      alpha = layer.add_weight(
-          name.join("_alpha"),
-          initializer=self.initializer,
-          trainable=True,
-          dtype=tf.float32,
-          regularizer=self.regularizer,
-          constraint=PositiveConstraint(),
-        )
-        return {"alpha": alpha}
-\end{lstlisting}
-
-\subsubsection{Cuantizador uniforme}
-
-La implementación de la función de cuantización uniforme definida \eqref{eq:uniform_quantizer} se muestra en el fragmento de código \ref{code:uniform_quantizer}.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer,caption=Definición de la función de cuantización uniforme.]
-  def uniform_quantizer(x):
-    clipped_x = tf.clip_by_value(x, levels[0], levels[-1])
-    q = self.delta() * tf.math.floor(clipped_x / self.delta())
-\end{lstlisting}
-
-\TODO{Considerar agregar el histograma input/output de la función de cuantizacion}
-
-Para implementar los gradientes se utilizan las definiciones de la sección \ref{sec:uniform_quantizer_gradient}, y se utilizan en la función \texttt{grad} dentro del método \texttt{quantize}.
-
-El gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida \eqref{eq:uniform_quantizer_ste_signed} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_x}.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_x,caption=Definición del gradiente de la función de cuantización uniforme con respecto a la entrada $x$.]
-  dq_dx = tf.where(
-      tf.logical_and(
-          tf.greater_equal(x, levels[0]),
-          tf.less_equal(x, levels[-1]),
-      ),
-      upstream,
-      tf.zeros_like(x),
-  )
-\end{lstlisting}
-
-El gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definida \eqref{eq:uniform_quantizer_dq_dalpha} se implementa como se muestra en el fragmento de código \ref{code:uniform_quantizer_gradient_alpha}. Donde \texttt{upstream} es el gradiente acumulado.
-
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer_gradient_alpha,caption=Definición del gradiente de la función de cuantización uniforme con respecto al parámetro $\alpha$.]
-  dq_dalpha = tf.reduce_sum(q / alpha * upstream)
-\end{lstlisting}
-
-Es importante notar la utilización de \texttt{tf.reduce\_sum} en la implementación del gradiente con respecto a $\alpha$. Esto se debe a que $\alpha$ es un escalar, y la función de cuantización se aplica elemento a elemento sobre el tensor de entrada $x$. Por lo tanto, para calcular el gradiente total con respecto a $\alpha$, es necesario sumar los gradientes parciales de cada elemento del tensor de entrada.
-
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
-
-\subsubsection{Cuantizador flexible}
-
-La implementación de la función de cuantización flexible definida \eqref{eq:flexible_quantizer} se muestra en el fragmento de código \ref{code:flexible_quantizer}.
-
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer,caption=Definición de la función de cuantización flexible.]
-  def flexible_quantizer(x):
-    # Quantize the levels using uniform quantization
-    qlevels = uniform_quantizer(self.levels)
-
-    # Quantize input
-    q = tf.zeros_like(x)
-    for i in range(self.thresholds.shape[0] - 1):
-        q = tf.where(
-            tf.logical_and(
-                tf.greater_equal(x, self.thresholds[i]),
-                tf.less_equal(x, self.thresholds[i + 1]),
-            ),
-            qlevels[i],
-            q,
-        )
-\end{lstlisting}
-
-El gradiente de la función de cuantización flexible con respecto a la entrada $x$, $\frac{\partial q_{f}}{\partial x}$, es idéntico al del cuantizador uniforme, al ser un STE. Lo mismo ocurre con el gradiente con respecto a $\alpha$, $\frac{\partial q_{f}}{\partial \alpha}$.
-
-El gradiente de la función de cuantización flexible con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descripta \eqref{eq:flexible_quantizer_dq_dl} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_levels}.
-
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_levels,caption=Definición del gradiente de la función de cuantización flexible con respecto a los niveles $l$.]
-  bin_indices = tf.searchsorted(
-      qlevels, tf.reshape(q, (-1,)), side="left"
-  )
-  q_one_hot = tf.one_hot(bin_indices, depth=qlevels.shape[0])
-  dq_dlevel = tf.matmul(
-                  tf.transpose(q_one_hot), tf.reshape(upstream, (-1, 1))
-              )
-              dq_dlevel = tf.reshape(dq_dlevel, (-1,))
-\end{lstlisting}
-
-En este caso, la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los niveles $l$. Por ende, se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Es decir, todas aquellas entradas que son cuantizadas al nivel $l_i$. Para esto, se utiliza \texttt{tf.searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego se utiliza \texttt{tf.one\_hot} para crear una matriz one-hot con estos índices, y finalmente se utiliza \texttt{tf.matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}).
-
-El gradiente de la función de cuantización flexible con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descripta \eqref{eq:flexible_quantizer_dq_dt} se implementa como se muestra en el fragmento de código \ref{code:flexible_quantizer_gradient_thresholds}.
-
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_gradient_thresholds,caption=Definición del gradiente de la función de cuantización flexible con respecto a los umbrales $t$.]
-  dq_dthresholds = tf.zeros_like(thresholds)
-  for i in range(1, self.thresholds.shape[0] - 1):
-      delta_y = qlevels[i - 1] - qlevels[i]
-      delta_x = thresholds[i + 1] - thresholds[i - 1]
-
-      # Only those associated with the 'x' values that
-      # Fall within the range of the two borderline levels
-      masked_upstream = tf.where(
-          tf.logical_and(
-              tf.greater_equal(x, self.thresholds[i - 1]),
-              tf.less_equal(x, self.thresholds[i + 1]),
-          ),
-          upstream,
-          tf.zeros_like(x),
-      )
-
-      update_value = (
-          delta_y / delta_x * tf.reduce_sum(masked_upstream)
-      )
-
-      dq_dthresholds = tf.tensor_scatter_nd_update(
-          dq_dthresholds, indices=[[i]], updates=[update_value]
-      )
-\end{lstlisting}
-
-En este caso también se utiliza la acumulación de los gradientes, para todos los valores de entrada $x_j$ pues la dimensión de la variable de entrada $x$ no corresponde con la dimensión de la variable de los umbrales $t$. Para esto, se utiliza \texttt{tf.where} para crear una máscara que seleccione solo aquellos valores de $x$ que caen dentro del rango definido por los umbrales $t_{i-1}$ y $t_{i+1}$, luego se utiliza \texttt{tf.reduce\_sum} para sumar los gradientes correspondientes a estos valores, y finalmente se utiliza \texttt{tf.tensor\_scatter\_nd\_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
-
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
-
-\subsection{Implementación de la descripción de esquemas de cuantización (módulo \texttt{configs})}
-
-\subsubsection{Clase \texttt{QuantizeConfig}}
-
-Para especificar cómo se cuantiza una capa, \texttt{TFMOT} proporciona la interfaz \texttt{QuantizeConfig}. Dicha interfaz permite indicar los cuantizadores que deben aplicarse a los pesos, las activaciones y las salidas de la capa. El fragmento de código \ref{code:quantize_config} muestra una implementación de ejemplo: donde se definien dos cuantizadores personalizados, \texttt{MyQuantizer} y \texttt{SomeOtherQuantizer}, y una clase \texttt{MyQuantizeConfig} que los asigna a los atributos correspondientes de la capa.
-
-\begin{lstlisting}[language=Python,label=code:quantize_config,caption=Interfaz \texttt{QuantizeConfig} de \texttt{TFMOT}.]
-class MyQuantizer(Quantizer):
-  ...
-
-class SomeOtherQuantizer(Quantizer):
-  ...
-
-class MyQuantizeConfig(QuantizeConfig):
-  def get_weights_and_quantizers(self, layer):
-    return [(layer.kernel, MyQuantizer()),
-            (layer.bias, SomeOtherQuantizer())]
-
-  def set_quantize_weights(self, layer, quantize_weights):
-    layer.kernel = quantize_weights[0]
-    layer.bias = quantize_weights[1]
-
-  def get_activations_and_quantizers(self, layer):
-    return [(layer.activation, SomeOtherQuantizer())]
-
-  def set_quantize_activations(self, layer, quantize_activations):
-    layer.activation = quantize_activations[0]
-
-  def get_output_quantizers(self, layer):
-    # No cuantizar la salida
-    return []
-
-  def get_config(self):
-    return {}
-
-\end{lstlisting}
-
-Este enfoque obliga a crear, para cada configuración de cuantización, una clase que implementara \texttt{QuantizeConfig} y describiera explícitamente los cuantizadores para pesos, activaciones y salidas. Como resultado, se genera código repetitivo y se encarece la definición de nuevas configuraciones, la escritura de pruebas y la experimentación.
-
-Para mejorar la ergonomía y simplificar la definición de esquemas de cuantización, se propuso facilitar la definición de los mismos como diccionarios de Python.
-
-\subsubsection{Clase \texttt{GenerateConfig}}
-\label{sec:generate_config}
-Esto se logra definiendo una clase \texttt{GenerateConfig} que recibe un diccionario con la configuración de cuantización, y hereda de \texttt{QuantizeConfig}, implementando los métodos necesarios para definir los cuantizadores a utilizar de manera dinámica.
-
-Para adaptar los métodos de la interfaz \texttt{QuantizeConfig} a esta nueva forma de definir las configuraciones, se hizo provecho de la funcionalidad de Python de inspeccionar los atributos de una clase en tiempo de ejecución, utilizando las funciones nativas \texttt{getattr} y \texttt{setattr}.
-
-Para que sea compatible para todo tipo de capas y atributos de las mismas, fue necesario agregar soporte para atributos anidados, para lo cual se implementaron las funciones auxiliares \texttt{get\_nested\_attribute} y \texttt{set\_nested\_attribute}, que permiten obtener y establecer atributos anidados a partir de una cadena de texto que representa la ruta del atributo. A modo de ejemplo, el fragmento de código \ref{code:generate_config} muestra como se realiza esta configuración para los pesos.
-
-\begin{lstlisting}[language=Python,label=code:generate_config,caption=Metodos para cuantizar los pesos]
-    def get_weights_and_quantizers(
-        self, layer: Layer
-    ) -> list[Tuple[Tensor, Quantizer]]:
-        weights_and_quantizers = []
-        for weight_attr, quantizer in self.weights.items():
-            weights_and_quantizers.append(
-                (get_nested_attribute(layer, weight_attr), quantizer)
-            )
-        return weights_and_quantizers
-
-    def set_quantize_weights(
-        self, layer: Layer, quantize_weights: list[Tensor]
-    ):
-        for attribute, quantized_weight in zip(
-            self.weights.keys(), quantize_weights
-        ):
-            set_nested_attribute(layer, attribute, quantized_weight)
-\end{lstlisting}
-
-Se definio a partir de este mecanismo los métodos restantes de la interfaz \texttt{QuantizeConfig} para activaciones, siguiendo el mismo patrón, y se tiene así una clase que permite definir cualquier configuración de cuantización a partir de un diccionario, como se muestra en el fragmento de código \ref{code:generate_config}.
-
-\begin{lstlisting}[language=Python,label=code:generate_config,caption=Definición de la clase \texttt{GenerateConfig}.]
-  class GenerateConfig(QuantizeConfig):
-
-    def __init__(
-        self,
-        weights: AttributeQuantizerDict = None,
-        activations: AttributeQuantizerDict = None,
-    ):
-      ...
-    def get_weights_and_quantizers(
-        self, layer: Layer
-    ) -> list[Tuple[Tensor, Quantizer]]:
-      ...
-
-    def set_quantize_weights(
-        self, layer: Layer, quantize_weights: list[Tensor]
-    ):
-        ...
-
-    def get_activations_and_quantizers(
-        self, layer: Layer
-    ) -> list[Tuple[Tensor, Quantizer]]:
-        ...
-
-    def set_quantize_activations(
-        self, layer: Layer, quantize_activations: list[Tensor]
-    ):
-        ...
-\end{lstlisting}
-
-Este mecanismo habilita la definición de nuevas configuraciones de cuantización de manera dinámica, y facilita la experimentación con diferentes esquemas de cuantización. El ejemplo del fragmento \ref{code:quantize_config} se puede reescribir y definir de manera simple y concisa como se muestra en el fragmento de código \ref{code:generate_config_usage}.
-
-\begin{lstlisting}[language=Python,label=code:generate_config_usage,caption=Uso de la clase GenerateConfig para definir una configuración de cuantización.]
-  config = GenerateConfig(
-    weights={
-      "kernel": MyQuantizer(),
-      "bias": SomeOtherQuantizer(),
-    },
-    activations={
-      "activation": SomeOtherQuantizer(),
-    },
-  )
-\end{lstlisting}
-
-Este aporte es clave, ya que permite con una unica clase, definir cualquier configuración de cuantización a partir de un diccionario, lo cual facilita la definición de nuevas configuraciones, y la experimentación con diferentes esquemas de cuantización.
-
-\subsubsection{Submódulo \texttt{qmodel}}
-\label{sec:qmodel}
-
-Previamente, la cuantización de un modelo completo con diferentes configuraciones de cuantización para cada capa.
-
-\begin{lstlisting}[language=Python,label=code:custom_cuantization_layout,caption=Uso de TFMOT para cuantización con configuración personalizada.]
-    my_config = GenerateConfig(
-      weights={
-        "kernel": MyQuantizer(),
-        "bias": SomeOtherQuantizer(),
-      },
-      activations={
-        "activation": SomeOtherQuantizer(),
-      },
-    )
-
-    my_other_config = GenerateConfig(
-      weights={
-        "kernel": SomeOtherQuantizer(),
-        "bias": MyQuantizer(),
-      },
-      activations={
-        "activation": MyQuantizer(),
-      },
-    )
-
-    layer_1 = quantize_annotate_layer(
-        Dense(128, activation="relu", name="hidden"),
-        my_config,
-    )
-    layer_2 = quantize_annotate_layer(
-      Dense(64, activation="relu", name="hidden_1"),
-      my_other_config,),
-    layer_3 = Dense(10, activation="softmax", name="output")
-    model = quantize_annotate_model(Sequential([layer_1, layer_2, layer_3]))
-
-    with quantize_scope({"MyQuantizeConfig": MyQuantizeConfig}):
-        quant_aware_model = quantize_apply(model)
-\end{lstlisting}
-
-Para simplificar este proceso se diseño una interfaz de alto nivel, en el módulo \texttt{qmodel} que define las funciones necesarias para cuantizar cualquier modelo definido en \texttt{TensorFlow} a partir de cualquier descripción de esquema de cuantización.
-
-El ejemplo del fragmento \ref{code:custom_cuantization_layout} se puede rescribir como se muestra en el fragmento de código \ref{code:qmodel_usage}.
-
-\begin{lstlisting}[language=Python,label=code:qmodel_usage,caption=Uso del módulo qmodel para cuantizar un modelo a partir de una descripción de esquema de cuantización.]
-model = Sequential([
-    Dense(128, activation="relu", name="hidden"),
-    Dense(64, activation="relu", name="hidden_1"),
-    Dense(10, activation="softmax", name="output")
-])
-qconfig = {
-    "hidden": {
-        "weights": {
-            "kernel": MyQuantizer(),
-            "bias": SomeOtherQuantizer(),
-        },
-        "activations": {
-            "activation": SomeOtherQuantizer(),
-        },
-    },
-    "hidden_1": {
-        "weights": {
-            "kernel": SomeOtherQuantizer(),
-            "bias": MyQuantizer(),
-        },
-        "activations": {
-            "activation": MyQuantizer(),
-        },
-    },
-}
-apply_quantization(model, qconfig)
-\end{lstlisting}
-
-De esta manera no solo se desacopla la definición del esquema de cuantización de la definición del modelo, sino que también se simplifica la interacción del usuario con la biblioteca, permitiendo definir esquemas de cuantización complejos de manera sencilla y rápida. También se esconde la complejidad de la biblioteca \texttt{TFMOT}, permitiendo a los usuarios enfocarse en la definición del esquema de cuantización y el modelo, sin preocuparse por los detalles de implementación de la cuantización.
-
-
-\subsection{Implementación de computos de complejidad espacial (módulo \texttt{utils})}
-% Para calcular la complejidad espacial de un modelo cuantizado, se implementaron las funciones necesarias para calcular la complejidad espacial de modelos sin cuantizar y cuantizados, tanto para el caso de cuantización uniforme como para el esquema de cuantización flexible.
-
-La complejidad espacial de un modelo $S_{M}$, se calcula acumulando la complejidad espacial de cada capa, como se muestra \eqref{eq:space_complexity_model}, con $N_{L}$ la cantidad de capas del modelo.
-
-\begin{equation}
-  \label{eq:space_complexity_model}
-  S_{M} = \sum_{i=1}^{N_{L}} S_{L_i}
-\end{equation}
-
-A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, como se muestra \eqref{eq:space_complexity_layer}, con $N_{\theta}$ la cantidad de parámetros de la capa.
-
-\begin{equation}
-  \label{eq:space_complexity_layer}
-  S_{L} = \sum_{j=1}^{N_{\theta}} S_{\theta_j}
-\end{equation}
-
-Como se desarrollo anteriormente, la granularidad de los esquemas de cuantización es a nivel de parámetro. Y la complejidad espacial depende del tipo de cuantización aplicada.
-
-En el caso de un parámetro sin cuantización, la complejidad espacial, en bits se calcula como el tamaño del tipo de dato del parámetro, multiplicado por la cantidad de elementos del tensor, como se muestra \eqref{eq:space_complexity_no_quantized}.
-
-\begin{equation}
-  \label{eq:space_complexity_no_quantized}
-    S_{\theta} = P \cdot k
-\end{equation}
-
-donde $P$ es el tamaño en bits del tipo de dato del parámetro, y $k$ es la cantidad de elementos del tensor.
-
-En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es la misma que la de un parámetro sin cuantización, pero en este caso $P$ es el número de bits utilizado en la cuantización $b$, como se muestra \eqref{eq:space_complexity_uniform}.
-
-\begin{equation}
-  \label{eq:space_complexity_uniform}
-    S_{\theta_{q_{u}}} = b \cdot k
-\end{equation}
-
-En el caso de la cuantización flexible, la complejidad espacial se calcula asumiendo que su implementación en hardware utiliza la codificación de Huffman, pues es esta la manera presentada de implementación en su descripción \cite{electronics13101923}.
-
-La codificación de Huffman es un esquema de codificación sin pérdida que asigna códigos de longitud variable a diferentes símbolos, basándose en sus frecuencias de aparición. Los símbolos más frecuentes reciben códigos más cortos, mientras que los menos frecuentes reciben códigos más largos. Esto permite reducir el tamaño total de los datos al aprovechar la distribución de frecuencias de los símbolos. Los detalles de la codificación de Huffman se encuentran en el apéndice \ref{appendix:huffman}.
-
-% La complejidad espacial entonces puede representarte como la suma del espacio necesario para almacenar los valores de los niveles del cuantizador $S_{l}$, y el espacio necesario para almacenar los índices $S_{\mathcal{I}}$ de los niveles asignados a cada parámetro cuantizado.
-
-Para implementar esta codificación, es necesario almacenar los niveles de cuantización en la memoria del hardware, y los índices de los niveles asignados a cada parámetro cuantizado.
-
-La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra \eqref{eq:space_complexity_flexible_levels}.
-
-\begin{equation}
-  \label{eq:space_complexity_flexible_levels}
-    S_{l} = N_{l} \cdot b
-\end{equation}
-
-La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad nominal de la codificación de Huffman: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador, como se muestra \eqref{eq:space_complexity_flexible_indices}.
-
-\begin{equation}
-  \label{eq:space_complexity_flexible_indices}
-    S_{\mathcal{I}} = k \cdot H
-\end{equation}
-
-Por lo tanto, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra \eqref{eq:space_complexity_flexible}.
-
-\begin{equation}
-  \label{eq:space_complexity_flexible}
-    S_{\theta_{q_{f}}} = S_{l} + S_{\mathcal{I}} = N_{l} \cdot b + k \cdot H
-\end{equation}
-
-
-\subsection{Implementación del módulo de flujo de trabajo (módulo \texttt{stages})}
-
-Un flujo típico de trabajo utilizado durante el desarrollo de este trabajo, y que se busca facilitar con la implementación de este módulo, consta de los siguientes pasos:
-
-\begin{enumerate}
-    \item Definir el modelo a cuantizar.
-    \item Pre-entrenar el modelo.
-    \item Evaluar el modelo pre-entrenado.
-    \item Cuantizar el modelo con un esquema de cuantización.
-    \item Entrenar el modelo cuantizado.
-    \item Evaluar el modelo cuantizado.
-\end{enumerate}
-
-Es común querer probar diferentes esquemas de cuantización sobre un mismo modelo, y comparar los resultados obtenidos. Para comparar entre diferentes esquemas de cuantización, es necesario partir desde el mismo modelo pre-entrenado. Otro punto a considerar es que algunos de estos pasos son computacionalmente costosos, como el pre-entrenamiento y el entrenamiento del modelo cuantizado. A su vez, si se quiere extraer información adicional, como otras métricas de evaluación, distribuciones de pesos, activaciones, u otros. Es necesario volver a ejecutar estos pasos.
-
-Por ejemplo, en la \reffig{typical_workflow} se muestra un experimento ejecutado donde cada etapa ya fue ejecutada previamente.
-
-\defaultdiagram{stages/pipeline_first_run}{Diagrama de un flujo de trabajo típico.}{typical_workflow}{0.7}
-
-Ahora, si se quiere probar un nuevo esquema de cuantización, es necesario volver a ejecutar todos los pasos del flujo de trabajo, se invalida todo el trabajo previo. Esto se muestra en la \reffig{typical_workflow_rerun}.
-
-\defaultdiagram{stages/pipeline_first_run_invalidated}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización.}{typical_workflow_rerun}{0.7}
-
-La solución a este problema es guardar los resultados intermedios de cada paso del flujo de trabajo, para poder reutilizarlos en futuras ejecuciones. Esto permite ahorrar tiempo y recursos computacionales, al no tener que volver a ejecutar todos los pasos del flujo de trabajo cada vez que se quiere probar un nuevo esquema de cuantización o extraer información adicional.
-
-Cada paso queda definido principalmente por el modelo inicial del cual se parte (su entrada), una función que define el proceso a ejecutar, y los parámetros de esta función. A esto se le suma la semilla para la generación de números aleatorios, para asegurar que los resultados de procesos no determinísticos sean reproducibles.
-
-Al quedar definido cada paso por estos elementos, es posible identificar de manera única cada paso del flujo de trabajo. Esto se realizo generando un hash único a partir de estos elementos, y utilizando este hash para guardar los resultados intermedios de cada paso del flujo de trabajo. Permitiendo invalidar solo los pasos que dependen de un paso que ha cambiado, y reutilizar los resultados intermedios de los pasos que no han cambiado como se muestra en la \reffig{typical_workflow_rerun_optimized} donde ahora el ejemplo anterior se puede ejecutar sin necesidad de volver a ejecutar el pre-entrenamiento.
-
-\defaultdiagram{stages/pipeline_hashed}{Diagrama de un flujo de trabajo típico, al probar un nuevo esquema de cuantización, reutilizando resultados intermedios.}{typical_workflow_rerun_optimized}{0.7}
-
-La \texttt{dataclass} \texttt{StageMetadata} define los siguientes atributos:
-
-\begin{enumerate}
-    \item \texttt{name}: Nombre del paso del flujo de trabajo.
-    \item \texttt{seed}: Semilla para la generación de números aleatorios.
-    \item \texttt{function}: Función que define el proceso a ejecutar en este paso.
-    \item \texttt{parameters}: Parámetros a pasar a la función.
-    \item \texttt{previous\_hash}: Hash del paso anterior, para definir el modelo original del cual se parte.
-\end{enumerate}
-
-Esta clase permite generar un hash único a partir de estos atributos, utilizando la función \texttt{to\_hash}, que permite identificar unívocamente cada paso del flujo de trabajo.
-
-\subsubsection{Clase \texttt{Stage}}
-
-La clase \texttt{Stage} representa un paso del flujo de trabajo. Esta clase permite ejecutar el proceso definido por la función y los parámetros, y guardar los resultados intermedios en disco. La clase \texttt{Stage} se compone con la clase \texttt{StageMetadata} y define el método \texttt{run}, cuyo diagrama de flujo se muestra en la figura \ref{fig:stage_flow}.
-
-\defaultdiagram{stages/stage}{Diagrama de la clase Stage.}{stage_flow}{0.7}
-
-Es importante destacar que para guardar y cargar los modelos deben ser serializables y deserializables. Para esto, se utilizó la funcionalidad de Keras para guardar y cargar modelos en formato \texttt{keras}. Todo objeto desarrollado por la biblioteca que forme parte del modelo como la configuracion (\texttt{GenerateConfig}) o los cuantizadores personalizados (\texttt{UniformQuantizer}, \texttt{FlexQuantizer}) implementan el método \texttt{get\_config} y el método de clase \texttt{from\_config}, para poder ser serializados y deserializados correctamente \cite{tensorflow_serialization_guide}.
-
-\subsubsection{Clase \texttt{Pipeline}}
-\label{sec:pipeline}
-
-La clase \texttt{Pipeline} es un orquestador de etapas. Esta clase permite definir un flujo de trabajo a partir de una lista de \texttt{Stage}, y ejecutar cada una de estas etapas en orden. La clase \texttt{Pipeline} se encarga de gestionar la ejecución de cada etapa, pasando los resultados intermedios entre las etapas, y guardando los resultados intermedios.
-
-Implementa el método \texttt{run}, que ejecuta cada una de las etapas del flujo de trabajo. Y también permite serializar y deserializar el flujo de trabajo, para poder guardar y cargar flujos de trabajo completos.
-
-Es a partir de esta clase que se realiz\'o la definición y orquestación del flujo de trabajo realizado para el experimento cuyos resultados se muestran en el capítulo \ref{chap:resultados}.
+\input{sections/03_diseno_e_implementacion/03_quantize_config}
+\input{sections/03_diseno_e_implementacion/04_quantizers}
+\input{sections/03_diseno_e_implementacion/05_utils}
+\input{sections/03_diseno_e_implementacion/06_stages}

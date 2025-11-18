@@ -9,6 +9,7 @@ La implementación de modelos de redes neuronales complejos y los algoritmos de 
 \texttt{TensorFlow} es una biblioteca de software de código abierto desarrollada por el equipo de Google Brain (actualmente parte de Google DeepMind) que se ha consolidado como una de las herramientas de facto para el aprendizaje automático tanto en la industria como en la academia. Proporciona un ecosistema completo para la creación, el entrenamiento y el despliegue de modelos de \textit{machine learning}.
 
 \subsubsection{Keras API}
+\label{sec:keras}
 Para simplificar la construcción de modelos de \textit{machine learning}, TensorFlow incorpora la biblioteca \texttt{Keras}, una API de alto nivel que ofrece una interfaz intuitiva y modular para definir modelos capa por capa, esto acelera significativamente el ciclo de desarrollo y experimentación. Proporciona una amplia variedad de capas predefinidas, funciones de activación, optimizadores y herramientas de preprocesamiento de datos, lo que facilita la implementación de modelos complejos de manera rápida y ordenada.
 
 La definición de un modelo MLP de una sola capa oculta con \texttt{Keras} se define como en el código \ref{code:tensorflow_mlp}. Donde se define una capa de entrada que aplana las imágenes de $28 \times 28$ píxeles, una capa oculta densa con 128 neuronas y función de activación ReLU, y una capa de salida con 10 neuronas y función de activación \textit{softmax} para clasificación multiclase.
@@ -61,7 +62,7 @@ Para abordar la compresión de modelos y otras optimizaciones, el ecosistema de 
 
 Esta biblioteca admite QAT mediante la modificación del grafo computacional para incorporar operaciones de cuantización durante el entrenamiento, añadiendo un nodo de \textit{fake quantization} después de cada operación que deba cuantizarse. De este modo se simula el efecto de la cuantización en los pesos y activaciones durante el entrenamiento, similar al \textit{forward pass} desarrollado en la figura \reffig{single_layer_training_quantizer}.
 
-Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte nativo de \texttt{TFMOT} incluye únicamente cuantizadores uniformes a enteros de 8 bits, con signo o sin signo. Y tampoco proporciona cuantizadores que soporten parámetros entrenables.
+Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte completo de \texttt{TFMOT} incluye únicamente cuantizadores uniformes a enteros de 8 bits, con signo o sin signo. Si bien es posible configurar los numeros de bits, y definir esquemas de cuantización personalizados, la ergonomía decae rápidamente y el uso presenta grandes complejidades, como se desarrollará en la sección \ref{sec:generate_config}. Además, los cuantizadores definidos en la biblioteca no soportan parámetros entrenables.
 
 \subsubsection{Diferenciación automática y backpropagation}
 \label{sec:autodiff}

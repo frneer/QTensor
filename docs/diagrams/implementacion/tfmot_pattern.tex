@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=white, text width=7em, text centered, rounded corners, minimum height=3em, minimum width=7em, font=\footnotesize},
+    arrow/.style={-latex, thick}
+]
+
+\tikzset{node distance=0.5cm and 0.5cm}
+
+\node[block] (config_1) {\texttt{QuantizeConfig1}};
+\node[block, below=of config_1] (config_2) {\texttt{QuantizeConfig2}};
+\node[below=of config_2] (vdots) {$\vdots$};
+\node[block, below=of vdots] (config_n) {\texttt{QuantizeConfigN}};
+
+\node[block, right=of config_1] (layer_1) {\texttt{Layer1}};
+\node[block, right=of config_2] (layer_2) {\texttt{Layer2}};
+\node[below=of layer_2] (vdots_2) {$\vdots$};
+\node[block, right=of config_n] (layer_n) {\texttt{LayerN}};
+
+\draw[arrow] (config_1) -- (layer_1);
+\draw[arrow] (config_2) -- (layer_2);
+\draw[arrow] (config_n) -- (layer_n);
+
+\node[block, right=of layer_1] (quantize_annotate_layer_1) {\texttt{quantize\_annotate\_layer}};
+\node[block, right=of layer_2] (quantize_annotate_layer_2) {\texttt{quantize\_annotate\_layer}};
+\node[below=of quantize_annotate_layer_2] (vdots_3) {$\vdots$};
+\node[block, right=of layer_n] (quantize_annotate_layer_n) {\texttt{quantize\_annotate\_layer}};
+
+\draw[arrow] (layer_1) -- (quantize_annotate_layer_1);
+\draw[arrow] (layer_2) -- (quantize_annotate_layer_2);
+\draw[arrow] (layer_n) -- (quantize_annotate_layer_n);
+
+\node[block, right=of quantize_annotate_layer_2, xshift=0.5cm] (quantize_apply) {\texttt{quantize\_apply}};
+
+\draw[arrow] (quantize_annotate_layer_1.south east) -- (quantize_apply.north west);
+\draw[arrow] (quantize_annotate_layer_2.east) -- (quantize_apply.west);
+\draw[arrow] (quantize_annotate_layer_n.north east) -- (quantize_apply.south west);
+
+\draw[arrow] (quantize_apply.east) -- ++(3,0) node[midway, above, font=\footnotesize] {\texttt{quantized\_model}};
+
+\end{tikzpicture}
