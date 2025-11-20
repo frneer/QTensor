@@ -6,7 +6,7 @@
     % Nodes
     \node (w_input) at (0,0) [block] {Actualización de parámetros};
     \node (forward_pass) [right=of w_input] [block] {Inferencia};
-    \node (loss) [below=of forward_pass] [block] {Calculo del costo};
+    \node (loss) [below=of forward_pass] [block] {Cálculo del costo};
     \node (gradient) [left=of loss] [block] {Cálculo del gradiente};
     \node (x_input) [above=of forward_pass] [block] {$x$};
     \node (y_input) [below=of loss] [block] {$y$};

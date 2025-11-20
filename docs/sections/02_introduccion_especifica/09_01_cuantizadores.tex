@@ -17,7 +17,6 @@ De forma general, el intervalo del rango se define como \eqref{eq:range_interval
     \mathbb{I} = [m, M]
 \end{equation}
 
-
 donde $m$ representa el valor mínimo y $M$ el valor máximo del intervalo del rango.
 
 El paso de cuantización, denotado por $\Delta(\alpha, b)$, es la distancia entre niveles consecutivos y se define \eqref{eq:quantization_step}.
@@ -46,6 +45,7 @@ La función de cuantización uniforme se define \eqref{eq:uniform_quantizer} y s
     \end{cases}
 \end{equation}
 
+\vspace{-0.5cm}
 \defaultfigure{quantizers/uniform/q.png}{Función de cuantización uniforme signada.}{uniform_signed}
 
 El cuantizador uniforme resulta sencillo de implementar tanto en hardware como en software debido a la distribución equiespaciada de sus niveles. Presenta eficiencia computacional, pues la cuantización se realiza mediante operaciones aritméticas simples, como divisiones y redondeos.
@@ -107,8 +107,9 @@ La función de cuantización flexible se define \eqref{eq:flexible_quantizer}
     \end{cases}
 \end{equation}
 
-    donde $q_{u}$ es la función de cuantización uniforme definida \eqref{eq:uniform_quantizer}. El gráfico de la función de cuantización flexible se muestra en la \reffig{flexible_signed_q}.
+donde $q_{u}$ es la función de cuantización uniforme definida \eqref{eq:uniform_quantizer}. El gráfico de la función de cuantización flexible se muestra en la \reffig{flexible_signed_q}.
 
+\vspace{-0.5cm}
 \defaultfigure{quantizers/flex/q_q.png}{Función de cuantización flexible signada.}{flexible_signed_q}
 
 La \reffig{flexible_signed_q} muestra, en amarillo, los niveles previos a la aplicación del cuantizador uniforme y, en azul, los niveles finales tras aplicar dicho cuantizador.

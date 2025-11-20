@@ -6,9 +6,9 @@
     \tikzset{node distance = 1cm and 1cm}
 
     % Node definitions
-    \node (input) [block] {$x$\\ FP32};
+    \node (input) [block] {$x$\\ \texttt{FP32}};
     \node (quant) [operation_block, right=of input] {$q()$};
-    \node (quant_input) [block, right=of quant] {$q(x)$\\ FP32};
+    \node (quant_input) [block, right=of quant] {$q(x)$\\ \texttt{FP32}};
 
     % Arrows
     \draw [arrow] (input) -- (quant);

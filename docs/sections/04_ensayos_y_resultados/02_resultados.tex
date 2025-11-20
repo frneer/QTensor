@@ -8,17 +8,35 @@ Los resultados se enfocan en el análisis de la relación entre la complejidad d
 \subsection{Resultados para el esquema de cuantización uniforme}
 \label{sec:uniform_results}
 
-En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en Kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado. La figura muestra tres curvas, cada una compuesta por la coleccion dentro de todas las ejecuciones con diferentes semillas aleatorias, mostrando el valor máximo, medio y mínimo de precisión alcanzada para cada configuración de bits. La tabla \ref{tab:uniform_results} presenta los valores máximos obtenidos con el esquema de cuantización uniforme para las diferentes configuraciones de bits.
+En primer lugar, se presentan los resultados obtenidos con el esquema de cuantización uniforme en la \reffig{uniform_results}, donde el eje horizontal describe la complejidad del modelo, tanto en kbits, como en términos de la tasa de compresión lograda respecto del modelo original en punto flotante. El eje vertical muestra la precisión alcanzada por cada esquema evaluado. La figura muestra tres curvas, cada una compuesta por la colección dentro de todas las ejecuciones con diferentes semillas aleatorias, mostrando el valor máximo, medio y mínimo de precisión alcanzada para cada configuración de bits. La tabla \ref{tab:uniform_results} presenta los valores máximos obtenidos con el esquema de cuantización uniforme para las diferentes configuraciones de bits.
 
 \defaultfigure{resultados/complexity_vs_quantized_uniform_stats.png}{Resultados de la cuantización uniforme.}{uniform_results}
 
 \input{sections/04_ensayos_y_resultados/tab_uniform}
+\vspace{-0.3cm}
 
-Los resultados mostraron que el esquema de cuantización uniforme presenta capacidad de compresión aceptable hasta compresiones de $\approx8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $102.51\%$ en comparación con el modelo original, con una tasa de compresión de $4.00\times$. Con $10$ y $16$ bits se obtuvieron valores relativos de precisión de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuye, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
+Los resultados obtenidos para el esquema uniforme se resumen a continuación:
 
-También a medida que se incrementa la cantidad de bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de precisión para configuraciones a partir de $5$ o $6$ bits. Con lo cual se puede concluir que existe una alta variabilidad de la precisión en la zona de bajas cantidades de bits, mientras que para configuraciones con más bits la precisión se estabiliza cerca del valor del modelo original.
+\begin{itemize}
 
-Algunas configuraciones superaron la precisión del modelo original. En estos casos, el ruido introducido por la cuantización actúa como una forma de regularización, ayudando al modelo a generalizar mejor y evitar el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
+\item El esquema de cuantización uniforme mostró una capacidad de compresión aceptable hasta valores cercanos a $8\times$, con una precisión del $99.49\%$ respecto del modelo original.
+
+\item Con 8 bits se alcanzó una precisión máxima de $102.51\%$, con una tasa de compresión de $4\times$.
+
+\item Para 10 bits y 16 bits, las precisiones relativas fueron de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente.
+
+\item A medida que disminuye el número de bits, la precisión se reduce de forma significativa: con 3 bits, descendió a $86.03\%$ respecto del modelo original. Lo que indica que la cuantización uniforme no resulta adecuada para compresiones agresivas, ya que la precisión presenta alta variabilidad en configuraciones de baja resolución.
+
+\item A partir de 5 o 6 bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de rendimiento cercana al valor del modelo original. Lo cual sugiere que incrementar la cantidad de bits más allá de este punto no aporta mejoras significativas en precisión.
+
+\item En algunas configuraciones, la precisión superó la del modelo original debido a que el ruido introducido por la cuantización actuó como un mecanismo de regularización, favoreciendo la generalización y reduciendo el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
+\end{itemize}
+
+% Los resultados mostraron que el esquema de cuantización uniforme presenta capacidad de compresión aceptable hasta compresiones de $\approx8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $102.51\%$ en comparación con el modelo original, con una tasa de compresión de $4.00\times$. Con $10$ y $16$ bits se obtuvieron valores relativos de precisión de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuye, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
+
+% También a medida que se incrementa la cantidad de bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de precisión para configuraciones a partir de $5$ o $6$ bits. Con lo cual se puede concluir que existe una alta variabilidad de la precisión en la zona de bajas cantidades de bits, mientras que para configuraciones con más bits la precisión se estabiliza cerca del valor del modelo original.
+
+% Algunas configuraciones superaron la precisión del modelo original. En estos casos, el ruido introducido por la cuantización actúa como una forma de regularización, ayudando al modelo a generalizar mejor y evitar el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
 
 \subsection{Resultados para el esquema de cuantización flexible}
 \label{sec:flexible_results}
@@ -46,6 +64,6 @@ Finalmente, en la \reffig{uniform_vs_flex_max_curves} se presentan los resultado
 
 En la zona de mayor tasa de compresión se observó que el esquema de cuantización flexible proporcionó mejores valores de precisión en comparación con el esquema uniforme, este último no permitió alcanzar altas tasas de compresión sin una pérdida significativa de precisión.
 
-En términos de la frontera de Pareto (precisión vs. complejidad), el esquema flexible dominó a partir de compresiones superiores a \mbox{$\sim$10$\times$}.
+En términos de la frontera de Pareto \cite{pareto1906manuale} (precisión vs. complejidad), el esquema flexible dominó a partir de compresiones superiores a \mbox{$\sim$10$\times$}.
 
 Asimismo, se observaron configuraciones con compresiones de entre 12$\times$ y 18$\times$ con pérdidas de precisión por debajo de dos puntos porcentuales respecto del modelo original. Para compresiones moderadas (\mbox{$\leq$ 8$\times$}) ambos esquemas mostraron desempeños similares, mientras que para tasas de compresión muy altas (\mbox{$\geq$ 20$\times$}) la ventaja del esquema flexible fue aún más pronunciada.

@@ -10,24 +10,26 @@ En el contexto del aprendizaje automático, las métricas de evaluación permite
 En problemas de regresión, se emplean métricas que cuantifican el error de predicción, entre ellas:
 
 \begin{itemize}
-    \item Error cuadrático medio (MSE, por sus siglas en inglés \textit{Mean Squared Error}): se define como la media de los cuadrados de las diferencias entre las predicciones y los valores reales \cite{botchkarev2019performance}.
+    \item Error cuadrático medio (MSE, por sus siglas en inglés \textit{Mean Squared Error}): se define como la media de los cuadrados de las diferencias entre las predicciones y los valores reales \cite{botchkarev2019performance}, como se muestra en la ecuación \eqref{eq:mse}.
     \begin{equation}
         \label{eq:mse}
         \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
     \end{equation}
 
-    \item Error absoluto medio (MAE, por sus siglas en inglés \textit{Mean Absolute Error}): se define como la media de las diferencias absolutas entre las predicciones y los valores reales \cite{willmott2005advantages}.
+    \item Error absoluto medio (MAE, por sus siglas en inglés \textit{Mean Absolute Error}): se define como la media de las diferencias absolutas entre las predicciones y los valores reales \cite{willmott2005advantages}, según la ecuación \eqref{eq:mae}.
     \begin{equation}
+        \label{eq:mae}
         \text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
     \end{equation}
 
-    \item Coeficiente de determinación ($R^2$): mide la proporción de varianza en los datos explicada por el modelo. Un valor de $R^2$ cercano a $1$ indica un buen ajuste \\cite{wooldridge2016econometrics}.
+    \item Coeficiente de determinación ($R^2$): mide la proporción de varianza en los datos explicada por el modelo. Un valor de $R^2$ cercano a $1$ indica un buen ajuste \cite{wooldridge2016econometrics}. Se expresa mediante la ecuación \eqref{eq:r2}.
     \begin{equation}
+        \label{eq:r2}
         R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
     \end{equation}
 \end{itemize}
 
-Otras métricas asociadas a la evaluación del ajuste son el $R^2$ ajustado \cite{kutner2004regression}, el AIC (criterio de información de akaike) \cite{akaike1974aic} y el BIC (criterio de información bayesiano) \cite{schwarz1978bic}. Estas métricas permiten evaluar la calidad del modelo teniendo en cuenta su complejidad, penalizando aquellos con un número excesivo de parámetros.
+Otras métricas asociadas a la evaluación del ajuste son el $R^2$ ajustado \cite{kutner2004regression}, el AIC (criterio de información de Akaike) \cite{akaike1974aic} y el BIC (criterio de información bayesiano) \cite{schwarz1978bic}. Estas métricas permiten evaluar la calidad del modelo teniendo en cuenta su complejidad, penalizando aquellos con un número excesivo de parámetros.
 
 \subsubsection{Métricas para problemas de clasificación}
 \label{sec:metricas_clasificacion}
@@ -48,22 +50,22 @@ En problemas de clasificación, las métricas se definen a partir de la matriz d
 \end{table}
 
 \begin{itemize}
-    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define como \eqref{eq:accuracy} \cite{bishop2006pattern}.
+    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define en la ecuación \eqref{eq:accuracy} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:accuracy}
         \text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
     \end{equation}
-    \item Precisión (\textit{precision} en inglés): mide la proporción de predicciones positivas correctas sobre el total de predicciones positivas. Se calcula como \eqref{eq:precision} \cite{bishop2006pattern}.
+    \item Precisión (\textit{precision} en inglés): mide la proporción de predicciones positivas correctas sobre el total de predicciones positivas. Se calcula mediante la ecuación \eqref{eq:precision} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:precision}
         \text{precision} = \frac{TP}{TP + FP}
     \end{equation}
-    \item Sensibilidad (\textit{recall} en inglés): mide la proporción de verdaderos positivos sobre el total de positivos reales. Se expresa como \eqref{eq:recall} \cite{bishop2006pattern}.
+    \item Sensibilidad (\textit{recall} en inglés): mide la proporción de verdaderos positivos sobre el total de positivos reales. Se expresa en la ecuación \eqref{eq:recall} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:recall}
         \text{recall} = \frac{TP}{TP + FN}
     \end{equation}
-    \item Puntaje F1 (\textit{F1-score} en inglés): es la media armónica entre la precisión y la sensibilidad, y proporciona un balance entre ambas métricas. Se obtiene como \eqref{eq:f1_score} \cite{bishop2006pattern}.
+    \item Puntaje F1 (\textit{F1-score} en inglés): es la media armónica entre la precisión y la sensibilidad, y proporciona un balance entre ambas métricas. Se obtiene mediante la ecuación \eqref{eq:f1_score} \cite{bishop2006pattern}.
     \begin{equation}
         \label{eq:f1_score}
         \text{F1-score} = 2 \cdot \frac{\text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}

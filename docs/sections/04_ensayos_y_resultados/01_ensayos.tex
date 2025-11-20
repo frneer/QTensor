@@ -17,7 +17,7 @@ El \textit{dataset} CIFAR-10 se consideró adecuado por su tamaño moderado y po
 \label{sec:model}
 El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{LeCun1998}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) con una ventana de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa $0.5$ y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con \num{2175626} parámetros entrenables.
 
-La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y la \reffig{model_architecture} ilustra la misma.
+La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y la \reffig{model_architecture} la ilustra.
 
 \begin{table}[H]
     \centering
@@ -47,7 +47,7 @@ La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizad
 A continuación se exponen las funciones principales de los tipos de capa empleados:
 
 \begin{itemize}
-    \item Capas convolucionales (\texttt{Conv2D}): Extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas \cite{Krizhevsky2012}.
+    \item Capas convolucionales (\texttt{Conv2D}): extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas \cite{Krizhevsky2012}.
 
     \item Capas de submuestreo (\texttt{MaxPool2D}): reducen la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo en ventanas locales, lo que genera invarianza a pequeñas traslaciones y reduce el costo computacional \cite{LeCun1998}.
 
@@ -82,7 +82,7 @@ Para estas capas, el primer esquema utiliza cuantización uniforme signada con l
 
 El segundo esquema emplea cuantización flexible signada para las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), donde se definieron múltiples configuraciones combinando número de bits y niveles, mientras que las capas de entrada y salida mantuvieron configuraciones fijas.
 
-La elección de no modificar los parámetros de cuantización para la primera y última capa se justifica en que se evaluó empíricamente que la precisión del modelo es altamente sensible a la cuantización de estas capas. Sumado a esto, las capas intermedias concentran, como se puede observan en la tabla \ref{tab:model_architecture}, un $\approx 99.8\%$ de los parámetros del modelo, mientras que la primera y última capa contienen una proporción muy pequeña de los mismos ($\approx 0.2\%$). Por lo tanto, los beneficios en términos de reducción del tamaño no justifican la perdida de precisión para estas capas y por ende, se utiliza una cuantización poco agresiva.
+La elección de no modificar los parámetros de cuantización para la primera y última capa se justifica en que se evaluó empíricamente que la precisión del modelo es altamente sensible a la cuantización de estas capas. Sumado a esto, las capas intermedias concentran, como se puede observan en la tabla \ref{tab:model_architecture}, un $\approx 99.8\%$ de los parámetros del modelo, mientras que la primera y última capa contienen una proporción muy pequeña de los mismos ($\approx 0.2\%$). Por lo tanto, los beneficios en términos de reducción del tamaño no justifican la pérdida de precisión para estas capas y por ende, se utiliza una cuantización poco agresiva.
 
 Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final}.
 
@@ -140,8 +140,8 @@ Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final
 \end{tabularx}
 \end{table}
 
+\vspace{-0.3cm}
 \subsection{\texttt{Pipeline}s experimentales}
-
 Se definieron una serie de \texttt{Pipeline}s (ver sección \ref{sec:pipeline}) que describen las etapas necesarias para reproducir los experimentos, y generan las configuraciones de cuantización (\texttt{qconfig}) de forma dinámica para cada esquema de cuantización y configuración de hiperparámetros.
 
 Los pipelines generados para ambos esquemas poseen las mismas etapas, que se ilustran en la \reffig{experimental_pipeline}.

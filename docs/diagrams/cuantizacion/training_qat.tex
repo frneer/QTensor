@@ -7,7 +7,7 @@
     \node (w_input) at (0,0) [block] {Actualización de parámetros};
     \node (quant) [right=of w_input] [block, pattern=north east lines, pattern color=gray!20] {\textit{fake-quantization}};
     \node (forward_pass) [right=of quant] [block] {Inferencia};
-    \node (loss) [below=of forward_pass] [block] {Calculo del costo};
+    \node (loss) [below=of forward_pass] [block] {Cálculo del costo};
     \node (gradient) [below=of w_input] [block] {Cálculo del gradiente};
     \node (x_input) [above=of forward_pass, yshift=-0.5cm] [block] {$x$};
     \node (y_input) [below=of loss, yshift=0.5cm] [block] {$y$};

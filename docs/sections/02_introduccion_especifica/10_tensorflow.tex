@@ -12,7 +12,7 @@ La implementación de modelos de redes neuronales complejos y los algoritmos de 
 \label{sec:keras}
 Para simplificar la construcción de modelos de \textit{machine learning}, TensorFlow incorpora la biblioteca \texttt{Keras}, una API de alto nivel que ofrece una interfaz intuitiva y modular para definir modelos capa por capa, esto acelera significativamente el ciclo de desarrollo y experimentación. Proporciona una amplia variedad de capas predefinidas, funciones de activación, optimizadores y herramientas de preprocesamiento de datos, lo que facilita la implementación de modelos complejos de manera rápida y ordenada.
 
-La definición de un modelo MLP de una sola capa oculta con \texttt{Keras} se define como en el código \ref{code:tensorflow_mlp}. Donde se define una capa de entrada que aplana las imágenes de $28 \times 28$ píxeles, una capa oculta densa con 128 neuronas y función de activación ReLU, y una capa de salida con 10 neuronas y función de activación \textit{softmax} para clasificación multiclase.
+La definición de un modelo \cite{tensorflow_keras_model} MLP de una sola capa oculta con \texttt{Keras} se define como en el código \ref{code:tensorflow_mlp}. Donde se define una capa de entrada que aplana las imágenes de $28 \times 28$ píxeles, una capa oculta densa con 128 neuronas y función de activación ReLU, y una capa de salida con 10 neuronas y función de activación \textit{softmax} para clasificación multiclase.
 
 \begin{lstlisting}[language=Python,label=code:tensorflow_mlp,caption=Definición de un modelo MLP de una sola capa oculta con Keras.]
 model = Sequential([
@@ -20,26 +20,26 @@ model = Sequential([
     Dense(128, activation="relu", name="hidden"),
     Dense(10, activation="softmax", name="output")
 ])
-
 \end{lstlisting}
 
 % El entrenamiento del modelo consiste en llamar a la función \texttt{fit}, como se muestra en el fragmento de código \ref{code:tensorflow_mlp_train}, después de definir el conjunto de datos de entrenamiento \texttt{(x\_train, y\_train)}, el algoritmo de optimización (en este caso ADAM), la función de costo (entropía cruzada) ,ambos descritos en la sección \ref{sec:entrenamiento_redes_neuronales}, y la métrica de evaluación (precisión), descrita en la sección \ref{sec:metricas}.
 
-El entrenamiento del modelo consiste en definir el conjunto de datos de entrenamiento \texttt{(x\_train, y\_train)}, definir la función de costo (entropía cruzada \cite{Goodfellow2016}), el algoritmo de optimización (en este caso ADAM), explicado en la sección \ref{sec:entrenamiento_redes_neuronales}, y la métrica de evaluación (precisión), descrita en la sección \ref{sec:metricas}. Finalmente, se llama a la función \texttt{fit}, como se muestra en el fragmento de código \ref{code:tensorflow_mlp_train}.
+El entrenamiento del modelo consiste en definir el conjunto de datos de entrenamiento \texttt{(x\_train, y\_train)}, definir la función de costo (entropía cruzada \cite{Goodfellow2016}), el algoritmo de optimización (en este caso ADAM), explicado en la sección \ref{sec:entrenamiento_redes_neuronales}, y la métrica de evaluación (precisión), descrita en la sección \ref{sec:metricas}. Finalmente, se llama a la función \texttt{fit} que entrena el modelo con los datos de entrenamiento, como se muestra en el fragmento de código \ref{code:tensorflow_mlp_train}.
 
+\vspace{0.4cm}
 \begin{lstlisting}[language=Python,label=code:tensorflow_mlp_train,caption=Entrenamiento de un modelo MLP en TensorFlow con Keras.]
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 model.fit(x_train, y_train, epochs=5)
 \end{lstlisting}
-
+\vspace{-0.4cm}
 \subsubsection{Grafo de ejecución}
 \label{sec:tensorflow_graph}
-El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph}. Este grafo está compuesto principalmente por los siguientes componentes:
+El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph} \cite{tensorflow_graph}. Este grafo está compuesto principalmente por los siguientes componentes:
 % las aristas representan tensores: (\texttt{tf.Tensor} o \texttt{tf.Variable}) y operaciones (\texttt{tf.Operation})
 
 \begin{itemize}
-    \item Tensores (\texttt{tf.Tensor} o \texttt{tf.Variable}): son las aristas del grafo y representan los datos que fluyen a través de las operaciones. Los tensores son estructuras multidimensionales que almacenan datos numéricos.
-    \item Operaciones (\texttt{tf.Operation}): son los nodos del grafo y representan las transformaciones matemáticas que se aplican a los tensores. Cada operación toma uno o más tensores como entrada y produce uno o más tensores como salida.
+    \item Tensores (\texttt{tf.Tensor} \cite{tensorflow_tensor} o \texttt{tf.Variable} \cite{tensorflow_variable}): son las aristas del grafo y representan los datos que fluyen a través de las operaciones. Los tensores son estructuras multidimensionales que almacenan datos numéricos.
+    \item Operaciones (\texttt{tf.Operation} \cite{tensorflow_operation}): son los nodos del grafo y representan las transformaciones matemáticas que se aplican a los tensores. Cada operación toma uno o más tensores como entrada y produce uno o más tensores como salida.
 \end{itemize}
 
 Esta arquitectura permite optimizaciones automáticas y facilita la ejecución en diferentes dispositivos, además, al tratarse de una estructura de datos, el grafo puede serializarse y exportarse a otras plataformas sin depender de Python. En resumen, utilizar el grafo permite portabilidad, velocidad y paralelización en la ejecución.
@@ -50,18 +50,20 @@ Una desventaja del modo basado en grafos es la dificultad para implementar ciert
 
 Un ejemplo de \texttt{tf.function} es el multiplexor condicional \texttt{tf.where} \cite{tensorflow_where}, que selecciona elementos de dos tensores según una condición booleana. En el código \ref{code:tensorflow_where}, se muestra un ejemplo de uso de \texttt{tf.where} que ilustra cómo seleccionar elementos de dos listas basándose en una lista de condiciones.
 
+\vspace{0.4cm}
 \begin{lstlisting}[language=Python,label=code:tensorflow_where,caption=Ejemplo de uso de tf.where en TensorFlow.]
 >>>    tf.where([True, False, False, True],
 ...         [1, 2, 3, 4],
 ...         [100, 200, 300, 400]).numpy()
 array([  1, 200, 300,   4], dtype=int32)
 \end{lstlisting}
+\vspace{-0.4cm}
 
 \subsubsection{TensorFlow Model Optimization}
 \label{sec:tensorflow_model_optimization}
 Para abordar la compresión de modelos y otras optimizaciones, el ecosistema de \texttt{TensorFlow} incluye la biblioteca \texttt{TensorFlow Model Optimization} (en adelante \texttt{TFMOT}). \texttt{TFMOT} ofrece herramientas destinadas a optimizar modelos de cara al despliegue y la distribución. Proporciona funcionalidades para diversas técnicas de compresión, como \textit{weight clustering}, \textit{weight pruning} y cuantización.
 
-Esta biblioteca admite QAT mediante la modificación del grafo computacional para incorporar operaciones de cuantización durante el entrenamiento, añadiendo un nodo de \textit{fake quantization} después de cada operación que deba cuantizarse. De este modo se simula el efecto de la cuantización en los pesos y activaciones durante el entrenamiento, similar al \textit{forward pass} desarrollado en la figura \reffig{single_layer_training_quantizer}.
+Esta biblioteca admite QAT mediante la modificación del grafo computacional para incorporar operaciones de cuantización durante el entrenamiento, añadiendo un nodo de \textit{fake quantization} después de cada operación que deba cuantizarse. De este modo se simula el efecto de la cuantización en los pesos y activaciones durante el entrenamiento, similar al \textit{forward pass} desarrollado en la \reffig{single_layer_training_quantizer}.
 
 Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte completo de \texttt{TFMOT} incluye únicamente cuantizadores uniformes a enteros de 8 bits, con signo o sin signo. Si bien es posible configurar los numeros de bits, y definir esquemas de cuantización personalizados, la ergonomía decae rápidamente y el uso presenta grandes complejidades, como se desarrollará en la sección \ref{sec:generate_config}. Además, los cuantizadores definidos en la biblioteca no soportan parámetros entrenables.
 
@@ -69,7 +71,7 @@ Aunque existe la posibilidad de seleccionar distintos cuantizadores, el soporte 
 \label{sec:autodiff}
 La diferenciación automática es una técnica computacional que permite calcular de forma eficiente las derivadas de funciones matemáticas complejas. En el contexto del aprendizaje profundo, resulta fundamental para entrenar redes neuronales mediante el algoritmo de \textit{backpropagation}. Este algoritmo, descrito en la sección \ref{sec:entrenamiento_redes_neuronales}, se basa en la regla de la cadena para calcular derivadas parciales de manera eficiente. \texttt{TensorFlow} implementa \textit{autodiff} \texttt{tf.autodiff} y emplea el grafo computacional para ejecutar el algoritmo de retropropagación.
 
-\texttt{TensorFlow} registra todas las operaciones ejecutadas a partir de la clase \texttt{tf.\allowbreak{}GradientTape}, cada operación dispone de su regla de derivación. A partir de este registro se construye automáticamente un grafo de gradientes asociado al grafo directo. Para calcular la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo, similar a lo que se ejemplifico en las figuras \ref{fig:single_layer_training} y \ref{fig:single_layer_training_quantizer}.
+\texttt{TensorFlow} registra todas las operaciones ejecutadas a partir de la clase \texttt{tf.\allowbreak{}GradientTape}, cada operación dispone de su regla de derivación. A partir de este registro se construye automáticamente un grafo de gradientes asociado al grafo directo. Para calcular la derivada de la función de pérdida, \texttt{TensorFlow} recorre el grafo en sentido inverso y aplica la regla de la cadena para propagar gradientes hasta los parámetros entrenables del modelo, similar a lo que se ejemplific\'o en las figuras \ref{fig:single_layer_training} y \ref{fig:single_layer_training_quantizer}.
 
 \subsubsection{Gradientes personalizados}
 \label{sec:gradientes_personalizados}
