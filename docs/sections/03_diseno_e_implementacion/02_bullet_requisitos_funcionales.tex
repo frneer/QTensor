@@ -1,0 +1,49 @@
+\subsubsection*{Objetivo 1: Diseño y API}
+
+\begin{itemize}
+    \item RF1.1: El sistema deberá permitir la definición de una estrategia de cuantización a partir de una configuración en un formato estructurado (e.g. diccionario en Python \cite{python_dictionaries}).
+
+    \item RF1.2: El sistema debe permitir una granularidad a nivel de atributo, posibilitando la asignación de cuantizadores distintos para cada parámetro del modelo. En particular, para todo peso y toda activación de cada capa, incluyendo capas con parámetros anidados (e.g. RNN \cite{tensorflow_keras_rnn}).
+
+    \item RF1.3: El sistema debe ser compatible con la API de modelos \texttt{Sequential} \cite{tensorflow_keras_sequential_api} y \texttt{Functional} \cite{tensorflow_keras_functional_api} de Keras.
+
+    \item RF1.4: El sistema debe soportar la serialización y deserialización \cite{tensorflow_serialization_guide} de modelos cuantizados (formato .keras o SavedModel), preservando el estado completo de los cuantizadores, incluyendo sus parámetros entrenables.
+\end{itemize}
+
+\subsubsection*{Objetivo 2: Cuantizador Uniforme}
+
+\begin{itemize}
+    \item RF2.1: El sistema debe proveer una implementación de la cuantización uniforme y debe ser configurable en número de bits y en el modo de operación (signado o no signado).
+
+    \item RF2.2: La implementación de la cuantización uniforme debe permitir la definición de su rango de cuantización (parámetro $\alpha$) como una variable entrenable, de modo que el modelo optimice dicho rango durante el entrenamiento.
+
+    \item RF2.3: La implementación de la cuantización uniforme debe implementar un gradiente personalizado para permitir la propagación de gradientes, tanto para las entradas como para el parámetro entrenable $\alpha$.
+
+    \item RF2.4: La implementación de la cuantización uniforme debe permitir la inicialización del parámetro $\alpha$.
+\end{itemize}
+
+\subsubsection*{Objetivo 3: Cuantizador Flexible}
+
+\begin{itemize}
+    \item RF3.1: El sistema debe proveer una implementación de la cuantización flexible y debe ser configurable en número de bits, número de niveles y modo de operación (con signo o sin signo).
+
+    \item RF3.2: La implementación de la cuantización flexible debe permitir la definición de su rango ($\alpha$), los valores de los niveles de cuantización ($\mathbf{l}$) y los umbrales ($\mathbf{t}$) como variables entrenables, de modo que el modelo optimice dichos parámetros durante el entrenamiento.
+
+    \item RF3.3: La implementación de la cuantización flexible debe implementar un gradiente personalizado que permita el entrenamiento de los parámetros del modelo y del cuantizador (rango, niveles y umbrales).
+
+    \item RF3.4: La implementación de la cuantización flexible debe permitir la inicialización de los parámetros del cuantizador ($\alpha$, $\mathbf{l}$ y $\mathbf{t}$).
+\end{itemize}
+
+\subsubsection*{Objetivo 4: Evaluación}
+
+\begin{itemize}
+    \item RF4.1: La biblioteca debe permitir recolectar y registrar la evolución de los parámetros entrenables de todos los cuantizadores del modelo en cada época de entrenamiento.
+
+    \item RF4.2: Se debe proporcionar utilidades para visualizar los datos recolectados, para generar gráficos del estado y la evolución de los parámetros de los cuantizadores.
+
+    \item RF4.3: La biblioteca debe permitir calcular la complejidad espacial teórica. Para cuantizadores uniformes, deberá basarse en el número de bits fijos. Para cuantizadores flexibles, se deberá basar en la entropía de los pesos cuantizados para simular una codificación de Huffman \cite{huffman1952method}.
+
+    \item RF4.4: El sistema debe permitir desarrollar experimentos de comparación entre distintos esquemas de cuantización y definir la ejecución de flujos de trabajo de manera modular y reutilizable.
+
+    \item RF4.5: La biblioteca debe definir un ejemplo que demuestre el uso de la biblioteca, donde se ilustre cómo configurar el modelo, determinar el \textit{dataset} y la estrategia de cuantización, y comparar los resultados de diferentes configuraciones.
+\end{itemize}
