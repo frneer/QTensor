@@ -96,13 +96,11 @@ Otra función de cuantización utilizada normalmente es la cuantización no unif
 
 En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo para cada tipo de cuantización utilizando un cuantizador de 8 niveles.
 
-\TODO{Reemplazar figura con tikz}
-\defaultfigure{cuantizacion/uniform_vs_non_uniform_3bits.png}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}
+\defaultdiagram{cuantizacion/uniform_vs_non_uniform}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}{1}
 
-Otra característica importante, especialmente para el caso de la cuantización uniforme, es que la misma puede ser signada o no signada. En la cuantización signada, el rango de valores se divide en partes iguales alrededor de cero, mientras que en la cuantización no signada, los niveles de cuantización son siempre positivos, en donde se mejora la precisión para el rango positivo de valores. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3  bits, donde se puede ver que a pesar de utilizar el mismo número de bits, el caso sin signo presenta una mejor resolución.
+Otra característica importante, especialmente para el caso de la cuantización uniforme, es que la misma puede ser signada o no signada. En la cuantización signada, el rango de valores se divide en partes iguales alrededor de cero, mientras que en la cuantización no signada, los niveles de cuantización son siempre positivos, en donde se mejora la precisión para el rango positivo de valores. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits, donde se puede ver que a pesar de utilizar el mismo número de bits, el caso sin signo presenta una mejor resolución.
 
-\TODO{Reemplazar figura con tikz - sign/unsign}
-\defaultfigure{cuantizacion/sym_vs_asym_3bits.png}{Cuantización simétrica y asimétrica.}{sym_vs_asym}
+\defaultdiagram{cuantizacion/signed_vs_non_signed}{Cuantización signada y no signada.}{sym_vs_asym}{1}
 
 Es importante recalcar que toda cuantización introduce un error de cuantización, que es la diferencia entre el valor original y su representación cuantizada. Este error se busca minimizar para preservar la precisión de la representación original. En el caso, por ejemplo, de una cuantización uniforme de 8 niveles, el error de cuantización máximo es la mitad del tamaño del intervalo entre niveles consecutivos \cite{sayood2017introduction}.
 

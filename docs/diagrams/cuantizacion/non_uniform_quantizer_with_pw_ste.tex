@@ -36,7 +36,16 @@
     \draw[red, thick, dashed] (-0.6,-0.2) -- (0.4,0.8);
     \draw[red, thick, dashed] (0.4,0.8) -- (1.7,1.9);
     \draw[red, thick, dashed] (1.7,1.9) -- (2.9,3.1);
-    \draw[red, thick, dashed] (2.9,3.1) -- (4.0,3.1);
+    \draw[red, thick, dashed] (2.9,3.1) -- (4.0,4.0);
+
+    % x-axis label
+    \node at (4.4, -0.3) {$x$};
+    % Add legend
+    % Align the text to the initial point of the line
+    \node[anchor=west] at (0.7, 4.4) {$q$};
+    \draw[green, thick] (0.4, 4.4) -- (0.6, 4.4);
+    \node[anchor=west] at (0.7, 4.0) {$\hat{q}$};
+    \draw[red, thick] (0.4, 4.0) -- (0.6, 4.0);
 
 
 \end{tikzpicture}
