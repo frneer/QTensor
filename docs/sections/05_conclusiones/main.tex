@@ -5,6 +5,8 @@ En este capítulo se presentan las conclusiones del trabajo realizado, sintetiza
 
 El objetivo principal de esta tesis, establecido en la sección \ref{sec:objetivos}, consistió en el diseño, implementación y evaluación de una biblioteca de software, \texttt{QTensor}, que simplifique la investigación y aplicación de técnicas de QAT con cuantizadores de parámetros adaptables.
 
+Además, el desarrollo de \texttt{QTensor} brinda una herramienta imprescindible para la compresión de redes neuronales, lo que permite alcanzar una pérdida mínima de rendimiento y posibilita su implementación eficiente en hardware que utiliza aritmética de punto fijo.
+
 Se desarrolló exitosamente la biblioteca \texttt{QTensor}, construida sobre \texttt{TensorFlow} y \texttt{Keras}, cumpliendo con los 17 requisitos funcionales definidos en la sección \ref{sec:requerimientos_funcionales}. Estos requisitos se organizaron en cuatro categorías principales alineadas con los objetivos específicos: diseño y API (RF1.1-RF1.4), cuantizador uniforme (RF2.1-RF2.4), cuantizador flexible (RF3.1-RF3.4) y evaluación y experimentación (RF4.1-RF4.5). A continuación, se analiza el cumplimiento de cada uno de los objetivos específicos planteados.
 
 \subsection{Objetivo 1: Diseño e implementación de la biblioteca}
@@ -24,11 +26,11 @@ Adicionalmente, los atributos de calidad definidos en la sección \ref{sec:atrib
 \begin{itemize}
     \item Adecuación funcional (RNF1.1): la biblioteca proporciona todas las funciones necesarias para realizar QAT con cuantizadores personalizados, facilitando la experimentación con diferentes esquemas de cuantización.
     \item Auto-descriptividad (RNF2.1): la interfaz basada en diccionarios de Python y la arquitectura modular hacen que el uso de la biblioteca sea intuitivo, sin requerir consultas extensas a documentación externa.
-    \item Capacidad para ser probado (RNF3.1): se alcanzó una cobertura de código del 96\% mediante pruebas unitarias y de integración, como se detalla en el apéndice \ref{appendix:coverage}. Se desarrolló código de manera modular, en conformidad con el principio de responsabilidad única de SOLID \cite{ampatzoglou2019srp} (\textit{Single Responsibility Principle}), lo que facilitó la creación de pruebas específicas para cada componente.
+    \item Capacidad para ser probado (RNF3.1): se alcanzó una cobertura de código del 96\% mediante pruebas unitarias y de integración, como se detalla en el apéndice \ref{appendix:coverage}. Este nivel de cobertura garantiza que la lógica crítica de la biblioteca, incluyendo las operaciones de cuantización, el cálculo de gradientes personalizados y la gestión de restricciones sobre parámetros, está exhaustivamente probada. La arquitectura modular adoptada, en conformidad con el principio de responsabilidad única de SOLID \cite{ampatzoglou2019srp} (\textit{Single Responsibility Principle}), facilitó la creación de pruebas específicas y efectivas para cada componente.
     \item Modularidad (RNF3.2): la arquitectura modular de \texttt{QTensor} facilita la incorporación de nuevos cuantizadores y funcionalidades sin afectar componentes existentes.
 \end{itemize}
 
-\subsection{Objetivo 2: Implementación de cuantización uniforme con parámetros adaptables}
+\subsection{Objetivo 2: implementación de cuantización uniforme con parámetros adaptables}
 
 Se implementó exitosamente el cuantizador uniforme con parámetros entrenables, cumpliendo con los requisitos funcionales RF2.1-RF2.4. La implementación soporta modos signados y no signados, con número arbitrario de bits, e incluye:
 
@@ -39,7 +41,7 @@ Se implementó exitosamente el cuantizador uniforme con parámetros entrenables,
     \item Mecanismos de inicialización configurables para el parámetro $\alpha$.
 \end{itemize}
 
-\subsection{Objetivo 3: Implementación de cuantización flexible con parámetros adaptables}
+\subsection{Objetivo 3: implementación de cuantización flexible con parámetros adaptables}
 
 Se implementó el esquema de cuantización flexible con parámetros entrenables, cumpliendo con los requisitos funcionales RF3.1-RF3.4 y representando una contribución original al extender el trabajo de \cite{electronics13101923} con la capacidad de entrenar los parámetros del cuantizador. La implementación incluye:
 
@@ -51,31 +53,19 @@ Se implementó el esquema de cuantización flexible con parámetros entrenables,
     \item Mecanismos de inicialización para los parámetros del cuantizador.
 \end{itemize}
 
-\subsection{Objetivo 4: Evaluación y comparación de esquemas de cuantización}
+\subsection{Objetivo 4: evaluación y comparación de esquemas de cuantización}
 
 Se desarrollaron herramientas de evaluación y experimentación que satisfacen los requisitos funcionales RF4.1-RF4.5. Estas herramientas incluyen utilidades para calcular la complejidad espacial teórica (considerando codificación de Huffman para esquemas flexibles), visualizar la evolución de los parámetros de cuantización durante el entrenamiento, y el módulo \texttt{stages} que permite definir flujos de trabajo experimentales de manera modular y reproducible.
 
-Por otra parte, se realizó una evaluación y comparación cuantitativa de ambos tipos de cuantización sobre el conjunto de datos CIFAR-10, como se detalló en el capítulo \ref{sec:ensayos}. A continuación se sintetizan los principales hallazgos experimentales que demostraron el cumplimiento de este objetivo:
-
-\subsubsection{Resultados del cuantizador uniforme}
-Como se presenta en la sección \ref{sec:uniform_results}, el cuantizador uniforme alcanza precisiones de hasta el $102.51\%$ respecto del modelo original con 8 bits y tasas de compresión de $4\times$. La cuantización uniforme se mantiene efectiva hasta compresiones de aproximadamente $8\times$, con una precisión del $99.49\%$. A partir de compresiones superiores a $8\times$, la precisión se degrada significativamente.
-
-\subsubsection{Resultados del cuantizador flexible}
-Como se presenta en la sección \ref{sec:flexible_results}, el cuantizador flexible mantiene el $96.73\%$ de la precisión original con tasas de compresión de $24.23\times$ (8 bits, 3 niveles), superando significativamente las capacidades del cuantizador uniforme en regímenes de alta compresión. El análisis de sensibilidad presentado en la \reffig{flex_heatmap} reveló que, para el cuantizador flexible, el número de niveles tiene un impacto más significativo en la precisión que el número de bits, excepto en configuraciones con muy pocos niveles ($\leq 2$).
-
-\subsubsection{Comparación entre esquemas}
-
-Los principales hallazgos de la comparación entre ambos esquemas son los siguientes en función de la tasa de compresión:
+Se realizó una evaluación y comparación cuantitativa de ambos cuantizadores sobre el conjunto de datos CIFAR-10, como se detalló en el capítulo \ref{chap:resultados}. Los principales hallazgos experimentales en función del régimen de compresión son:
 
 \begin{itemize}
-    \item Compresiones moderadas ($\leq 8\times$): ambos esquemas presentan desempeños similares, con el cuantizador uniforme alcanzando precisiones superiores al $99\%$ del modelo original.
+    \item Compresiones moderadas (hasta $8\times$): ambos cuantizadores presentan desempeños similares, manteniendo precisiones superiores al $99\%$ del modelo original. El cuantizador uniforme se muestra efectivo en este régimen, con resultados que en algunos casos superan ligeramente la precisión del modelo base debido al efecto regularizador de la cuantización.
 
-    \item Compresiones altas ($\geq 10\times$): el esquema flexible domina en términos de la frontera de Pareto \cite{pareto1906manuale} (precisión vs. complejidad), permitiendo configuraciones con compresiones de 12$\times$ a 18$\times$ con pérdidas de precisión inferiores a dos puntos porcentuales respecto del modelo original.
+    \item Compresiones altas ($10\times$ a $20\times$): el cuantizador flexible comienza a demostrar ventajas significativas en términos de la frontera de Pareto \cite{pareto1906manuale} (precisión vs. complejidad), logrando pérdidas de precisión inferiores a dos puntos porcentuales respecto del modelo original, mientras que el cuantizador uniforme presenta degradaciones más pronunciadas.
 
-    \item Compresiones muy altas ($\geq 20\times$): la ventaja del esquema flexible se hace aún más pronunciada, manteniendo precisiones superiores al $96\%$ con compresiones superiores a $24\times$, mientras que el cuantizador uniforme presenta degradaciones significativas en este régimen.
+    \item Compresiones muy altas (superiores a $20\times$): la ventaja del cuantizador flexible se acentúa notablemente, manteniendo más del $96\%$ de la precisión original en tasas de compresión donde el cuantizador uniforme experimenta degradaciones significativas. El análisis de sensibilidad reveló que, para el cuantizador flexible, el número de niveles tiene mayor impacto en la precisión que el número de bits, lo que constituye un hallazgo relevante para el diseño de esquemas de cuantización eficientes.
 \end{itemize}
-
-Habiendo verificado el cumplimiento de los objetivos planteados, resulta pertinente analizar el impacto y las contribuciones que este trabajo representa para el campo.
 
 \section{Impacto y contribuciones}
 
@@ -95,51 +85,47 @@ El desarrollo de \texttt{QTensor} representa una contribución significativa al 
 
 En un panorama donde los modelos de aprendizaje profundo crecen exponencialmente en tamaño y complejidad, mientras que las restricciones de recursos (memoria, energía, latencia) se vuelven cada vez más críticas, \texttt{QTensor} proporcionó herramientas prácticas para enfrentar este desafío. Por lo tanto, la biblioteca contribuye a hacer el despliegue de redes neuronales más sostenible y accesible, tanto desde una perspectiva económica como ambiental, al reducir los requisitos computacionales sin perjudicar el desempeño del modelo.
 
-\section{Limitaciones y trabajo futuro}
+\section{Lineas de trabajo futuro}
 
-Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados, es importante reconocer que existen limitaciones y oportunidades de mejora que representan líneas de trabajo futuro prometedoras:
+Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados, es importante reconocer que existen limitaciones y oportunidades de mejora que representan líneas de trabajo futuro prometedoras. A continuación, se describen algunas de las más relevantes.
 
-\subsection{Limitaciones actuales}
+% \subsection{Limitaciones actuales}
 
-\begin{itemize}
-    \item Exploración de esquemas de cuantización: los experimentos realizados en esta tesis se centraron en un conjunto limitado de configuraciones para demostrar las capacidades de la biblioteca. Una exploración más exhaustiva del espacio de hiperparámetros (número de bits, niveles, configuraciones por capa) podría revelar esquemas de cuantización aún más eficientes.
+% \begin{itemize}
+%     \item Limitación de granularidad en capas convolucionales: actualmente, la biblioteca solo soporta cuantización con granularidad a nivel de atributo. En el caso de las capas convolucionales \texttt{Conv2D}, su implementación en \texttt{Keras} agrupa los pesos de todos los filtros en un único tensor, lo que impide asignar diferentes cuantizadores a cada filtro individualmente. La capacidad de definir esquemas de cuantización por canal es una mejora potencial que permitiría una adaptación más fina a las características de diferentes filtros \cite{Jacob2018}.
 
-    \item Escalabilidad a modelos grandes: los experimentos se realizaron sobre una arquitectura de tamaño moderado. La evaluación en modelos de gran escala, como redes preentrenadas de clasificación de imágenes (e.g. EfficientNet \cite{tan2020efficientnetrethinkingmodelscaling}) o LLMs, permitiría validar los resultados en contextos más representativos de aplicaciones reales. Además, es posible que en modelos más grandes surjan desafíos adicionales relacionados con la estabilidad del entrenamiento y la convergencia de los parámetros de cuantización \cite{wang2024artsciencequantizinglargescale}.
+%     \item Ecosistema limitado: actualmente, \texttt{QTensor} solo es compatible con \texttt{TensorFlow} y \texttt{Keras}, lo que limita su adopción por parte de la comunidad que utiliza otros frameworks. En particular, \texttt{PyTorch} es ampliamente utilizado en investigación y desarrollo, y presenta un alto crecimiento en popularidad \cite{alawi2025comparativesurveypytorchvs}.
 
-    \item Evaluación en hardware real: los resultados presentados se basan en complejidad espacial teórica y precisión del modelo. La evaluación del desempeño en hardware real (FPGA, ASIC, microcontroladores) proporcionaría una validación más completa del impacto práctico de los esquemas implementados.
+% Considerando las limitaciones identificadas y las oportunidades detectadas durante el desarrollo, se proponen las siguientes líneas de trabajo futuro:
 
-    \item Ecosistema limitado: actualmente, \texttt{QTensor} solo es compatible con \texttt{TensorFlow} y \texttt{Keras}, lo que limita su adopción por parte de la comunidad que utiliza otros frameworks. En particular, \texttt{PyTorch} es ampliamente utilizado en investigación y desarrollo, y presenta un alto crecimiento en popularidad \cite{alawi2025comparativesurveypytorchvs}.
-\end{itemize}
-
-\subsection{Líneas de trabajo futuro}
-
-Considerando las limitaciones identificadas y las oportunidades detectadas durante el desarrollo, se proponen las siguientes líneas de trabajo futuro:
-
-\subsubsection{Mejoras en la biblioteca}
+\subsection{Mejoras en la biblioteca}
 
 \begin{itemize}
     \item Compatibilidad con PyTorch: migrar o extender \texttt{QTensor} para que sea compatible con \texttt{PyTorch} \cite{pytorch}, que se ha convertido en el framework predominante en la comunidad de investigación en aprendizaje automático. Esto ampliaría significativamente el alcance y la adopción de la biblioteca.
 
     \item Cuantización por canal: agregar soporte para especificaciones de esquemas de cuantización por canal en capas convolucionales \cite{Jacob2018}, lo que permitiría una adaptación más fina a las características de diferentes filtros y podría mejorar el balance precisión-compresión.
 
-    \item Restricciones para hardware específico: implementar restricciones adicionales sobre los parámetros de cuantización que faciliten la implementación en hardware embebido. Por ejemplo, restringir el parámetro $\alpha$ para que sea una potencia de dos ($\alpha = 2^k$ con $k \in \mathbb{Z}$) simplificaría las operaciones en hardware de punto fijo \cite{przewlockarus2022poweroftwoquantizationlowbitwidth}.
+    % \item Restricciones para hardware específico: implementar restricciones adicionales sobre los parámetros de cuantización que faciliten la implementación en hardware embebido. Por ejemplo, restringir el parámetro $\alpha$ para que sea una potencia de dos ($\alpha = 2^k$ con $k \in \mathbb{Z}$) simplificaría las operaciones en hardware de punto fijo \cite{przewlockarus2022poweroftwoquantizationlowbitwidth}.
 
     \item Optimización automática de esquemas: desarrollar algoritmos de búsqueda automática de esquemas de cuantización óptimos mediante técnicas como búsqueda de arquitecturas neuronales (NAS, \textit{Neural Architecture Search}) \cite{uhlich2020mixedprecisiondnnsneed} o algoritmos evolutivos \cite{dong2019hawqv2hessianawaretraceweighted}, que exploren el espacio de configuraciones de manera sistemática.
+
+    \item Métricas de complejidad temporal: incorporar en las herramientas de evaluación métricas de complejidad temporal, en función de la cantidad de operaciones (FLOPs), lo que permitiría una evaluación más completa del desempeño de los modelos cuantizados.
+
 \end{itemize}
 
-\subsubsection{Evaluación y validación}
+\subsection{Evaluación y validación}
 
 \begin{itemize}
-    \item Exploración exhaustiva de hiperparámetros: realizar experimentos sistemáticos sobre diferentes arquitecturas de redes neuronales y conjuntos de datos (e.g. ImageNet \cite{deng2009imagenet}) para identificar patrones y heurísticas que guíen la selección de esquemas de cuantización óptimos para diferentes escenarios.
+    \item Exploración de esquemas de cuantización: los experimentos realizados en esta tesis se centraron en un conjunto limitado de configuraciones para demostrar las capacidades de la biblioteca. Una exploración más exhaustiva del espacio de hiperparámetros (número de bits, niveles, configuraciones por capa) podría revelar esquemas de cuantización aún más eficientes.
 
-    \item Métricas de desempeño en hardware: extender las herramientas de evaluación para incluir métricas de complejidad computacional (FLOPs \cite{shahriar2025comparativeanalysislightweightdeep}), latencia, consumo energético \cite{7738524} y ancho de banda de memoria, lo que permitiría una evaluación más completa del desempeño de los modelos cuantizados en diferentes plataformas de hardware.
+    \item Evaluación de complejidad temporal: realizar evaluaciones que incluyan métricas de complejidad computacional (FLOPs), latencia, consumo energético y ancho de banda de memoria, para complementar los resultados obtenidos en este trabajo.
+
+    \item Evaluación en modelos de gran escala: aplicar \texttt{QTensor} a modelos preentrenados de visión computacional (e.g. EfficientNet \cite{tan2020efficientnetrethinkingmodelscaling}) y LLMs con mayor cantidad de parámetros, para validar la efectividad de los esquemas de cuantización en contextos más representativos de aplicaciones reales. Además, es posible que en modelos más grandes surjan desafíos adicionales relacionados con la estabilidad del entrenamiento y la convergencia de los parámetros de cuantización \cite{wang2024artsciencequantizinglargescale}.
 
     \item Implementación en FPGA/ASIC: desarrollar casos de estudio que implementen modelos cuantizados con \texttt{QTensor} en hardware real (FPGA o ASIC) para validar las ventajas prácticas de los esquemas de cuantización flexible en términos de área, potencia y velocidad.
-
-    \item Evaluación en modelos de gran escala: aplicar \texttt{QTensor} a modelos preentrenados de visión computacional y LLMs para demostrar su escalabilidad y efectividad en arquitecturas modernas complejas.
 \end{itemize}
 
-\subsubsection{Extensiones teóricas}
+\subsection{Extensiones teóricas}
 
 \begin{itemize}
     \item Análisis teórico de convergencia: desarrollar un análisis teórico que caracterice las propiedades de convergencia del entrenamiento con cuantizadores de parámetros entrenables \cite{jeong2025discretenessfinitesampleanalysisstraightthrough}, lo que podría proporcionar garantías formales sobre el comportamiento del algoritmo.
@@ -153,3 +139,16 @@ El desarrollo de \texttt{QTensor} ha demostrado que es posible diseñar e implem
 La biblioteca desarrollada no solo cumple con los objetivos planteados, sino que proporciona una base sólida para futuras investigaciones en el campo de la compresión de redes neuronales. Su arquitectura modular y extensible facilita la incorporación de nuevos esquemas de cuantización y la adaptación a diferentes casos de uso, desde dispositivos embebidos hasta en sistemas \textit{cloud}.
 
 En un contexto donde la eficiencia computacional y energética se vuelven cada vez más críticas, tanto por razones económicas como ambientales, herramientas como \texttt{QTensor} contribuyen a hacer el aprendizaje profundo más accesible y sostenible, permitiendo el despliegue de modelos sofisticados en una mayor variedad de plataformas y aplicaciones.
+
+
+% \begin{itemize}
+%     \item Exploración de esquemas de cuantización: los experimentos realizados en esta tesis se centraron en un conjunto limitado de configuraciones para demostrar las capacidades de la biblioteca. Una exploración más exhaustiva del espacio de hiperparámetros (número de bits, niveles, configuraciones por capa) podría revelar esquemas de cuantización aún más eficientes.
+
+%     \item Escalabilidad a modelos grandes: los experimentos se realizaron sobre una arquitectura de tamaño moderado. La evaluación en modelos de gran escala, como redes preentrenadas de clasificación de imágenes (e.g. EfficientNet \cite{tan2020efficientnetrethinkingmodelscaling}) o LLMs, permitiría validar los resultados en contextos más representativos de aplicaciones reales. Además, es posible que en modelos más grandes surjan desafíos adicionales relacionados con la estabilidad del entrenamiento y la convergencia de los parámetros de cuantización \cite{wang2024artsciencequantizinglargescale}.
+
+%     \item Evaluación en hardware real: los resultados presentados se basan en complejidad espacial teórica y precisión del modelo. La evaluación del desempeño en hardware real (FPGA, ASIC, microcontroladores) proporcionaría una validación más completa del impacto práctico de los esquemas implementados.
+
+%     \item Ecosistema limitado: actualmente, \texttt{QTensor} solo es compatible con \texttt{TensorFlow} y \texttt{Keras}, lo que limita su adopción por parte de la comunidad que utiliza otros frameworks. En particular, \texttt{PyTorch} es ampliamente utilizado en investigación y desarrollo, y presenta un alto crecimiento en popularidad \cite{alawi2025comparativesurveypytorchvs}.
+% \end{itemize}
+
+% \subsection{Líneas de trabajo futuro}

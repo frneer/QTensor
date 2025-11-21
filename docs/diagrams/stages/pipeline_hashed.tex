@@ -19,9 +19,9 @@
     \node (final_evaluate_old) [stage, fill=green!20, right=of train_qat_old, text=black] {$6$};
 
     % Rama inferior (rojo - invalidado)
-    \node (quantize_new) [stage, fill=red!20, right=2cm of evaluate, yshift=-1.5cm, text=black] {$4$};
-    \node (train_qat_new) [stage, fill=red!20, right=of quantize_new, text=black] {$5$};
-    \node (final_evaluate_new) [stage, fill=red!20, right=of train_qat_new, text=black] {$6$};
+    \node (quantize_new) [stage, fill=red!20, right=2cm of evaluate, yshift=-1.5cm, text=black] {$4'$};
+    \node (train_qat_new) [stage, fill=red!20, right=of quantize_new, text=black] {$5'$};
+    \node (final_evaluate_new) [stage, fill=red!20, right=of train_qat_new, text=black] {$6'$};
 
     % Arrows primera parte
     \draw [arrow] (create_model) -- (pre-train);

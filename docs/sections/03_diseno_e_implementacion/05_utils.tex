@@ -1,7 +1,7 @@
 \subsection{Implementación de cómputos de complejidad espacial (módulo \texttt{utils})}
 \label{sec:implementation_evaluation}
 
-Como se desarrolló en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} no proporciona herramientas para calcular la complejidad espacial teórica de modelos cuantizados. Esta funcionalidad es fundamental para evaluar el impacto de diferentes esquemas de cuantización en el tamaño del modelo y para comparar la eficiencia de distintos cuantizadores. Por ello, se implementó en el módulo \texttt{utils} un conjunto de funciones para calcular la complejidad espacial de modelos tanto sin cuantizar como cuantizados, considerando los esquemas de cuantización uniforme y flexible.
+Como se desarrolló en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} no proporciona herramientas para calcular la complejidad espacial teórica de modelos cuantizados, y menos aún para el caso de la cuantización flexible, que asume una codificación asintótica de Huffman \cite{huffman1952method}. Esta funcionalidad es fundamental para evaluar el impacto de diferentes esquemas de cuantización en el tamaño del modelo y para comparar la eficiencia de distintos cuantizadores. Por ello, se implementó en el módulo \texttt{utils} un conjunto de funciones para calcular la complejidad espacial de modelos tanto sin cuantizar como cuantizados, considerando los esquemas de cuantización uniforme y flexible.
 
 La complejidad espacial de un modelo $S_{M}$ se calcula acumulando la complejidad espacial de cada capa, como se muestra en \eqref{eq:space_complexity_model}, donde $N_{L}$ representa la cantidad de capas del modelo.
 
@@ -35,24 +35,24 @@ En el caso de un parámetro cuantizado con cuantización uniforme, la expresión
     S_{\theta_{q_{u}}} = b \cdot k
 \end{equation}
 
-Para el caso de la cuantización flexible, la complejidad espacial se calcula asumiendo que su implementación en hardware utiliza la codificación de Huffman \cite{huffman1952method}, dado que esta es la manera presentada de implementación en su descripción \cite{electronics13101923}.
+Para el caso de la cuantización flexible, la complejidad espacial se calcula asumiendo que su implementación en hardware utiliza la codificación de Huffman, dado que esta es la manera presentada de implementación en su descripción \cite{electronics13101923}.
 
 La codificación de Huffman es un esquema de codificación sin pérdida que asigna códigos de longitud variable a diferentes símbolos basándose en sus frecuencias de aparición. Los símbolos más frecuentes reciben códigos más cortos, mientras que los menos frecuentes reciben códigos más largos, lo que permite reducir el tamaño total de los datos al aprovechar la distribución de frecuencias.
 
-Para implementar esta codificación, es necesario almacenar en la memoria del hardware tanto los niveles de cuantización como los índices de los niveles asignados a cada parámetro cuantizado.
+Para implementar esta codificación, es necesario almacenar en la memoria del hardware tanto los índices de los niveles asignados a cada parámetro cuantizado como los niveles de cuantización.
 
-La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra en \eqref{eq:space_complexity_flexible_levels}.
-
-\begin{equation}
-  \label{eq:space_complexity_flexible_levels}
-    S_{l} = N_{l} \cdot b
-\end{equation}
-
-Por otra parte, la complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad nominal de la codificación de Huffman: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador \cite{huffman1952method}, como se muestra en \eqref{eq:space_complexity_flexible_indices}.
+La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la complejidad asintótica de la codificación de Huffman \cite{huffman1952method}: el número de parámetros cuantizados $k$ multiplicado por la entropía $H$ de la distribución de los niveles del cuantizador, como se muestra en \eqref{eq:space_complexity_flexible_indices}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible_indices}
     S_{\mathcal{I}} = k \cdot H
+\end{equation}
+
+Por otra parte, en la implementación planteada no se considera que los valores de los niveles se almacenen dentro del chip, sino que se almacenan en memoria externa. Por esta razón, es necesario sumarlos a la complejidad espacial. La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra en \eqref{eq:space_complexity_flexible_levels}.
+
+\begin{equation}
+  \label{eq:space_complexity_flexible_levels}
+    S_{l} = N_{l} \cdot b
 \end{equation}
 
 En consecuencia, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra en \eqref{eq:space_complexity_flexible}.

@@ -150,6 +150,16 @@
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 
+\usepackage{titlesec}
+
+% \setcounter{secnumdepth}{4} % Optional: Adds numbers (1.1.1.1)
+% \setcounter{tocdepth}{4}    % Optional: Adds it to Table of Contents
+
+% This defines the look. The key is removing the "runin" shape.
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 \begin{document}
 
@@ -170,8 +180,9 @@
 
 \begin{abstract}
 \addchaptertocentry{\abstractname} % Agregar resumen al índice
-\TODO{Escribir el resumen de la memoria}
-El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin ningún elemento de formato en el texto como itálicas o negritas. Tampoco se deben usar siglas ni acrónimos que no resulten obvios para un lector promedio de la memoria, ni referencias bibliográficas o notas al pie de página. No debe faltar qué es lo que se hizo/logró, qué importancia/valor tiene el proyecto/resultado, qué va a encontrar el lector en la memoria y qué contenidos de la especialización/maestría se aplicaron en el proyecto.
+El presente trabajo de tesis aborda el diseño y desarrollo de \texttt{QTensor}, una biblioteca de software para la compresión de redes neuronales mediante cuantización durante el entrenamiento. Esta herramienta facilita la experimentación con diferentes esquemas de cuantización para redes neuronales, con la particularidad de poder definir cuantizadores personalizados con parámetros entrenables. Se implementaron dos cuantizadores, uno uniforme y otro flexible especialmente diseñado para la compresión de redes neuronales y su aplicación en hardware.
+
+Los resultados experimentales demostraron que el cuantizador flexible permite obtener modelos significativamente más compactos sin comprometer su desempeño, validando la utilidad de la herramienta para la optimización de modelos en entornos con recursos restringidos. En esta memoria se detallan los fundamentos teóricos de las redes neuronales y la teoría de la información aplicados, la arquitectura de software de la solución propuesta y el análisis de los ensayos realizados. El proyecto sintetiza conceptos avanzados de ingeniería de software, optimización numérica e inteligencia artificial, aportando una solución práctica para el desarrollo y la evaluación de técnicas de compresión de modelos de aprendizaje profundo.
 \end{abstract}
 
 
@@ -181,8 +192,18 @@ El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin
 
 \begin{acknowledgements}
 \vspace{1.5cm}
-\TODO{Escribir los agradecimientos}
-Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONAL}.
+Gracias a todas las personas que me acompañaron en este camino.
+
+A mis compañeros de carrera y amigos, por las cursadas de días completos, los trabajos en grupo, las noches de estudio y los momentos compartidos.
+
+A mis profesores y tutores, por su guía, paciencia y dedicación a lo largo de este proceso de aprendizaje. En particular, a los que me acompañaron en este último esfuerzo, al Dr. Ing. Federico Zacchigna por proponerme tomar este desafío y por su constante apoyo y guía, y a la Ing. María Celeste Corominas por su invalorable ayuda en la revisión y corrección de este trabajo.
+
+A los jurados de esta tesis, el Ing. Juan Manuel Cruz, el Dr. Ing. Pablo Gomez y el Ing. Ricardo Veiga por su tiempo y dedicación en la evaluación de este trabajo.
+
+A mi familia, por su apoyo incondicional desde el primer día, por creer en mí y en mis capacidades, y por brindarme el soporte necesario para superar los desafíos académicos y personales.
+
+A mi pareja, Florencia, por su amor, paciencia y comprensión durante todo este proceso. Gracias por estar a mi lado en los momentos difíciles y por celebrar conmigo cada logro alcanzado.
+
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
@@ -197,7 +218,7 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 % Dedicatoria
 %----------------------------------------------------------------------------------------
 
-\dedicatory{\textbf{Dedicado a... [OPCIONAL]} \TODO{Escribir la dedicatoria}}
+\dedicatory{Dedicado a mi madre, Leticia, mi padre, Néstor, mi pareja, Florencia y mis mascotas: Mina, Tolouse y Lana.}
 
 %----------------------------------------------------------------------------------------
 % Capítulos
