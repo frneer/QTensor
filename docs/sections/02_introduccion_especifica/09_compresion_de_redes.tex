@@ -134,9 +134,9 @@ Existen dos estrategias principales para aplicar la cuantización en redes neuro
 El objetivo de ambas, es minimizar el impacto negativo de la cuantización en la precisión del modelo mediante el ajuste de los parámetros de cuantización y la adaptación del modelo a la representación cuantizada.
 
 \subsubsection{Estrategia PTQ}
-PTQ es la estrategia mayormente utilizada debida a su simplicidad y rapidez de implementación, ya que pueden determinarse los parámetros de cuantización a partir de una red ya entrenada, sin necesidad de reentrenamiento o ajuste fino \textit{fine-tuning} del modelo, y por ende, no necesita del conjunto de datos de entrenamiento para su aplicación \cite{gholami2021surveyquantizationmethodsefficient}.
+La estrategia PTQ es la mayormente utilizada debida a su simplicidad y rapidez de implementación, ya que pueden determinarse los parámetros de cuantización a partir de una red ya entrenada, sin necesidad de reentrenamiento o ajuste fino \textit{fine-tuning} del modelo, y por ende, no necesita del conjunto de datos de entrenamiento para su aplicación \cite{gholami2021surveyquantizationmethodsefficient}.
 
-Sin embargo, en modelos complejos o con cuantizaciones agresivas (por ejemplo, \texttt{INT4}), PTQ puede ocasionar pérdidas de precisión significativas debido a la incapacidad del modelo para adaptarse a la representación cuantizada \cite{dai2024trainablefixedpointquantizationdeep}.
+Sin embargo, en modelos complejos o con cuantizaciones agresivas (por ejemplo, \texttt{INT4}), la PTQ puede ocasionar pérdidas de precisión significativas debido a la incapacidad del modelo para adaptarse a la representación cuantizada \cite{dai2024trainablefixedpointquantizationdeep}.
 
 Para seleccionar los parámetros de cuantización adecuados, se analizan las distribuciones de los pesos y activaciones de la red. En el caso de los pesos, esto se realiza directamente sobre los valores de los pesos entrenados. Pero, en el caso de las activaciones, se utiliza un conjunto de datos representativo de las entradas para realizar una inferencia y recopilar estadísticas sobre las activaciones, dado que estos valores no son parámetros, si no, resultados intermedios durante la inferencia.
 
@@ -158,7 +158,7 @@ La definición de los parámetros de cuantización es crítica, puesto que una c
 
 \subsubsection{Estrategia QAT}
 \label{sec:qat}
-QAT consiste en entrenar un modelo en un entorno que emule los efectos de la cuantización durante el proceso de entrenamiento \cite{jacob2017quantizationtrainingneuralnetworks}, al hacerlo, el modelo se adapta a la representación cuantizada durante el entrenamiento. QAT generalmente produce modelos cuantizados de mayor precisión en comparación con PTQ, especialmente en cuantizaciones agresivas \cite{dai2024trainablefixedpointquantizationdeep}.
+La estrategia QAT consiste en entrenar un modelo en un entorno que emule los efectos de la cuantización durante el proceso de entrenamiento \cite{jacob2017quantizationtrainingneuralnetworks}, al hacerlo, el modelo se adapta a la representación cuantizada durante el entrenamiento. La QAT generalmente produce modelos cuantizados de mayor precisión en comparación con la PTQ, especialmente en cuantizaciones agresivas \cite{dai2024trainablefixedpointquantizationdeep}.
 
 Como se explicó, en la sección \ref{sec:entrenamiento_redes_neuronales}, el proceso de entrenamiento de una red neuronal requiere de una alta precisión numérica, y suele realizarse en \texttt{FP32}. Esta precisión, es particularmente crítica para el \textit{backward pass}, al depender de cálculos precisos para actualizar los pesos de manera efectiva y asegurar la convergencia del entrenamiento.
 
@@ -174,7 +174,7 @@ Otra técnica muy utilizada es \textit{fake-quantization} \cite{dai2024trainable
 %  Sin embargo, incrementa el coste computacional y la duración del entrenamiento, ya que requiere de un reentrenamiento o ajuste fino (ajuste fino (fine-tuning)).
 % \defaultdiagram{cuantizacion/qat_process}{Cuantización durante el entrenamiento (QAT)}{qat_process}{0.8}
 
-QAT consiste en modificar el proceso de entrenamiento tradicional \cite{jacob2017quantizationtrainingneuralnetworks}, explicado en la sección \ref{sec:entrenamiento_redes_neuronales} y que se muestra en la \reffig{training}. QAT incorpora el uso de \textit{fake-quantization} para obtener una inferencia con los efectos de la cuantización, y luego, utilizar la representación sin cuantizar para realizar \textit{backpropagation} para preservar la precisión del gradiente, como se muestra en la \reffig{qat}.
+La QAT consiste en modificar el proceso de entrenamiento tradicional \cite{jacob2017quantizationtrainingneuralnetworks}, explicado en la sección \ref{sec:entrenamiento_redes_neuronales} y que se muestra en la \reffig{training}. La QAT incorpora el uso de \textit{fake-quantization} para obtener una inferencia con los efectos de la cuantización, y luego, utilizar la representación sin cuantizar para realizar \textit{backpropagation} para preservar la precisión del gradiente, como se muestra en la \reffig{qat}.
 
 \defaultdiagram{cuantizacion/training}{Entrenamiento simple.}{training}{1}
 \defaultdiagram{cuantizacion/training_qat}{Entrenamiento con cuantización.}{qat}{1}

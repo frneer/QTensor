@@ -100,7 +100,7 @@ def quantize(x, alpha):
 
 \paragraph{Ejemplo de entrenamiento del cuantizador uniforme}
 
-Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador uniforme de 3 bits a los pesos de la capa oculta y a sus activaciones mediante la definición del diccionario \texttt{qconfig}, y finalmente se cuantiza el modelo mediante \texttt{quantize_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_uniform}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
+Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador uniforme de 3 bits a los pesos de la capa oculta y a sus activaciones mediante la definición del diccionario \texttt{qconfig}, y finalmente se cuantiza el modelo mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_uniform}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
 
 La figura \ref{fig:uniform_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y del parámetro $\alpha$ del cuantizador aplicado a la capa oculta a lo largo del entrenamiento.
 

@@ -50,7 +50,7 @@ En problemas de clasificación, las métricas se definen a partir de la matriz d
 \end{table}
 
 \begin{itemize}
-    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define en la ecuación \eqref{eq:accuracy} \cite{bishop2006pattern}.
+    \item Exactitud (\textit{accuracy} en inglés): mide la proporción de predicciones correctas sobre el total de predicciones. Se define en la ecuación \eqref{eq:accuracy} \cite{bishop2006pattern}. Esta métrica se utiliza como indicador principal para evaluar el desempeño de los modelos de clasificación en este trabajo. Dado que en la literatura el término precisión suele emplearse de manera intercambiable con exactitud, en este documento se adoptará el término precisión para referirse a \textit{accuracy}, mientras que la métrica \textit{precision} (definida a continuación) no se utilizará.
     \begin{equation}
         \label{eq:accuracy}
         \text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
