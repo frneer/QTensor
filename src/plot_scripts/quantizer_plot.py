@@ -18,7 +18,7 @@ def plot_levels(ax, thresholds, levels, **kwargs):
     )
 
 
-def plot_ste(ax, min_limit, max_limit):
+def plot_ste(ax, min_limit, max_limit, **kwargs):
     dq_dx = np.linspace(min_limit, max_limit, 100)
     ax.plot(
         dq_dx,
@@ -27,7 +27,9 @@ def plot_ste(ax, min_limit, max_limit):
         linestyle="-.",
         lw=1,
         alpha=0.5,
-        label="ste",
+        label=kwargs.get(
+            "label", "aproximación de la función de cuantización"
+        ),
     )
 
 
@@ -90,9 +92,9 @@ def plot_uniform(
 
     # Plots
     plot_limits(ax, min_limit, max_limit)
-    plot_levels(ax, thresholds, levels)
+    plot_levels(ax, thresholds, levels, label=r"$q_{u}(x; \alpha)$")
     if do_plot_ste:
-        plot_ste(ax, min_limit, max_limit)
+        plot_ste(ax, min_limit, max_limit, label=r"$\hat{q}_{u}(x; \alpha)$")
 
     thresholds_ticks = thresholds
     levels_ticks = levels  # Exclude the last level for ticks
@@ -233,12 +235,16 @@ def plot_flex_quantizer(fig_path, do_plot_prequantized, do_plot_ste=False):
         levels,
         color="blue",
         linestyle="-",
-        label="función de cuantización",
+        label=r"$q_{f}(x; \alpha, \mathbf{l}, \mathbf{t})$",
     )
 
     if do_plot_ste:
-        plot_ste(ax, thresholds[0], thresholds[-1])
-
+        plot_ste(
+            ax,
+            thresholds[0],
+            thresholds[-1],
+            label=r"$\hat{q}_{f}(x; \alpha, \mathbf{l}, \mathbf{t})$",
+        )
     if do_plot_prequantized:
         plot_levels(
             ax,
