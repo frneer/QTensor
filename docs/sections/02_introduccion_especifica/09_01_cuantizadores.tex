@@ -6,8 +6,8 @@ El cuantizador uniforme consta de una serie de $n(b) = 2^b$ niveles equiespaciad
 El rango del cuantizador depende del tipo de cuantización:
 
 \begin{itemize}
-    \item En el caso signado, el rango es $r(\alpha) = 2\alpha$, abarcando el intervalo $[-\alpha, \alpha].$
-    \item En el caso no signado, el rango es $r(\alpha) = \alpha$, abarcando el intervalo $[0, \alpha].$
+    \item En el caso signado, el rango es $r(\alpha) = 2\alpha$, definido por el intervalo $[-\alpha, \alpha].$
+    \item En el caso no signado, el rango es $r(\alpha) = \alpha$, definido por el intervalo $[0, \alpha].$
 \end{itemize}
 
 De forma general, el intervalo del rango se define como \eqref{eq:range_interval}.
@@ -89,8 +89,8 @@ El cuantizador flexible pretende combinar la eficiencia de implementación del c
 El cuantizador flexible consta de un conjunto de $n$ niveles, con valores $\mathbf{l}$ cuyos límites están determinados por los umbrales $\mathbf{t}$. Como los casos anteriores, el rango se fija mediante el parámetro $\alpha$ y el rango del cuantizador depende del tipo de cuantización:
 
 \begin{itemize}
-    \item En el caso signado, el rango es $r(\alpha) = 2\alpha$, abarcando el intervalo $[-\alpha, \alpha].$
-    \item En el caso no signado, el rango es $r(\alpha) = \alpha$, abarcando el intervalo $[0, \alpha].$
+    \item En el caso signado, el rango es $r(\alpha) = 2\alpha$, definido por el intervalo $[-\alpha, \alpha].$
+    \item En el caso no signado, el rango es $r(\alpha) = \alpha$, definido por el intervalo $[0, \alpha].$
 \end{itemize}
 
 Para optimizar la implementación en la biblioteca, se definen $n$ niveles y $n+1$ umbrales. Esta elección puede resultar poco intuitiva, pero facilita la implementación posterior. En esta definición, los umbrales $t_0$ y $t_n$ son fijos y coinciden con los límites del rango: $t_0 = m$ y $t_n = M$.

@@ -3,13 +3,13 @@
 Dentro del aprendizaje automático, existen dos enfoques principales:
 
 \begin{itemize}
-    \item Aprendizaje supervisado: en este enfoque, el modelo se entrena utilizando un conjunto de datos etiquetados, donde cada entrada tiene una salida correspondiente conocida. El objetivo es que el modelo aprenda a mapear las entradas a las salidas correctas.
-    \item Aprendizaje no supervisado: en este enfoque, el modelo se entrena utilizando datos no etiquetados. El objetivo es que el modelo descubra patrones o estructuras subyacentes en los datos sin la guía de salidas conocidas.
+    \item Aprendizaje supervisado: en este enfoque, el modelo se entrena mediante un conjunto de datos etiquetados, donde cada entrada tiene una salida correspondiente conocida. El objetivo es que el modelo aprenda a mapear las entradas a las salidas correctas.
+    \item Aprendizaje no supervisado: en este enfoque, el modelo se entrena mediante datos no etiquetados. El objetivo es que el modelo descubra patrones o estructuras subyacentes en los datos sin la guía de salidas conocidas.
 \end{itemize}
 
 Este trabajo se enfoca en el aprendizaje supervisado, en el que pueden distinguirse principalmente dos tipos de problemas: los de regresión y los de clasificación.
 
-En los problemas de regresión, el objetivo consiste en predecir una variable de salida continua a partir de un conjunto de variables de entrada, mientras que en los problemas de clasificación la salida es discreta o categórica, representando la pertenencia de una observación $x_j$ a una clase o categoría determinada. Ambos enfoques comparten el mismo principio general de aprendizaje a partir conjunto de datos etiquetados $\mathcal{D} = \{(x_i,y_i)\}_{i=1}^N$, donde cada par $(x_i,y_i)$ representa un valor de entrada y su correspondiente salida para un sistema cuya relación funcional es desconocida $y = f(x)$, como se muestra en la \reffig{system}.
+En los problemas de regresión, el objetivo consiste en predecir una variable de salida continua a partir de un conjunto de variables de entrada, mientras que en los problemas de clasificación la salida es discreta o categórica, y representa la pertenencia de una observación $x_j$ a una clase o categoría determinada. Ambos enfoques comparten el mismo principio general de aprendizaje a partir conjunto de datos etiquetados $\mathcal{D} = \{(x_i,y_i)\}_{i=1}^N$, donde cada par $(x_i,y_i)$ representa un valor de entrada y su correspondiente salida para un sistema cuya relación funcional es desconocida $y = f(x)$, como se muestra en la \reffig{system}.
 
 \begin{figure}[H]
     \centering
@@ -64,7 +64,7 @@ En la práctica, los datos disponibles suelen contener ruido, ya sea en las vari
 
 El objetivo del aprendizaje supervisado es aproximar la función desconocida $f$ a partir de un conjunto de datos con ruido, de modo que la función estimada $\hat{f}(x; \theta)$ se acerque lo más posible a $f$ bajo algún criterio de error o desempeño.
 
-Como se mencionó anteriormente en esta sección, la función $\hat{f}$ es paramétrica, es decir, depende de un conjunto finito de parámetros $\theta$. La calidad de la aproximación se obtiene optimizando dichos parámetros con el fin de minimizar una función de costo, generalmente denominada $\mathcal{L}$, la cual cuantifica la discrepancia entre las predicciones del modelo y los valores reales observados. Para cuantizar estos errores se utilizan diferentes métricas, las cuales se detallaran en la sección \ref{sec:metricas}.
+Como se mencionó anteriormente en esta sección, la función $\hat{f}$ es paramétrica, es decir, depende de un conjunto finito de parámetros $\theta$. La calidad de la aproximación se obtiene mediante la optimización de dichos parámetros con el fin de minimizar una función de costo, generalmente denominada $\mathcal{L}$, la cual cuantifica la discrepancia entre las predicciones del modelo y los valores reales observados. Para cuantizar estos errores se utilizan diferentes métricas, las cuales se detallarán en la sección \ref{sec:metricas}.
 
 La definición formal de la función de costo $\mathcal{L}$ y los métodos empleados para su optimización se presentarán más adelante en la sección \ref{sec:funcion_de_costo}.
 

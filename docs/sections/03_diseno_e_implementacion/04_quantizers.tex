@@ -13,7 +13,7 @@ El método \texttt{build} se llama una vez que se conoce la forma de los tensore
 
 \subsubsection{Modificaciones a la clase \texttt{Quantizer}}
 
-Para implementar cuantizadores con parámetros entrenables y gradientes personalizados, se crearon clases que heredan de \texttt{Quantizer} (de \texttt{TFMOT}), extendiendo su funcionalidad mediante modificaciones en los métodos \texttt{build} y \texttt{\_\_call\_\_}.
+Para implementar cuantizadores con parámetros entrenables y gradientes personalizados, se crearon clases que heredan de \texttt{Quantizer} (de \texttt{TFMOT}), que extienden su funcionalidad mediante modificaciones en los métodos \texttt{build} y \texttt{\_\_call\_\_}.
 
 Con el fin de definir gradientes personalizados, se define un método adicional \texttt{quantize} decorado con \texttt{@tf.custom\_gradient} \cite{tensorflow_custom_gradient}, explicado en la sección \ref{sec:gradientes_personalizados}, donde se define la función de cuantización y su gradiente. El método \texttt{\_\_call\_\_} llama a \texttt{quantize} para aplicar la cuantización con el gradiente personalizado.
 
@@ -23,7 +23,7 @@ Por otro lado, para habilitar parámetros entrenables, se modificó el método \
 % \newline
 Los parámetros entrenables de los cuantizadores tienen restricciones específicas que garantizan la validez matemática de las operaciones de cuantización. Por ejemplo, los niveles y umbrales de la cuantización deben mantenerse siempre ordenados, y el parámetro que define el rango $\alpha$ debe ser estrictamente positivo.
 
-Para implementar este comportamiento se utilizó la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, la cual define operaciones de restricción que se aplican a los tensores durante el entrenamiento, como parte de su actualización. Se implementaron tres restricciones personalizadas en el módulo \texttt{constraints} \cite{qtensor_constraints}, cuyos detalles se resumen en la tabla \ref{tab:quantizer_constraints}.
+Para implementar este comportamiento se utilizó la interfaz de \texttt{Keras} \texttt{Constraint} \cite{tensorflow_keras_constraint}, que define operaciones de restricción que se aplican a los tensores durante el entrenamiento, como parte de su actualización. Se implementaron tres restricciones personalizadas en el módulo \texttt{constraints} \cite{qtensor_constraints}, cuyos detalles se resumen en la tabla \ref{tab:quantizer_constraints}.
 
 \input{sections/03_diseno_e_implementacion/04_tab_constraints}
 
@@ -39,7 +39,7 @@ Como ejemplo, el fragmento de código \ref{code:quantizer_constraints} muestra l
 
 Además de la definición de gradientes personalizados y parámetros entrenables, los cuantizadores implementados exponen mecanismos para controlar la inicialización y regularización de dichos parámetros.
 
-Para ello, los parámetros entrenables se agregan a la capa mediante el método \texttt{add\_weight} \cite{tensorflow_add_weight_api}, el cual permite especificar tanto el inicializador como el regularizador. En consecuencia, el usuario puede elegir cómo inicializar los parámetros mediante el argumento \texttt{initializer} \cite{tensorflow_initializers_api}, así como también definir estrategias de regularización a través del argumento \texttt{regularizer} \cite{tensorflow_regularizers_api}.
+Para ello, los parámetros entrenables se agregan a la capa mediante el método \texttt{add\_weight} \cite{tensorflow_add_weight_api}, que permite especificar tanto el inicializador como el regularizador. En consecuencia, el usuario puede elegir cómo inicializar los parámetros mediante el argumento \texttt{initializer} \cite{tensorflow_initializers_api}, así como también definir estrategias de regularización a través del argumento \texttt{regularizer} \cite{tensorflow_regularizers_api}.
 
 La tabla \ref{tab:quantizer_comparison} resume las diferencias estructurales entre un cuantizador tradicional de \texttt{TFMOT} y los cuantizadores implementados en \texttt{QTensor}.
 
@@ -67,11 +67,11 @@ La tabla \ref{tab:quantizer_comparison} resume las diferencias estructurales ent
 
 El fragmento de código \ref{code:uniform_quantizer_full} muestra la implementación completa de la función de cuantización uniforme y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_uniform_quantizer}.
 
-La función de cuantización uniforme, definida en la ecuación \eqref{eq:uniform_quantizer} (sección \ref{sec:uniform}), limita primero los valores de entrada al rango definido por los niveles mínimo y máximo mediante la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value}, y luego aplica la cuantización mediante la operación de piso (\texttt{tf.math.floor} \cite{tensorflow_math_floor}).
+La función de cuantización uniforme, definida en la ecuación \eqref{eq:uniform_quantizer} (sección \ref{sec:uniform}), primero limita los valores de entrada al rango definido por los niveles mínimo y máximo mediante la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value}, posteriormente aplica la cuantización mediante la operación de piso (\texttt{tf.math.floor} \cite{tensorflow_math_floor}).
 
-Para implementar los gradientes definidos en la sección \ref{sec:uniform_quantizer_gradient}, se decora la función de cuantización \texttt{quantize} con \texttt{@tf.custom\_gradient} (explicado en la sección \ref{sec:gradientes_personalizados}), la cual devuelve el valor cuantizado \texttt{q} y la función de gradiente personalizada \texttt{grad}, la cual debe definir dos gradientes: uno con respecto a la entrada $x$ y otro con respecto al parámetro $\alpha$.
+Para implementar los gradientes definidos en la sección \ref{sec:uniform_quantizer_gradient}, se decora la función de cuantización \texttt{quantize} con \texttt{@tf.custom\_gradient} (explicado en la sección \ref{sec:gradientes_personalizados}). Este decorador permite devolver el valor cuantizado \texttt{q} junto con la función de gradiente personalizada \texttt{grad}, la cual debe definir dos gradientes: uno con respecto a la entrada $x$ y otro con respecto al parámetro $\alpha$.
 
-En particular, \texttt{grad} define el gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida en \eqref{eq:uniform_quantizer_ste_signed}, utilizando la función \texttt{tf.where} \cite{tensorflow_where} descrita en la sección \ref{sec:tensorflow_graph} para aplicar el STE. Esta retorna el gradiente acumulado (\texttt{upstream}) cuando el valor de entrada $x$ se encuentra dentro del rango definido por los niveles, y cero en caso contrario. El uso de \texttt{tf.where} es necesario para operar de manera segura en el contexto del grafo computacional de TensorFlow.
+En particular, \texttt{grad} define el gradiente de la función de cuantización uniforme con respecto a la entrada $x$, $\frac{\partial q_{u}}{\partial x}$, definida en \eqref{eq:uniform_quantizer_ste_signed}, mediante la función \texttt{tf.where} \cite{tensorflow_where} descrita en la sección \ref{sec:tensorflow_graph} para aplicar el STE. Esta retorna el gradiente acumulado (\texttt{upstream}) cuando el valor de entrada $x$ se encuentra dentro del rango definido por los niveles, y cero en caso contrario. El uso de \texttt{tf.where} es necesario para operar de manera segura en el contexto del grafo computacional de TensorFlow.
 
 Por otra parte, el gradiente con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definido en \eqref{eq:uniform_quantizer_dq_dalpha}, se calcula de manera diferente. A diferencia del caso anterior, donde existe un gradiente para cada elemento de $x$, aquí $\alpha$ es un único escalar que afecta a todos los elementos del tensor de entrada. Por lo tanto, se calcula un gradiente para cada elemento $x_i$ con respecto a $\alpha$, y luego se suman todos estos gradientes para obtener el gradiente total mediante \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum}.
 
@@ -100,11 +100,11 @@ def quantize(x, alpha):
 
 \paragraph{Ejemplo de entrenamiento del cuantizador uniforme}
 
-Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador uniforme de 3 bits a los pesos de la capa oculta y a sus activaciones mediante la definición del diccionario \texttt{qconfig}, aplicando luego la cuantización mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_uniform}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
+Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador uniforme de 3 bits a los pesos de la capa oculta y a sus activaciones mediante la definición del diccionario \texttt{qconfig}, y finalmente se cuantiza el modelo mediante \texttt{quantize_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_uniform}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
 
 La figura \ref{fig:uniform_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y del parámetro $\alpha$ del cuantizador aplicado a la capa oculta a lo largo del entrenamiento.
 
-\begin{lstlisting}[language=Python,label=code:modelo_utilizado_uniform,caption={Definición de un modelo MLP de una sola capa oculta con Keras, utilizando el cuantizador uniforme}]
+\begin{lstlisting}[language=Python,label=code:modelo_utilizado_uniform,caption={Definición de un modelo MLP de una sola capa oculta con Keras, con cuantización uniforme}]
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = Dense(128, activation="relu", name="hidden")
     layer_3 = Dense(10, activation="softmax", name="output")
@@ -124,30 +124,30 @@ La figura \ref{fig:uniform_quantizer_training} muestra la evolución de la funci
     qmodel = quantize_model(model, qconfig)
 \end{lstlisting}
 
-\vspace{-1cm}
+% \vspace{-1cm}
 \input{sections/03_diseno_e_implementacion/04_fig_uniform_training}
 
-De manera complementaria, la figura \ref{fig:uniform_quantizer_snapshots} presenta la evolución de la función de cuantización de la capa oculta en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7, 10.
+De manera complementaria, la figura \ref{fig:uniform_quantizer_snapshots} presenta la evolución de la función de cuantización de la capa oculta en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7, y 10. Notar que en cada época el rango de valores de entrada y salida cambia, como se aprecia en los ejes de las gráficas.
 
 \input{sections/03_diseno_e_implementacion/04_fig_uniform_snapshots}
 
-Como se puede observar en las figuras \ref{fig:uniform_quantizer_training} y \ref{fig:uniform_quantizer_snapshots}, el cuantizador uniforme ajusta su parámetro $\alpha$ en conjunto con el entrenamiento del modelo logrando una minimización efectiva de la función de pérdida.
+Como se puede observar en las figuras \ref{fig:uniform_quantizer_training} y \ref{fig:uniform_quantizer_snapshots}, el cuantizador uniforme ajusta su parámetro $\alpha$ en conjunto con el entrenamiento del modelo, lo que consigue una minimización efectiva de la función de pérdida.
 
 \subsubsection{Implementación del cuantizador flexible}
 
 El fragmento de código \ref{code:flexible_quantizer_full} muestra la implementación completa de la función de cuantización flexible y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_flexible_quantizer}.
 
-La implementación de la función de cuantización flexible definida en \eqref{eq:flexible_quantizer} cuantiza primero los niveles utilizando el cuantizador uniforme definido anteriormente, y luego cuantiza la entrada $x$ asignándole el nivel correspondiente según los umbrales definidos mediante la función \texttt{tf.where}.
+La implementación de la función de cuantización flexible definida en \eqref{eq:flexible_quantizer} cuantiza primero los niveles mediante el cuantizador uniforme definido anteriormente, y luego cuantiza la entrada $x$ asignándole el nivel correspondiente según los umbrales definidos mediante la función \texttt{tf.where}.
 
 Para implementar los gradientes definidos en la sección \ref{sec:flexible_quantizer_gradient}, se decora la función de cuantización \texttt{quantize} con \texttt{@tf.custom\_gradient} y se define la función de gradiente personalizada \texttt{grad}, la cual debe definir cuatro gradientes: uno con respecto a la entrada $x$, otro con respecto al parámetro $\alpha$, otro con respecto a los niveles $l$ y otro con respecto a los umbrales $t$.
 
 El gradiente de la función de cuantización flexible con respecto a la entrada $x$, $\frac{\partial q_{f}}{\partial x}$, es idéntico al del cuantizador uniforme al ser un STE. Lo mismo ocurre con el gradiente con respecto a $\alpha$, $\frac{\partial q_{f}}{\partial \alpha}$.
 
-Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descrito en \eqref{eq:flexible_quantizer_dq_dl}, presenta una situación análoga al caso de $\alpha$: la dimensión de la entrada $x$ (un tensor) no corresponde con la dimensión de los niveles $l$ (un vector). Por lo tanto, se debe acumular el gradiente de todos los valores $x_j$ que son cuantizados al mismo nivel $l_i$, es decir, todos aquellos que caen dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$. Para esto, se utiliza \texttt{tf.searchsorted} \cite{tensorflow_searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego \texttt{tf.one\_hot} \cite{tensorflow_one_hot} para crear una matriz one-hot \cite{one_hot_encoding} con estos índices, y finalmente \texttt{tf.matmul} \cite{tensorflow_matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}). Nuevamente, se utilizan estas operaciones de TensorFlow para operar de manera segura en el contexto del grafo computacional, como fue explicado en la sección \ref{sec:tensorflow_graph}.
+Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f}}{\partial l}$, descrito en \eqref{eq:flexible_quantizer_dq_dl}, presenta una situación análoga al caso de $\alpha$: se debe calcular y acumular el gradiente para cada uno de los valores $x_j$. Por lo tanto, se debe acumular el gradiente de todos los valores $x_j$ que estan dentro del intervalo definido por los umbrales $\mathbb{I}_t = [t_i, t_{i+1}]$, y por ende, son cuantizados al mismo nivel $l_i$. Para esto, se utiliza \texttt{tf.searchsorted} \cite{tensorflow_searchsorted} para encontrar el índice del nivel correspondiente a cada valor cuantizado, luego \texttt{tf.one\_hot} \cite{tensorflow_one_hot} para crear una matriz one-hot \cite{one_hot_encoding} con estos índices, y finalmente \texttt{tf.matmul} \cite{tensorflow_matmul} para multiplicar la matriz one-hot transpuesta por el gradiente acumulado (\texttt{upstream}). Nuevamente, se utilizan estas operaciones de TensorFlow para operar de manera segura en el contexto del grafo computacional, como fue explicado en la sección \ref{sec:tensorflow_graph}.
 
-De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descrito en \eqref{eq:flexible_quantizer_dq_dt}, también requiere acumulación debido a la discrepancia dimensional entre $x$ y $t$. En este caso, cada umbral $t_i$ afecta a un subconjunto específico de valores de entrada: aquellos que caen dentro del rango definido por los umbrales adyacentes $t_{i-1}$ y $t_{i+1}$. Por lo tanto, se calcula un gradiente para cada valor $x_j$ en ese rango con respecto a $t_i$, y luego se suman. Para esto, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo los valores relevantes, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar sus gradientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
+De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descrito en \eqref{eq:flexible_quantizer_dq_dt}, también requiere calcular y acumular el gradiente para cada uno de los elementos de entrada $x_j$. En este caso, cada umbral $t_i$ afecta a un subconjunto específico de valores de entrada: aquellos que caen dentro del rango definido por los umbrales adyacentes $t_{i-1}$ y $t_{i+1}$. Por lo tanto, se calcula un gradiente para cada valor $x_j$ en ese rango con respecto a $t_i$, y luego se suman. Para esto, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo los valores relevantes, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar sus gradientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados]
+\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados, basicstyle=\ttfamily\scriptsize]
 def quantize(x, alpha, levels, thresholds):
   # Cuantizar los niveles usando cuantizacion uniforme
   qlevels = uniform_quantizer(levels)
@@ -203,11 +203,11 @@ def quantize(x, alpha, levels, thresholds):
 
 \paragraph{Ejemplo de entrenamiento del cuantizador flexible}
 
-Para ilustrar el comportamiento del cuantizador flexible durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador flexible de 4 bits y 8 niveles a los pesos de la capa oculta, y uno uniforme de 3 bits a sus activaciones, mediante la definición del diccionario \texttt{qconfig}, aplicando luego la cuantización mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_flexible}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
+Para ilustrar el comportamiento del cuantizador flexible durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador flexible de 4 bits y 8 niveles a los pesos de la capa oculta, y uno uniforme de 3 bits a sus activaciones, mediante la definición del diccionario \texttt{qconfig}, y finalmente, se aplica la cuantización mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_flexible}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
 
 La figura \ref{fig:flexible_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y de los parámetros $\alpha$, niveles $l$ y umbrales $t$ del cuantizador flexible aplicado a la capa oculta a lo largo del entrenamiento.
 
-\begin{lstlisting}[language=Python,label=code:modelo_utilizado_flexible,caption={Definición de un modelo MLP de una sola capa oculta con Keras, utilizando el cuantizador flexible}]
+\begin{lstlisting}[language=Python,label=code:modelo_utilizado_flexible,caption={Definición de un modelo MLP de una sola capa oculta con Keras, con cuantización flexible}]
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = Dense(128, activation="relu", name="hidden")
     layer_3 = Dense(10, activation="softmax", name="output")
@@ -230,10 +230,10 @@ La figura \ref{fig:flexible_quantizer_training} muestra la evolución de la func
 \end{lstlisting}
 
 
-\vspace{-1cm}
+% \vspace{-1cm}
 \input{sections/03_diseno_e_implementacion/04_fig_flexible_training}
 
-De manera complementaria, la figura \ref{fig:flexible_quantizer_snapshots} presenta la evolución de la función de cuantización flexible en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7 y 10. En estas capturas se muestran los niveles antes de ser cuantizados.
+De manera complementaria, la figura \ref{fig:flexible_quantizer_snapshots} presenta la evolución de la función de cuantización flexible en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7 y 10. En estas capturas se muestran los niveles antes y después de ser cuantizados.
 
 \input{sections/03_diseno_e_implementacion/04_fig_flexible_snapshots}
 

@@ -20,7 +20,7 @@ En el caso del cuantizador uniforme, la función depende de la entrada $x$ y del
 \end{equation}
 
 \subsubsection{Derivada con respecto a la entrada}
-La derivada respecto a la entrada se aproxima utilizando el STE explicado en la sección \ref{sec:qat}. En particular, se aproxima la $q_u$ con la función $\hat{q_u}$ definida en \eqref{eq:uniform_quantizer_ste_signed}. La función y su aproximación se muestran en la \reffig{uniform_signed_ste}.
+La derivada respecto a la entrada se aproxima mediante el STE explicado en la sección \ref{sec:qat}. En particular, se aproxima la $q_u$ con la función $\hat{q_u}$ definida en \eqref{eq:uniform_quantizer_ste_signed}. La función y su aproximación se muestran en la \reffig{uniform_signed_ste}.
 
 \begin{equation}
     \label{eq:uniform_quantizer_ste_signed}
@@ -49,7 +49,7 @@ Por ende, la derivada $\frac{\partial q_u}{\partial x}$ se aproxima como la deri
 
 \subsubsection{Derivada con respecto al rango de cuantización}
 
-La derivada de la función de cuantización uniforme con respecto al parámetro $\alpha$, necesaria para la optimización de $\alpha$ durante el entrenamiento, se puede deducir observando la gráfica de la función de cuantización uniforme $q_u$ de la \reffig{uniform_signed_ste}.
+La derivada de la función de cuantización uniforme con respecto al parámetro $\alpha$, necesaria para la optimización de $\alpha$ durante el entrenamiento, se puede deducir a partir de la gráfica de la función de cuantización uniforme $q_u$ de la \reffig{uniform_signed_ste}.
 
 Para un $x$ fijo dentro del rango de cuantización, el valor de salida es el nivel $l_i(\alpha)$ correspondiente. Cada nivel depende linealmente de $\alpha$, como se describió en \eqref{eq:uniform_quantizer_level_value} de la sección \ref{sec:uniform}. Por lo tanto, si se incrementa $\alpha$, la función de cuantización se incrementa en la misma proporción. La ecuación \eqref{eq:uniform_quantizer_dq_dalpha} expresa la derivada parcial con respecto a $\alpha$.
 
@@ -65,7 +65,7 @@ En el caso del cuantizador flexible, la función depende de la entrada $x$ y de 
 
 \begin{equation}
     \label{eq:flexible_quantizer_gradient_generic}
-    \nabla q_f\left(x; \alpha, t, l\right) =
+    \nabla q_f\left(x; \alpha, \mathbf{t}, \mathbf{l}\right) =
     \left[
     \frac{\partial q_f}{\partial x},
     \frac{\partial q_f}{\partial \alpha},
@@ -93,7 +93,7 @@ La derivada con respecto a la entrada se aproxima mediante el STE, al igual que 
 La derivada con respecto a $\alpha$, $\frac{\partial q_f}{\partial \alpha}$, también se puede aproximar de la misma manera que en el caso del cuantizador uniforme, como se muestra en \eqref{eq:uniform_quantizer_dq_dalpha}.
 
 \subsubsection{Derivada con respecto a los niveles}
-La derivada con respecto a los niveles se puede deducir proyectando sobre el nivel $l_i$ para un $x$ fijo dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$, $x \in \left[t_i, t_{i+1}\right]$, donde $q(x) = l_i$.
+La derivada con respecto a los niveles se puede deducir a partir de la proyección de la función de cuantización sobre el nivel $l_i$ para un $x$ fijo dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$, $x \in \left[t_i, t_{i+1}\right]$, donde $q(x) = l_i$.
 
 Si se observa que al incrementar el nivel $l_i$ infinitesimalmente, el valor de salida de la función de cuantización $q_f$ también se incrementa en la misma proporción, por ende, su derivada con respecto a $l_i$ es $1$ en ese intervalo.
 

@@ -1,9 +1,9 @@
 \subsection{Implementación de cómputos de complejidad espacial (módulo \texttt{utils})}
 \label{sec:implementation_evaluation}
 
-Como se desarrolló en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} no proporciona herramientas para calcular la complejidad espacial teórica de modelos cuantizados, y menos aún para el caso de la cuantización flexible, que asume una codificación asintótica de Huffman \cite{huffman1952method}. Esta funcionalidad es fundamental para evaluar el impacto de diferentes esquemas de cuantización en el tamaño del modelo y para comparar la eficiencia de distintos cuantizadores. Por ello, se implementó en el módulo \texttt{utils} un conjunto de funciones para calcular la complejidad espacial de modelos tanto sin cuantizar como cuantizados, considerando los esquemas de cuantización uniforme y flexible.
+Como se desarrolló en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} no proporciona herramientas para calcular la complejidad espacial teórica de modelos cuantizados, y menos aún para el caso de la cuantización flexible, que asume una codificación asintótica de Huffman \cite{huffman1952method}. Esta funcionalidad es fundamental para evaluar el impacto de diferentes esquemas de cuantización en el tamaño del modelo y para comparar la eficiencia de distintos cuantizadores. Por ello, se implementó en el módulo \texttt{utils} un conjunto de funciones para calcular la complejidad espacial de modelos tanto sin cuantizar como cuantizados, que considera tanto los esquemas de cuantización uniforme, como los de cuantización flexible.
 
-La complejidad espacial de un modelo $S_{M}$ se calcula acumulando la complejidad espacial de cada capa, como se muestra en \eqref{eq:space_complexity_model}, donde $N_{L}$ representa la cantidad de capas del modelo.
+La complejidad espacial de un modelo $S_{M}$ se calcula mediante la acumulación de la complejidad espacial de cada capa, como se muestra en \eqref{eq:space_complexity_model}, donde $N_{L}$ representa la cantidad de capas del modelo.
 
 \begin{equation}
   \label{eq:space_complexity_model}
@@ -35,7 +35,7 @@ En el caso de un parámetro cuantizado con cuantización uniforme, la expresión
     S_{\theta_{q_{u}}} = b \cdot k
 \end{equation}
 
-Para el caso de la cuantización flexible, la complejidad espacial se calcula asumiendo que su implementación en hardware utiliza la codificación de Huffman, dado que esta es la manera presentada de implementación en su descripción \cite{electronics13101923}.
+Para el caso de la cuantización flexible, la complejidad espacial se calcula mediante la suposición de que su implementación en hardware utiliza la codificación de Huffman, dado que esta es la manera presentada de implementación en su descripción \cite{electronics13101923}.
 
 La codificación de Huffman es un esquema de codificación sin pérdida que asigna códigos de longitud variable a diferentes símbolos basándose en sus frecuencias de aparición. Los símbolos más frecuentes reciben códigos más cortos, mientras que los menos frecuentes reciben códigos más largos, lo que permite reducir el tamaño total de los datos al aprovechar la distribución de frecuencias.
 

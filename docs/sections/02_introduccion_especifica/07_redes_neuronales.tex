@@ -26,7 +26,7 @@ El MLP consta de tres etapas: una capa de entrada, una o más capas ocultas y un
 
 En este paradigma, cada capa adicional aprende representaciones de mayor abstracción. Las capas iniciales extraen características simples, las capas profundas combinan esas características para identificar patrones complejos. Por tanto, aumentar la profundidad incrementa la capacidad expresiva de la red y su habilidad para resolver problemas más complejos \cite{lecun:hal-04206682}.
 
-Históricamente, en el aprendizaje supervisado, era necesaria realizar una extracción manual de características relevantes de los datos y un preprocesamiento de los mismos para su posterior uso en el entrenamiento de modelos. Sin embargo, las redes neuronales profundas han revolucionado este enfoque al permitir que el modelo aprenda automáticamente dichas características a partir de los datos crudos, eliminando la necesidad de ingeniería de características manual y mejorando significativamente el desempeño en tareas complejas como el reconocimiento de imágenes y el procesamiento del lenguaje natural \cite{Goodfellow2016}.
+Históricamente, en el aprendizaje supervisado, era necesaria realizar una extracción manual de características relevantes de los datos y un preprocesamiento de los mismos para su posterior uso en el entrenamiento de modelos. Sin embargo, las redes neuronales profundas han revolucionado este enfoque al permitir que el modelo aprenda automáticamente dichas características a partir de los datos crudos, lo que elimina la necesidad de ingeniería de características manual y mejora significativamente el desempeño en tareas complejas como el reconocimiento de imágenes y el procesamiento del lenguaje natural \cite{Goodfellow2016}.
 
 % \input{diagrams/mlp}
 \defaultdiagram{mlp.tex}{Esquema de un perceptrón multicapa.}{mlp}{0.8}
@@ -43,7 +43,7 @@ Desde el punto de vista matemático, las salidas de este modelo se representan c
 
 La diferencia central entre el entrenamiento de redes neuronales y la optimización de modelos más simples, como la regresión lineal o logística, radica en la complejidad de la función que se optimiza \cite{Goodfellow2016}.
 
-Esta complejidad proviene de la estructura profunda y no lineal de las redes: la función de costo $\mathcal{L}(\theta, \mathcal{D})$ puede ser no convexa y presentar múltiples mínimos locales, dificultando la convergencia de los algoritmos de optimización \cite{Goodfellow2016}.
+Esta complejidad proviene de la estructura profunda y no lineal de las redes: la función de costo $\mathcal{L}(\theta, \mathcal{D})$ puede ser no convexa y presentar múltiples mínimos locales, lo que dificulta la convergencia de los algoritmos de optimización \cite{Goodfellow2016}.
 
 Para lograr entrenar estos modelos profundos, generalmente se requieren grandes cantidades de datos etiquetados \cite{Goodfellow2016}. Lo que incrementa la complejidad computacional del proceso de entrenamiento y la necesidad de utilizar técnicas avanzadas de optimización.
 
@@ -56,7 +56,7 @@ De manera simplificada una iteración o época del algoritmo de entrenamiento de
     \item Inferencia: se calcula la salida de la red para el conjunto de datos de entrada $\mathcal{D}$ con los parámetros actuales de la red $\theta$.
     \item Cálculo del costo: se determina el valor de la función de costo $\mathcal{L}(\theta, \mathcal{D})$ a partir de las salidas predecidas $\hat{y_i}$ y las salidas reales del conjunto de datos $y_i$.
     \item Cálculo del gradiente: se calcula el gradiente de la función de costo, calculada en el punto anterior, con respecto a cada parámetro de la red.
-    \item Actualización de parámetros: los parámetros de la red se actualizan utilizando el algoritmo de optimización seleccionado, como por ejemplo GD, SGD o Adam.
+    \item Actualización de parámetros: los parámetros de la red se actualizan mediante el algoritmo de optimización seleccionado, como por ejemplo GD, SGD o Adam.
 \end{itemize}
 
 La \reffig{simple_training_loop} muestra un diagrama del ciclo (\textit{loop}) de entrenamiento de una red neuronal. Este ciclo se repite sobre el mismo conjunto de datos hasta cumplir con algún criterio de parada, el cual puede basarse, por ejemplo, en un número fijo de épocas y otros criterios que se detallan en la sección \ref{sec:conjuntos_de_datos}.
@@ -65,9 +65,9 @@ La \reffig{simple_training_loop} muestra un diagrama del ciclo (\textit{loop}) d
 
 
 \subsubsection{\textit{Backpropagation}}
-Para abordar el problema que surge al calcular los gradientes se emplea el algoritmo de retropropagación (\textit{backpropagation}) \cite{rumelhart1986learning}. Este procedimiento aplica la regla de la cadena de manera recursiva para descomponer el gradiente total en los gradientes de cada capa: primero se calcula el error en la salida y luego se propaga hacia atrás a través de la red, acumulando la multiplicación de los términos. Este algoritmo permite obtener de forma eficiente los gradientes necesarios para actualizar los parámetros en cada iteración. \textit{Backpropagation} es simplemente un caso particular de un grupo de algoritmos cuyo objetivo es el cálculo de derivadas de manera automática, llamada diferenciación automática o \textit{autodiff} (abreviado del inglés \textit{automatic differentiation}), la implementación computacional de este algoritmo en \texttt{TensorFlow} se explicará en la sección \ref{sec:autodiff} \cite{Goodfellow2016}.
+Para abordar el problema que surge al calcular los gradientes se emplea el algoritmo de retropropagación (\textit{backpropagation}) \cite{rumelhart1986learning}. Este procedimiento aplica la regla de la cadena de manera recursiva para descomponer el gradiente total en los gradientes de cada capa: primero se calcula el error en la salida y luego se propaga hacia atrás a través de la red, y se acumula la multiplicación de los términos. Este algoritmo permite obtener de forma eficiente los gradientes necesarios para actualizar los parámetros en cada iteración. \textit{Backpropagation} es simplemente un caso particular de un grupo de algoritmos cuyo objetivo es el cálculo de derivadas de manera automática, llamada diferenciación automática o \textit{autodiff} (abreviado del inglés \textit{automatic differentiation}), la implementación computacional de este algoritmo en \texttt{TensorFlow} se explicará en la sección \ref{sec:autodiff} \cite{Goodfellow2016}.
 
-Dos problemas que surgen al aplicar \textit{backpropagation} son el desvanecimiento y la explosión del gradiente. Estos fenómenos ocurren cuando los gradientes calculados durante la retropropagación se vuelven extremadamente pequeños o grandes, respectivamente, lo que dificulta el aprendizaje efectivo de la red \cite{Goodfellow2016}. Por ejemplo, si los gradientes se vuelven muy pequeños (desvanecimiento), las actualizaciones de los pesos serán insignificantes, lo que ralentiza o incluso detiene el aprendizaje. Por otro lado, si los gradientes se vuelven muy grandes (explosión), las actualizaciones pueden ser demasiado grandes, causando inestabilidad en el entrenamiento y dificultando la convergencia \cite{Goodfellow2016}.
+Dos problemas que surgen al aplicar \textit{backpropagation} son el desvanecimiento y la explosión del gradiente. Estos fenómenos ocurren cuando los gradientes calculados durante la retropropagación se vuelven extremadamente pequeños o grandes, respectivamente, lo que dificulta el aprendizaje efectivo de la red \cite{Goodfellow2016}. Por ejemplo, si los gradientes se vuelven muy pequeños (desvanecimiento), las actualizaciones de los pesos serán insignificantes, lo que ralentiza o incluso detiene el aprendizaje. Por otro lado, si los gradientes se vuelven muy grandes (explosión), las actualizaciones pueden ser demasiado grandes, lo que puede causar inestabilidad en el entrenamiento y dificultar la convergencia \cite{Goodfellow2016}.
 
 \subsubsection{Conjuntos de datos}
 \label{sec:conjuntos_de_datos}
@@ -80,7 +80,7 @@ El conjunto de validación ($\mathcal{D}_{\mathrm{val}}$) se emplea para monitor
 Finalmente, el conjunto de prueba ($\mathcal{D}_{\mathrm{test}}$) se reserva para evaluar el desempeño final del modelo sobre datos no vistos durante el desarrollo y verificar su capacidad de generalización \cite{vanderGoot2021}.
 
 \subsubsection{Ejemplo de un ciclo completo de entrenamiento}
-En el algoritmo \ref{alg:training_loop} se presenta un ejemplo de un ciclo de entrenamiento completo, incluyendo minibatches, evaluación en el conjunto de validación, SGD y \textit{early stopping}.
+En el algoritmo \ref{alg:training_loop} se presenta un ejemplo de un ciclo de entrenamiento completo, con minibatches, evaluación en el conjunto de validación, SGD y \textit{early stopping}.
 
 \begin{algorithm}[H]
     \caption[Ciclo de entrenamiento con guardado del mejor modelo]{Ciclo de entrenamiento con guardado del mejor modelo.}
@@ -120,7 +120,7 @@ En el algoritmo \ref{alg:training_loop} se presenta un ejemplo de un ciclo de en
 
 \subsection{Redes neuronales como modelos generales}
 \label{sec:redes_neuronales_como_modelos_generales}
-Una característica destacada de las redes neuronales es su capacidad para ser utilizadas como modelos generales para una amplia variedad de problemas de aprendizaje automático. Gracias a su estructura flexible y capacidad para aprender representaciones complejas, las redes neuronales pueden adaptarse a diferentes tipos de datos y tareas, incluyendo regresión, clasificación, procesamiento de imágenes, reconocimiento de voz, entre otros \cite{Goodfellow2016}.
+Una característica destacada de las redes neuronales es su capacidad para ser utilizadas como modelos generales para una amplia variedad de problemas de aprendizaje automático. Gracias a su estructura flexible y capacidad para aprender representaciones complejas, las redes neuronales pueden adaptarse a diferentes tipos de datos y tareas, como problemas de regresión, de clasificación, procesamiento de imágenes, reconocimiento de voz, entre otros \cite{Goodfellow2016}.
 
 En particular, es posible modelar los sistemas descritos en las secciones \ref{sec:regresion_lineal} y \ref{sec:regresion_logistica} con una red neuronal y determinar sus parámetros mediante el algoritmo de entrenamiento descrito en la sección \ref{sec:entrenamiento_redes_neuronales}.
 
@@ -156,7 +156,7 @@ Sin embargo, las capacidades de las redes neuronales profundas trascienden ampli
 
 En conjunto, estas arquitecturas ilustran el enorme potencial de las redes neuronales profundas para abordar problemas complejos en una amplia gama de dominios. Sin embargo, su uso presenta limitaciones prácticas, una de ellas es la necesidad de grandes volúmenes de datos etiquetados para ajustar los pesos \cite{Goodfellow2016}.
 
-Además, modelar sistemas más complejos suele exigir arquitecturas más profundas (más capas), más anchas (más canales o neuronas por capa) y con entradas más grandes, por ejemplo la arquitectura \textit{EfficientNet} \cite{tan2020efficientnetrethinkingmodelscaling}. Como resultado, aumentan tanto el número de parámetros a ajustar como el coste computacional de las operaciones. A modo de ilustración, en la \reffig{model_complexity_over_time} se muestra la evolución de la complejidad de los modelos a lo largo del tiempo, evidenciando la tendencia exponencial en el número de parámetros.
+Además, modelar sistemas más complejos suele exigir arquitecturas más profundas (más capas), más anchas (más canales o neuronas por capa) y con entradas más grandes, por ejemplo la arquitectura \textit{EfficientNet} \cite{tan2020efficientnetrethinkingmodelscaling}. Como resultado, aumentan tanto el número de parámetros a ajustar como el coste computacional de las operaciones. A modo de ilustración, en la \reffig{model_complexity_over_time} se muestra la evolución de la complejidad de los modelos a lo largo del tiempo, lo que evidencia la tendencia exponencial en el número de parámetros.
 
 \defaultfigure{redes/model_complexity_over_time.png}{Evolución de la complejidad de los modelos en el tiempo.\protect\footnotemark}{model_complexity_over_time}
 \footnotetext{Imagen tomada de Our World in Data (2023), \textit{Exponential growth of parameters in notable AI systems}. Disponible en: \url{https://ourworldindata.org/grapher/exponential-growth-of-parameters-in-notable-ai-systems}, bajo licencia Creative Commons BY 4.0.}

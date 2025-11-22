@@ -37,7 +37,7 @@ Existen múltiples técnicas de compresión de redes neuronales, las cuales perm
 
 \begin{itemize}
     \item Compartición de pesos (\textit{Weight Sharing} en inglés): se agrupan los pesos de la red en un conjunto reducido de valores, lo que permite una representación más compacta sin afectar demasiado la capacidad de generalización \cite{8253600}.
-    \item Poda (\textit{Weight Pruning} en inglés): se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, lo que reduce la cantidad de parámetros sin afectar significativamente la precisión del modelo \cite{8253600}.
+    \item Poda (\textit{Weight Pruning} en inglés): se eliminan conexiones o neuronas que tienen una contribución marginal en la inferencia, lo que reduce la cantidad de parámetros sin afectar significativamente el desempeño del modelo \cite{8253600}.
     \item Cuantización (\textit{Quantization} en inglés): se reduce la cantidad de bits utilizados para representar los parámetros del modelo, lo que disminuye el consumo de memoria y acelera las operaciones de inferencia \cite{8253600}.
     \item Factorización de tensores (\textit{Tensor Decomposition} en inglés): se aproximan los tensores de pesos mediante técnicas de factorización, lo que reduce la cantidad de FLOPS necesarias durante la inferencia \cite{8253600}.
     \item Destilación de conocimiento (\textit{Knowledge Distillation} en inglés): se entrena un modelo más pequeño (\textit{student}) para imitar el comportamiento de un modelo más grande (\textit{teacher}), lo que transfiere la información esencial en una forma más compacta \cite{8253600}.
@@ -90,11 +90,11 @@ Y los niveles de cuantización por \eqref{eq:quantization_levels_example}.
 
 La cuantización definida por $\mathbf{t}$ y $\mathbf{l}$ en \eqref{eq:quantization_thresholds_example} y \eqref{eq:quantization_levels_example}, donde tanto los niveles como los umbrales de cuantización son valores equiespaciados, se conoce como cuantización uniforme \cite{sayood2017introduction}, la definición matemática formal de este tipo de cuantización se presenta en la sección \ref{sec:uniform}.
 
-La cantidad de niveles $n_l$ en el caso de la cuantización uniforme queda definido por el número de bits $b$ utilizados para representar cada valor cuantizado, y se calcula como $n_{l} = 2^b$. Por ejemplo, si se utilizan 8 bits para la cuantización, se tendrán $n_{l} = 2^8 = 256$ niveles de cuantización.
+La cantidad de niveles $n_l$ en el caso de la cuantización uniforme queda definido por el número de bits $b$ utilizados para representar cada valor cuantizado, y se calcula como $n_{l} = 2^b$. Por ejemplo, si se utilizan 8 bits para la cuantización, se tendrán $n_{l} = 2^8 = 256$ niveles equiespaciados.
 
-Otra función de cuantización utilizada normalmente es la cuantización no uniforme \cite{sayood2017introduction}. En donde los niveles y umbrales de cuantización no están equiespaciados y la cantidad de niveles no esta limitada a potencias de 2. Este tipo de cuantización puede ser beneficiosa en situaciones donde la distribución de los datos no es uniforme, permitiendo una mejor representación de ciertos rangos de valores. La descripción matemática de la cuantización no uniforme será detallada en la sección \ref{sec:non_uniform}.
+Otra función de cuantización utilizada normalmente es la cuantización no uniforme \cite{sayood2017introduction}. En donde los niveles y umbrales de cuantización no están equiespaciados y la cantidad de niveles no esta limitada a potencias de 2. Este tipo de cuantización puede ser beneficiosa en situaciones donde la distribución de los datos no es uniforme, lo que permite una mejor representación de ciertos rangos de valores. La descripción matemática de la cuantización no uniforme será detallada en la sección \ref{sec:non_uniform}.
 
-En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo para cada tipo de cuantización utilizando un cuantizador de 8 niveles.
+En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo para cada tipo de cuantización para el caso de un cuantizador de 8 niveles.
 
 \defaultdiagram{cuantizacion/uniform_vs_non_uniform}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}{1}
 
@@ -127,7 +127,7 @@ En esta sección se describen tres funciones de cuantización relevantes en este
 
 \subsection{Estrategias de cuantización}
 \label{sec:estrategias_de_cuantizacion}
-La cuantización reduce el tamaño del modelo, la memoria requerida y acelera la inferencia. No obstante, la reducción de la precisión numérica introduce un error de cuantización que puede afectar el rendimiento, desplazando el modelo del punto de convergencia obtenido en el entrenamiento previo a la cuantización \cite{gholami2021surveyquantizationmethodsefficient}. Por ende, al cuantizar modelos es esencial evaluar el impacto de la cuantización en las métricas y hallar un compromiso adecuado entre compresión y precisión.
+La cuantización reduce el tamaño del modelo, la memoria requerida y acelera la inferencia. No obstante, la reducción de la precisión numérica introduce un error de cuantización que puede afectar el rendimiento, al generar un desplazamiento del punto de convergencia obtenido en el entrenamiento previo a la cuantización \cite{gholami2021surveyquantizationmethodsefficient}. Por ende, al cuantizar modelos es esencial evaluar el impacto de la cuantización en las métricas y hallar un compromiso adecuado entre compresión y precisión.
 
 Existen dos estrategias principales para aplicar la cuantización en redes neuronales: la cuantización post-entrenamiento (PTQ) y la cuantización durante el entrenamiento (QAT).
 
@@ -145,7 +145,7 @@ El proceso consiste en, a partir de una red entrenada, realizar los siguientes p
 \begin{enumerate}
     \item Calibración: uso de un conjunto de datos representativo para analizar la distribución de las activaciones de la red.
     \item Extracción de parámetros de cuantización: determinación de parámetros tales como niveles y umbrales a partir de las distribuciones de pesos y activaciones.
-    \item Cuantización: aplicación de la función de cuantización a los parámetros de la red utilizando los parámetros obtenidos.
+    \item Cuantización: aplicación de la función de cuantización a los parámetros de la red configurada con los parámetros obtenidos.
     \item Evaluación: evaluación del modelo cuantizado en un conjunto de prueba para medir el impacto sobre la precisión.
 \end{enumerate}
 
@@ -158,9 +158,9 @@ La definición de los parámetros de cuantización es crítica, puesto que una c
 
 \subsubsection{Estrategia QAT}
 \label{sec:qat}
-QAT consiste en entrenar un modelo considerando los efectos de la cuantización durante el proceso de entrenamiento \cite{jacob2017quantizationtrainingneuralnetworks}, al hacerlo, el modelo se adapta a la representación cuantizada. QAT generalmente produce modelos cuantizados de mayor precisión en comparación con PTQ, especialmente en cuantizaciones agresivas \cite{dai2024trainablefixedpointquantizationdeep}.
+QAT consiste en entrenar un modelo en un entorno que emule los efectos de la cuantización durante el proceso de entrenamiento \cite{jacob2017quantizationtrainingneuralnetworks}, al hacerlo, el modelo se adapta a la representación cuantizada durante el entrenamiento. QAT generalmente produce modelos cuantizados de mayor precisión en comparación con PTQ, especialmente en cuantizaciones agresivas \cite{dai2024trainablefixedpointquantizationdeep}.
 
-Como se explicó, en la sección \ref{sec:entrenamiento_redes_neuronales}, el proceso de entrenamiento de una red neuronal requiere de una alta precisión numérica, y suele realizarse en \texttt{FP32}, siendo particularmente crítico para el \textit{backward pass}, al depender de cálculos precisos para actualizar los pesos de manera efectiva y asegurar la convergencia del entrenamiento.
+Como se explicó, en la sección \ref{sec:entrenamiento_redes_neuronales}, el proceso de entrenamiento de una red neuronal requiere de una alta precisión numérica, y suele realizarse en \texttt{FP32}. Esta precisión, es particularmente crítica para el \textit{backward pass}, al depender de cálculos precisos para actualizar los pesos de manera efectiva y asegurar la convergencia del entrenamiento.
 
 Las técnicas utilizadas para incluir los efectos de la cuantización durante el entrenamiento, se basan en emular los efectos de la cuantización durante la inferencia (o \textit{forward pass}), y luego realizar el \textit{backward pass} en representación de punto flotante.
 
@@ -263,9 +263,9 @@ Si se reordenan los términos como \eqref{eq:single_layer_backward_quantizer_reo
     \underbrace{\overline{y_{m}\,}\dfrac{\partial z}{\partial \theta}\,\phi'}_{\text{\tiny Equivalente a la expresión \eqref{eq:single_layer_backward}}}\!\cdot\!\underbrace{q_{\phi}'\,q_{\theta}'\vphantom{\dfrac{\partial z}{\partial \theta}}}_{\text{\tiny Términos de cuantización}}
 \end{equation}
 
-En conclusión, la cuantización afecta el cálculo del gradiente mediante la introducción de los términos $\nabla_{q_{\theta}}$ y $\nabla_{q_{\phi}}$, que representan las derivadas de las funciones de cuantización. Estos términos modifican el gradiente original, impactando en la actualización de los pesos durante el entrenamiento.
+En conclusión, la cuantización afecta el cálculo del gradiente mediante la introducción de los términos $\nabla_{q_{\theta}}$ y $\nabla_{q_{\phi}}$, que representan las derivadas de las funciones de cuantización. Estos términos modifican el gradiente original, lo que impacta en la actualización de los pesos durante el entrenamiento.
 
-Ahora bien, si se analizan las funciones de cuantización presentadas en la sección \ref{sec:funciones_de_cuantizacion}, se observa que estas funciones tienen puntos no diferenciables y derivada nula en el resto de su dominio. Esto es un problema, ya que si se tiene un gradiente nulo de la función de cuantización, el gradiente total se anula, impidiendo la propagación del gradiente e inhibiendo el entrenamiento de la red. Esto también se un problema de gradiente desvaneciente.
+Ahora bien, si se analizan las funciones de cuantización presentadas en la sección \ref{sec:funciones_de_cuantizacion}, se observa que estas funciones tienen puntos no diferenciables y derivada nula en el resto de su dominio. Esto es un problema, ya que si se tiene un gradiente nulo de la función de cuantización, el gradiente total se anula, lo que impiede la propagación del gradiente e inhibe el entrenamiento de la red. Esto también se un problema de gradiente desvaneciente.
 
 Para solucionarlo, se utilizan aproximaciones de las funciones de cuantización que permiten calcular un gradiente no nulo. Una de las aproximaciones más utilizadas es el \textit{Straight-Through Estimator} (STE) \cite{bengio2013estimatingpropagatinggradientsstochastic}, que reemplaza la derivada nula por una aproximación lineal en la región activa de la función de cuantización. De esta manera, el gradiente se propaga a través de la cuantización como si fuera la identidad en la región activa. Una función de cuantización uniforme $q$ y su aproximación $\hat{q}$ mediante STE se muestra en la \reffig{q_ste} y \eqref{eq:ste_idea} detalla su derivada aproximada.
 
@@ -299,7 +299,7 @@ En este trabajo se utilizan STE y PW-STE para aproximar las funciones de cuantiz
 
 Asimismo, como se mencionó en la sección \ref{sec:objetivos}, el objetivo es implementar cuantizadores con parámetros entrenables. Para ello, se requiere calcular el gradiente de la función de cuantización con respecto a dichos parámetros y actualizarlos durante el proceso de entrenamiento mediante el mismo algoritmo de optimización empleado para los pesos de la red neuronal, descrito en esta sección.
 
-Ahora, la función de cuantización $q(u)$ se define como $q(u; \theta_{q})$ y sus parámetros de cuantización $\theta_{q}$ se actualizan durante el entrenamiento utilizando el gradiente de la función de pérdida con respecto a estos parámetros, de manera análoga a como se actualizan los pesos de la red neuronal. El gradiente se expresa en \eqref{eq:quantization_params_gradient}.
+Ahora, la función de cuantización $q(u)$ se define como $q(u; \theta_{q})$ y sus parámetros de cuantización $\theta_{q}$ se actualizan durante el entrenamiento mediante el gradiente de la función de pérdida con respecto a estos parámetros, de manera análoga a como se actualizan los pesos de la red neuronal. El gradiente se expresa en \eqref{eq:quantization_params_gradient}.
 
 \begin{equation}
     \label{eq:quantization_params_gradient}

@@ -5,7 +5,7 @@ Como se mencionó en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} ofrece
 
 Esta operación se puede realizar como muestra el fragmento de código \ref{code:tfmot_quantization_simple}, donde se define el mismo modelo presentado en la sección \ref{sec:keras} (fragmento de código \ref{code:tensorflow_mlp}) y posteriormente se aplica la cuantización mediante la función \texttt{quantize\_model} de \texttt{TFMOT}.
 
-\begin{lstlisting}[language=Python,label=code:tfmot_quantization_simple,caption=Uso sencillo de TFMOT para cuantización uniforme de 8 bits.]
+\begin{lstlisting}[language=Python,label=code:tfmot_quantization_simple,caption=Uso de TFMOT para cuantización uniforme de 8 bits.]
 model = Sequential([
     Flatten(input_shape=(28, 28), name="input"),
     Dense(128, activation="relu", name="hidden"),
@@ -14,7 +14,7 @@ model = Sequential([
 quant_aware_model = tfmot.quantization.keras.quantize_model(model)
 \end{lstlisting}
 
-Sin embargo, esta forma sencilla de definir la cuantización soporta únicamente el esquema de cuantización por defecto (global, uniforme y de 8 bits). Al utilizar un esquema de cuantización personalizado, ya implique cambiar el cuantizador para todo el modelo, para una capa o para un atributo específico de una capa, debe emplearse un patrón más complejo. Este patrón se ejemplifica en el fragmento de código \ref{code:tfmot_quantization_custom_layer}, el cual ilustra el caso de aplicar una configuración de cuantización personalizada para una capa específica.
+Sin embargo, esta forma de definir la cuantización soporta únicamente el esquema de cuantización por defecto (global, uniforme y de 8 bits). Al utilizar un esquema de cuantización personalizado, ya implique cambiar el cuantizador para todo el modelo, para una capa o para un atributo específico de una capa, debe emplearse un patrón más complejo. Este patrón se ejemplifica en el fragmento de código \ref{code:tfmot_quantization_custom_layer}, el cual ilustra el caso de aplicar una configuración de cuantización personalizada para una capa específica.
 
 Primero se define una clase que implementa la interfaz \texttt{QuantizeConfig} de \texttt{TFMOT}, la cual describe los cuantizadores a utilizar para los pesos, activaciones y salidas de la capa (su detalle se verá en la sección \ref{sec:quantize_config}). Luego se crea una instancia de dicha clase y se pasa como argumento a la función \texttt{quantize\_annotate\_layer} \cite{tfmot_quantize_py} para envolver la capa original con la configuración de cuantización deseada. Finalmente, la función \texttt{quantize\_apply} \cite{tfmot_quantize_py} recorre el grafo del modelo y materializa las capas cuantizadas con las configuraciones almacenadas previamente.
 
@@ -99,7 +99,7 @@ annotated_layer = quantize_annotate_layer(
 
 Este enfoque obliga a crear, para cada configuración de cuantización, una clase que implemente \texttt{QuantizeConfig} y describa explícitamente los cuantizadores para pesos, activaciones y salidas de manera estática. Como resultado, se genera código repetitivo y se encarecen las tareas de definición de nuevas configuraciones, escritura de pruebas y experimentación.
 
-Para abordar estas limitaciones y cumplir con los requisitos funcionales RF1.1 y RF1.2, se introdujo la clase \texttt{GenerateConfig}, la cual permite la definición de esquemas de cuantización mediante diccionarios de Python, mejorando significativamente la ergonomía del proceso.
+Para abordar estas limitaciones y cumplir con los requisitos funcionales RF1.1 y RF1.2, se introdujo la clase \texttt{GenerateConfig}, que permite la definición de esquemas de cuantización mediante diccionarios de Python, lo que mejora significativamente la ergonomía del proceso.
 
 \subsubsection{Clase \texttt{GenerateConfig}}
 \label{sec:generate_config}
@@ -126,7 +126,7 @@ annotated_layer = quantize_annotate_layer(
 
 La ventaja principal de este enfoque es que elimina la necesidad de definir una nueva clase para cada configuración de cuantización. En su lugar, simplemente se crea una instancia de \texttt{GenerateConfig} con los diccionarios que describen los cuantizadores a utilizar para cada atributo de la capa.
 
-Técnicamente, la implementación de \texttt{GenerateConfig} logra esta flexibilidad adaptando los métodos de la interfaz \texttt{QuantizeConfig} a la nueva forma declarativa. Para ello, se aprovecha la capacidad de Python para inspeccionar los atributos de una clase en tiempo de ejecución mediante las funciones nativas \texttt{getattr} y \texttt{setattr}.
+Técnicamente, la implementación de \texttt{GenerateConfig} logra esta flexibilidad mediante modificaciones a los métodos de la interfaz \texttt{QuantizeConfig} a la nueva forma declarativa. Para ello, se aprovecha la capacidad de Python para inspeccionar los atributos de una clase en tiempo de ejecución mediante las funciones nativas \texttt{getattr} y \texttt{setattr}.
 
 En particular, el requisito funcional RF1.2 establece que la configuración de cuantización debe soportar atributos anidados. Un caso concreto es la capa \texttt{LSTM} de \texttt{Keras}, donde los pesos se encuentran en el atributo \texttt{cell.kernel}. Para cumplir con este requisito, se implementaron funciones auxiliares que permiten obtener y establecer atributos anidados a partir de una cadena de texto que representa la ruta del atributo.
 
@@ -134,9 +134,9 @@ Concretamente, las funciones \texttt{get\_nested\_attribute} y \texttt{set\_nest
 
 Así, la implementación de los métodos de \texttt{GenerateConfig} utiliza estas funciones auxiliares para obtener y establecer los atributos correspondientes de la capa según lo especificado en los diccionarios de cuantizadores, como se muestra en el fragmento de código \ref{code:generate_config}.
 
-Donde los métodos \texttt{get\_*} se definen los cuantizadores para los atributos especificados en los diccionarios \texttt{weights} y \texttt{activations}, utilizando la función \texttt{get\_nested\_attribute} para acceder a los atributos correspondientes de la capa.
+Donde los métodos \texttt{get\_*} se definen los cuantizadores para los atributos especificados en los diccionarios \texttt{weights} y \texttt{activations}, mediante la función \texttt{get\_nested\_attribute} para acceder a los atributos correspondientes de la capa.
 
-De manera similar, en los métodos \texttt{set\_*} se actualizan los atributos de la capa con sus versiones cuantizadas, utilizando la función \texttt{set\_nested\_attribute} para modificar los atributos correspondientes. De esta manera cualquier peso que no este especificado explícitamente en el diccionario no será cuantizado.
+De manera similar, en los métodos \texttt{set\_*} se actualizan los atributos de la capa con sus versiones cuantizadas, mediante la función \texttt{set\_nested\_attribute} para modificar los atributos correspondientes. De esta manera cualquier peso que no este especificado explícitamente en el diccionario no será cuantizado.
 
 \begin{lstlisting}[language=Python,label=code:generate_config,caption=Implementación de la clase \texttt{GenerateConfig} de \texttt{QTensor}.,basicstyle=\ttfamily\scriptsize]
 class GenerateConfig(QuantizeConfig):
@@ -183,7 +183,7 @@ class GenerateConfig(QuantizeConfig):
 \subsubsection{Submódulo \texttt{qmodel}}
 \label{sec:qmodel}
 
-Si bien \texttt{GenerateConfig} simplifica la definición de configuraciones de cuantización personalizadas, el patrón de uso de \texttt{TFMOT} sigue siendo complejo y repetitivo cuando se desea cuantizar un modelo completo con diferentes configuraciones para cada capa.
+Si bien \texttt{GenerateConfig} simplifica la definición de configuraciones de cuantización personalizadas, el patrón de uso es complejo y repetitivo cuando se desea cuantizar un modelo completo con diferentes configuraciones para cada capa.
 
 Para ilustrar esta situación, el fragmento de código \ref{code:custom_cuantization_layout} muestra la cuantización de un modelo mediante \texttt{GenerateConfig}. En este ejemplo, se cuantiza el modelo anterior con un esquema heterogéneo: la capa de salida utiliza una configuración, la capa oculta emplea otra diferente y la capa de entrada permanece sin cuantización.
 
@@ -228,7 +228,7 @@ Este extracto incluye la función \texttt{quantize\_scope} \cite{tfmot_quantize_
         quant_aware_model = quantize_apply(model)
 \end{lstlisting}
 
-Como puede observarse, aunque \texttt{GenerateConfig} resuelve el problema de la definición estática, el patrón de uso de \texttt{TFMOT} sigue siendo extenso y requiere múltiples pasos manuales. Precisamente para abordar esta limitación, se diseñó el submódulo \texttt{qmodel}, que proporciona una interfaz de alto nivel, \texttt{apply\_quantization} \cite{qtensor_qmodel} para cuantizar cualquier modelo definido en \texttt{TensorFlow} a partir de esquemas de cuantización expresados como diccionarios de Python.
+Como puede observarse, aunque \texttt{GenerateConfig} resuelve el problema de la definición estática, el patrón es extenso y requiere múltiples pasos manuales. Precisamente para abordar esta limitación, se diseñó el submódulo \texttt{qmodel}, que proporciona una interfaz de alto nivel, \texttt{apply\_quantization} \cite{qtensor_qmodel} para cuantizar cualquier modelo definido en \texttt{TensorFlow} a partir de esquemas de cuantización expresados como diccionarios de Python.
 
 Con el uso de \texttt{qmodel}, el ejemplo del fragmento de código \ref{code:custom_cuantization_layout} se reduce considerablemente, como se muestra en el fragmento de código \ref{code:qmodel_usage}.
 
@@ -261,7 +261,7 @@ quantization_config = {
 apply_quantization(model, quantization_config)
 \end{lstlisting}
 
-Este enfoque ofrece múltiples beneficios. En primer lugar, desacopla la definición del esquema de cuantización de la definición del modelo, lo que permite una mayor modularidad. En segundo lugar, simplifica significativamente la interacción del usuario con la biblioteca, facilitando la definición de esquemas de cuantización complejos de manera ágil. Finalmente, oculta la complejidad subyacente de \texttt{TFMOT}, permitiendo que los usuarios se concentren en aspectos de alto nivel sin preocuparse por los detalles de implementación.
+Este enfoque ofrece múltiples beneficios. En primer lugar, desacopla la definición del esquema de cuantización de la definición del modelo, lo que permite una mayor modularidad. En segundo lugar, simplifica significativamente la interacción del usuario con la biblioteca, lo que facilita la definición de esquemas de cuantización complejos. Finalmente, oculta la complejidad subyacente de \texttt{TFMOT}, lo que permite que los usuarios se concentren en aspectos de alto nivel sin preocuparse por los detalles de implementación.
 
 Internamente, la implementación de este submódulo \cite{qtensor_qmodel} envuelve la lógica de clonación de modelos de \texttt{Keras} \cite{tensorflow_clone_model} para crear una copia del modelo original. En esta copia, solo las capas especificadas en el diccionario de configuración se anotan con sus respectivos cuantizadores.
 
@@ -271,10 +271,10 @@ La figura \ref{fig:qtensor_pattern} muestra el flujo simplificado del patrón de
 
 \defaultdiagram{implementacion/qtensor_pattern}{Patrón simplificado de uso de QTensor con el módulo \texttt{qmodel}.}{qtensor_pattern}{0.9}
 
-En síntesis, la combinación de la clase \texttt{GenerateConfig} y el submódulo \texttt{qmodel} constituye una solución integral que transforma radicalmente la definición y aplicación de esquemas de cuantización personalizados en \texttt{TensorFlow}. Esta arquitectura, diseñada para cumplir con los requisitos RF1.1, RF1.2 y RF1.4, ofrece tres ventajas fundamentales:
+La combinación de la clase \texttt{GenerateConfig} y el submódulo \texttt{qmodel} constituye una solución integral que transforma radicalmente la definición y aplicación de esquemas de cuantización personalizados en \texttt{TensorFlow}. Esta arquitectura, diseñada para cumplir con los requisitos RF1.1, RF1.2 y RF1.4, ofrece tres ventajas fundamentales:
 
 \begin{itemize}
     \item Reduce drásticamente la cantidad de código necesario para definir esquemas de cuantización personalizados.
     \item Mejora sustancialmente la experiencia del usuario mediante una interfaz declarativa e intuitiva.
-    \item Fomenta la experimentación rápida con diferentes configuraciones de cuantización, eliminando las barreras técnicas que tradicionalmente limitan la exploración de alternativas en el diseño de modelos cuantizados.
+    \item Fomenta la experimentación rápida con diferentes configuraciones de cuantización, lo que elimina las barreras técnicas que tradicionalmente limitan la exploración de alternativas en el diseño de modelos cuantizados.
 \end{itemize}

@@ -3,11 +3,11 @@
 \begin{itemize}
     \item RF1.1: El sistema deberá permitir la definición de una estrategia de cuantización a partir de una configuración en un formato estructurado (e.g. diccionario en Python \cite{python_dictionaries}).
 
-    \item RF1.2: El sistema debe permitir una granularidad a nivel de atributo, posibilitando la asignación de cuantizadores distintos para cada parámetro del modelo. En particular, para todo peso y toda activación de cada capa, incluyendo capas con parámetros anidados (e.g. RNN \cite{tensorflow_keras_rnn}).
+    \item RF1.2: El sistema debe permitir una granularidad a nivel de atributo, que permita la asignación de cuantizadores diferentes para cada parámetro del modelo. En particular, para todo peso y toda activación de cada capa, incluso capas con parámetros anidados (e.g. RNN \cite{tensorflow_keras_rnn}).
 
     \item RF1.3: El sistema debe ser compatible con la API de modelos \texttt{Sequential} \cite{tensorflow_keras_sequential_api} y \texttt{Functional} \cite{tensorflow_keras_functional_api} de Keras.
 
-    \item RF1.4: El sistema debe soportar la serialización y deserialización \cite{tensorflow_serialization_guide} de modelos cuantizados (formato .keras o SavedModel), preservando el estado completo de los cuantizadores, incluyendo sus parámetros entrenables.
+    \item RF1.4: El sistema debe soportar la serialización y deserialización \cite{tensorflow_serialization_guide} de modelos cuantizados (formato .keras o SavedModel), inclusive el estado completo de los cuantizadores.
 \end{itemize}
 
 \subsubsection*{Objetivo 2: Cuantizador Uniforme}

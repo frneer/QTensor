@@ -14,7 +14,7 @@ La biblioteca \texttt{QTensor} se desarrolló exitosamente sobre \texttt{TensorF
 Se diseñó e implementó una biblioteca modular y extensible que satisface los requisitos funcionales de diseño y API (RF1.1-RF1.4), así como los atributos de calidad (RNF1.1, RNF2.1, RNF3.1 y RNF3.2). Los aspectos destacados de la implementación incluyen:
 
 \begin{itemize}
-    \item Interfaz simplificada: la biblioteca permite definir esquemas de cuantización mediante diccionarios de Python, lo que simplifica significativamente la experimentación en comparación con la interfaz de \texttt{TFMOT}. Se logró una granularidad a nivel de atributo, permitiendo asignar diferentes cuantizadores a cada parámetro del modelo, independientemente del tipo de capa.
+    \item Interfaz simplificada: la biblioteca permite definir esquemas de cuantización mediante diccionarios de Python, lo que simplifica significativamente la experimentación en comparación con la interfaz de \texttt{TFMOT}. Se logró una granularidad a nivel de atributo, que permite asignar diferentes cuantizadores a cada parámetro del modelo, independientemente del tipo de capa.
 
     \item Compatibilidad y serialización: la compatibilidad con las APIs \texttt{Sequential} y \texttt{Functional} de Keras, así como el soporte para serialización de modelos cuantizados, garantizan la integración con el ecosistema existente de \texttt{TensorFlow}.
 
@@ -32,10 +32,10 @@ Adicionalmente, los atributos de calidad definidos se cumplieron satisfactoriame
 
 \subsection{Objetivo 2: implementación de cuantización uniforme con parámetros adaptables}
 
-Se implementó exitosamente el cuantizador uniforme con parámetros entrenables, cumpliendo con los requisitos funcionales RF2.1-RF2.4. La implementación soporta modos signados y no signados, con número arbitrario de bits, e incluye:
+Se implementó exitosamente el cuantizador uniforme con parámetros entrenables, que cumple con los requisitos funcionales RF2.1-RF2.4. La implementación soporta modos signados y no signados, con número arbitrario de bits, e incluye:
 
 \begin{itemize}
-    \item Parámetro $\alpha$ entrenable que define el rango de cuantización, permitiendo su optimización durante el entrenamiento.
+    \item Parámetro $\alpha$ entrenable que define el rango de cuantización, y permite su optimización durante el entrenamiento.
     \item Gradientes personalizados que permiten la propagación de los gradientes a través de la función de cuantización mediante STE.
     \item Restricciones sobre los parámetros para garantizar su validez matemática durante el entrenamiento.
     \item Mecanismos de inicialización configurables para el parámetro $\alpha$.
@@ -43,7 +43,7 @@ Se implementó exitosamente el cuantizador uniforme con parámetros entrenables,
 
 \subsection{Objetivo 3: implementación de cuantización flexible con parámetros adaptables}
 
-Se implementó el esquema de cuantización flexible con parámetros entrenables, cumpliendo con los requisitos funcionales RF3.1-RF3.4 y representando una contribución original al extender el trabajo de \cite{electronics13101923} con la capacidad de entrenar los parámetros del cuantizador. La implementación incluye:
+Se extendió el esquema de cuantización flexible propuesto en \cite{electronics13101923}, mediante la incorporación de cuantizadores con parámetros entrenables, que cumple con los requisitos funcionales RF3.1-RF3.4, lo que repesenta una contribución original. La implementación incluye:
 
 \begin{itemize}
     \item Parámetros entrenables: rango ($\alpha$), niveles de cuantización ($\mathbf{l}$) y umbrales ($\mathbf{t}$).
@@ -74,18 +74,16 @@ El desarrollo de \texttt{QTensor} representa una contribución significativa al 
 \begin{itemize}
     \item Se implementó una biblioteca que proporciona herramientas para QAT con cuantizadores personalizados de parámetros entrenables, lo que simplifica la experimentación con esquemas de cuantización personalizados y reduce la barrera técnica para investigadores y desarrolladores.
 
-    \item Se extendió el esquema de cuantización flexible propuesto en \cite{electronics13101923} para incorporar parámetros entrenables ($\alpha$, $\mathbf{l}$, $\mathbf{t}$) optimizables mediante QAT. Esta capacidad, que no existía en la literatura ni en implementaciones previas, permite que el modelo adapte dinámicamente su esquema de cuantización durante el entrenamiento.
+    \item Se extendió el esquema de cuantización flexible propuesto en \cite{electronics13101923} para incorporar parámetros entrenables ($\alpha$, $\mathbf{l}$, $\mathbf{t}$) optimizables mediante QAT. Esta capacidad, que no existía en la literatura ni en implementaciones previas, permite que adaptar las características del cuantizador a las necesidades específicas del modelo y la tarea.
 
     \item Se demostró experimentalmente la viabilidad de compresión agresiva mediante cuantizadores flexibles. Los resultados evidenciaron que es posible alcanzar compresiones superiores a $20\times$ con la conservación de más del $96\%$ de la precisión original. Este hallazgo tiene implicaciones directas para el despliegue de modelos complejos en dispositivos con memoria limitada, donde las técnicas de cuantización uniforme tradicionales resultan insuficientes.
 
     \item Se habilitó la exploración de arquitecturas para hardware especializado. La capacidad de \texttt{QTensor} para soportar precisión mixta arbitraria facilita el diseño de redes neuronales optimizadas específicamente para plataformas como FPGA y ASIC, donde la precisión puede ajustarse de forma más granular que en microprocesadores de propósito general. Esto permite el diseño conjunto de modelos y hardware, con una mejora potencial de la eficiencia energética y el rendimiento en aplicaciones embebidas.
-
-    \item Se desarrollaron herramientas que aceleran los ciclos de investigación. Las utilidades de evaluación integradas y el marco experimental permiten iterar rápidamente sobre diferentes esquemas de cuantización, lo que reduce el tiempo necesario para validar hipótesis y comparar alternativas de manera sistemática y reproducible.
 \end{itemize}
 
 En un panorama donde los modelos de aprendizaje profundo crecen exponencialmente en tamaño y complejidad, mientras que las restricciones de recursos (memoria, energía, latencia) se vuelven cada vez más críticas, \texttt{QTensor} proporcionó herramientas prácticas para enfrentar este desafío. La biblioteca contribuye a hacer el despliegue de redes neuronales más sostenible y accesible, tanto desde una perspectiva económica como ambiental, al reducir los requisitos computacionales sin perjudicar el desempeño del modelo.
 
-\section{Lineas de trabajo futuro}
+\section{Líneas de trabajo futuro}
 
 Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados, es importante reconocer que existen limitaciones y oportunidades de mejora que representan líneas de trabajo futuro prometedoras. A continuación, se describen algunas de las más relevantes.
 
@@ -107,7 +105,7 @@ Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados,
 
     % \item Restricciones para hardware específico: implementar restricciones adicionales sobre los parámetros de cuantización que faciliten la implementación en hardware embebido. Por ejemplo, restringir el parámetro $\alpha$ para que sea una potencia de dos ($\alpha = 2^k$ con $k \in \mathbb{Z}$) simplificaría las operaciones en hardware de punto fijo \cite{przewlockarus2022poweroftwoquantizationlowbitwidth}.
 
-    \item Optimización automática de esquemas: desarrollar algoritmos de búsqueda automática de esquemas de cuantización óptimos mediante técnicas como la búsqueda de arquitecturas neuronales (NAS, \textit{Neural Architecture Search}) \cite{uhlich2020mixedprecisiondnnsneed} o algoritmos evolutivos \cite{dong2019hawqv2hessianawaretraceweighted} que exploren el espacio de configuraciones de manera sistemática.
+    \item Optimización automática de esquemas de cuantización: desarrollar algoritmos de búsqueda automática de esquemas de cuantización óptimos mediante técnicas como aprendizaje por refuerzo \cite{dong2019hawqv2hessianawaretraceweighted}, algoritmos evolutivos \cite{dong2019hawqv2hessianawaretraceweighted}, optimización de hiperparámetros \cite{wu2020autoq} y algoritmos heurísticos \cite{louizos2018relaxed} que exploren el espacio de configuraciones de manera sistemática.
 
     \item Métricas de complejidad temporal: incorporar en las herramientas de evaluación métricas de complejidad temporal en función de la cantidad de operaciones (FLOPs), lo que permitiría una evaluación más completa del desempeño de los modelos cuantizados.
 
@@ -118,7 +116,7 @@ Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados,
 \begin{itemize}
     \item Exploración de esquemas de cuantización: los experimentos realizados en esta tesis se centraron en un conjunto limitado de configuraciones para demostrar las capacidades de la biblioteca. Una exploración más exhaustiva del espacio de hiperparámetros (número de bits, niveles, configuraciones por capa) podría revelar esquemas de cuantización aún más eficientes.
 
-    \item Evaluación de complejidad temporal: realizar evaluaciones que incluyan métricas de complejidad computacional (FLOPs), latencia, consumo energético y ancho de banda de memoria, para complementar los resultados obtenidos en este trabajo.
+    \item Evaluación de métricas de bajo nivel, que no solo incluyan la complejidad computacional, sino también la latencia, consumo energético, ancho de banda, para complementar los resultados obtenidos en este trabajo.
 
     \item Evaluación en modelos de gran escala: aplicar \texttt{QTensor} a modelos preentrenados de visión computacional (e.g. EfficientNet \cite{tan2020efficientnetrethinkingmodelscaling}) y LLMs con mayor cantidad de parámetros, para validar la efectividad de los esquemas de cuantización en contextos más representativos de aplicaciones reales. Además, es posible que en modelos más grandes surjan desafíos adicionales relacionados con la estabilidad del entrenamiento y la convergencia de los parámetros de cuantización \cite{wang2024artsciencequantizinglargescale}.
 
@@ -128,9 +126,9 @@ Si bien \texttt{QTensor} cumple satisfactoriamente con los objetivos planteados,
 \subsection{Extensiones teóricas}
 
 \begin{itemize}
-    \item Análisis teórico de convergencia: desarrollar un análisis teórico que caracterice las propiedades de convergencia del entrenamiento con cuantizadores de parámetros entrenables \cite{jeong2025discretenessfinitesampleanalysisstraightthrough}, lo que podría proporcionar garantías formales sobre el comportamiento del algoritmo.
-
     \item Cuantización mixta automática: desarrollar métodos que determinen automáticamente la precisión óptima para cada capa del modelo y que consideren restricciones de complejidad global y objetivos de precisión.
+
+    \item Análisis teórico de convergencia: desarrollar un análisis teórico que caracterice las propiedades de convergencia del entrenamiento con cuantizadores de parámetros entrenables \cite{jeong2025discretenessfinitesampleanalysisstraightthrough}, lo que podría proporcionar garantías formales sobre el comportamiento del algoritmo.
 \end{itemize}
 
 \section{Reflexiones finales}

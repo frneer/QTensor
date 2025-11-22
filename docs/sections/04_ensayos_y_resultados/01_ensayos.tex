@@ -80,7 +80,7 @@ La diferencia entre los grupos radica en la cuantización de los pesos de las ca
 
 Para estas capas, el primer esquema utiliza cuantización uniforme signada con la misma resolución de bits por capa. Se exploraron distintas configuraciones de bits para evaluar el impacto en la precisión y el tamaño del modelo, en particular se evaluaron 10 configuraciones con diferentes resoluciones de bits.
 
-El segundo esquema emplea cuantización flexible signada para las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), donde se definieron múltiples configuraciones combinando número de bits y niveles, mientras que las capas de entrada y salida mantuvieron configuraciones fijas.
+El segundo esquema emplea cuantización flexible signada para las capas intermedias (\texttt{conv2d\_1} y \texttt{dense}), donde se definieron múltiples configuraciones que combinan número de bits y niveles, mientras que las capas de entrada y salida mantuvieron configuraciones fijas.
 
 La elección de no modificar los parámetros de cuantización para la primera y última capa se justifica en que se evaluó empíricamente que la precisión del modelo es altamente sensible a la cuantización de estas capas. Sumado a esto, las capas intermedias concentran, como se puede observan en la tabla \ref{tab:model_architecture}, un $\approx 99.8\%$ de los parámetros del modelo, mientras que la primera y última capa contienen una proporción muy pequeña de los mismos ($\approx 0.2\%$). Por lo tanto, los beneficios en términos de reducción del tamaño no justifican la pérdida de precisión para estas capas y por ende, se utiliza una cuantización poco agresiva.
 

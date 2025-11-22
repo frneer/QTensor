@@ -10,8 +10,6 @@ Los requisitos funcionales describen las capacidades que debe tener un sistema d
 
 A continuación se desarrolla cada uno de los requisitos funcionales definidos para la biblioteca \texttt{QTensor}, etiquetados mediante un identificador único asociado al objetivo al que pertenecen, junto con una descripción detallada del mismo.
 
-% Los requerimientos funciónales de la biblioteca se definieron en base a los objetivos planteados en la sección \ref{sec:objetivos}. Los mismos se detallan en la tabla \ref{tab:rf_detailed}, donde se especifica el objetivo al que pertenecen, el numero del requisito y una descripción detallada del mismo.
-
 % \input{sections/03_diseno_e_implementacion/02_tab_requisitos_funcionales}
 \input{sections/03_diseno_e_implementacion/02_bullet_requisitos_funcionales}
 
@@ -20,74 +18,58 @@ A continuación se desarrolla cada uno de los requisitos funcionales definidos p
 
 Los atributos de calidad definidos en la norma ISO 25010 \cite{ISO25010} constituyen un modelo de calidad de software donde se formaliza la definición de requisitos no funcionales. La importancia de los requerimientos no funcionales radica en que, sin ellos, se puede llegar a una solución que cumple con los requisitos funcionales pero no satisface las necesidades del usuario. Este modelo se compone de dos partes: características y subcaracterísticas. Las características son las propiedades generales del software, mientras que las subcaracterísticas son propiedades más específicas. La \reffig{iso_25010} ilustra las características y subcaracterísticas definidas en la norma ISO 25010.
 
-% Use \protect\footnotemark in the caption (moving argument) and place the footnote text
-% immediately after the figure to avoid fragility inside \caption.
 \defaultfigure{implementacion/iso_25010.png}{Modelo de calidad de software ISO 25010.\protect\footnotemark}{iso_25010}
 \footnotetext{Imagen tomada de \href{https://iso25000.com/index.php/en/iso-25000-standards/iso-25010}{iso25000.com}.}
 
 En el caso de \texttt{QTensor}, se buscó obtener una solución que permita a investigadores y desarrolladores trabajar de manera eficiente, intuitiva y directa, sin requerir un entrenamiento extenso. Asimismo, como se trata de una herramienta que facilita la experimentación con diferentes cuantizadores, resulta fundamental que el código sea modular y fácil de mantener y extender, de manera que se puedan agregar nuevos cuantizadores y funcionalidades sin afectar la estabilidad del sistema.
 
-En consecuencia, los atributos de calidad que se definieron pertenecen a las características de adecuación funcional, capacidad de interacción y mantenibilidad. La tabla \ref{tab:iso25010} presenta la definición de los atributos elegidos.
+En consecuencia, los atributos de calidad que se definieron pertenecen a las características de adecuación funcional, capacidad de interacción y mantenibilidad. A continuación se presenta la definición de los atributos elegidos:
 
-\begin{table}[H]
-\centering
-% Make table body and header smaller while leaving caption at normal size
-\caption{Atributos de calidad elegidos}
-\begin{tabularx}{\textwidth}{{>{\centering\arraybackslash}m{1.2cm} >{\centering\arraybackslash}m{3cm} >{\centering\arraybackslash}m{3cm} >{\arraybackslash}m{6cm}}}
-\toprule
-\textbf{ID} & \textbf{Requisito} & \textbf{Característica} & \textbf{Descripción} \\ \hline
-RNF1.1 & Adecuación funcional & Pertinencia funcional & Capacidad del producto software para proporcionar un conjunto de funciones que facilitan la consecución de tareas y objetivos de usuario especificados. \\ \hline
-RNF2.1 & Capacidad de interacción & Auto-descriptividad & Capacidad de un producto para presentar la información adecuada, haciendo su uso inmediatamente evidente para el usuario sin interacciones excesivas con el producto u otros recursos (documentación, \textit{help desks}, otros usuarios...). \\
-\hline
-RNF3.1 & Mantenibilidad & Capacidad para ser probado & Facilidad con la que se pueden establecer criterios de prueba para un sistema o componente y con la que se pueden llevar a cabo las pruebas para determinar si se cumplen dichos criterios. \\
-\hline
-RNF3.2 & Mantenibilidad & Modularidad & Capacidad de un producto para evitar que los cambios en un componente afecten a otros componentes.\\
-\bottomrule
-\end{tabularx}
-\label{tab:iso25010}
-\end{table}
+\input{sections/03_diseno_e_implementacion/02_bullet_atributos_calidad}
 
 \subsection{Metodología de trabajo}
 
 Una vez definidos los requisitos funcionales y los atributos de calidad, se estableció la metodología de trabajo para el desarrollo de la biblioteca.
 
-Para el control de versiones, se eligió utilizar un repositorio de Git \cite{torvalds2005git} con un flujo de trabajo basado en \textit{Git Flow} \cite{driessen2010gitflow}. Este flujo de trabajo permite mantener una rama principal estable y ramas de desarrollo que posibilitan trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se fusionan con la rama principal solo después de completar tres etapas críticas: el desarrollo, la revisión del código y la ejecución exitosa de las pruebas unitarias necesarias para comprobar tanto la funcionalidad agregada como su compatibilidad con funcionalidades existentes.
+Para el control de versiones, se eligió utilizar un repositorio de Git \cite{torvalds2005git} con un flujo de trabajo basado en Git Flow \cite{driessen2010gitflow}. Este esquema permite mantener una rama principal estable y contra con ramas de desarrollo que posibilitan trabajar en nuevas funcionalidades sin afectar la rama principal. Las ramas de desarrollo se fusionan con la rama principal solo después de completar tres etapas críticas: el desarrollo, la revisión del código y la ejecución exitosa de las pruebas unitarias necesarias para comprobar tanto la funcionalidad agregada como su compatibilidad con funcionalidades existentes.
 
 \subsubsection{Pruebas unitarias y de integración}
-
+\label{sec:testing}
 Para garantizar la calidad del código, se implementó un sistema de pruebas mediante el \textit{framework} \texttt{unittest} de Python \cite{python_unittest}. Este \textit{framework} permite definir pruebas unitarias y de integración, y ejecutarlas de manera automática.
 
-Con el objetivo de asegurar el cumplimiento del requisito RNF3.1, se adoptó la métrica de cobertura de código \cite{pressman2014software} para evaluar la calidad del mismo. Esta métrica mide el porcentaje de código que se ha ejecutado durante las pruebas y permite identificar áreas del código que no están siendo probadas. Específicamente, se utilizó la herramienta \texttt{coverage.py} \cite{coveragepy} para medir la cobertura de código y se generaron informes para visualizar los resultados, los cuales se presentan en el apéndice \ref{appendix:coverage}.
+Con el objetivo de asegurar el cumplimiento del requisito RNF3.1, se adoptó la métrica de cobertura de código \cite{pressman2014software} para evaluar la calidad de este. Esta métrica mide el porcentaje de código que se ha ejecutado durante las pruebas y permite identificar áreas del código que no están cubiertas por pruebas. Específicamente, se utilizó la herramienta \texttt{coverage.py} \cite{coveragepy} para medir la cobertura de código y se generaron informes para visualizar los resultados, se presentan en el apéndice \ref{appendix:coverage}.
 
 % \TODO{Quizas esto en las conclusiones?}
-Como resultado, se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está siendo probado adecuadamente. Además, se identificaron algunas áreas del código que no estaban siendo probadas y se agregaron pruebas adicionales para cubrir esas áreas, como se observa en el apéndice \ref{appendix:coverage}.
+Como resultado, se obtuvo una cobertura de código del 96\%, lo que indica que la mayoría del código está probado adecuadamente. Además, se identificaron algunas áreas del código que no estaban probadas y se agregaron pruebas adicionales para cubrir esas áreas, como se observa en el apéndice \ref{appendix:coverage}.
 
 \subsubsection{Desarrollo con contenedores de \texttt{Docker}}
-Complementariamente al sistema de pruebas, se utilizó \texttt{Docker} \cite{docker} para asegurar la reproducibilidad del entorno de desarrollo y evitar problemas de compatibilidad entre diferentes versiones de bibliotecas o sistemas operativos. Esta herramienta permite crear un contenedor con todas las dependencias necesarias para el desarrollo y ejecución de la biblioteca.
+Complementariamente al sistema de pruebas explicado en \ref{sec:testing}, se utilizó \texttt{Docker} \cite{docker} para asegurar la reproducibilidad del entorno de desarrollo y evitar problemas de compatibilidad entre diferentes versiones de bibliotecas o sistemas operativos. Esta herramienta permite crear un contenedor con todas las dependencias necesarias para el desarrollo y ejecución de la biblioteca.
 
-El contenedor se define en el archivo \texttt{Dockerfile} \cite{qtensor_dockerfile}, que especifica la imagen base, las dependencias a instalar y los comandos a ejecutar para configurar el entorno. Asimismo, se utilizó \texttt{docker-compose} \cite{docker_compose} para facilitar la gestión del contenedor y permitir la ejecución de comandos específicos dentro del mismo, así como versiones con y sin soporte para GPU \cite{qtensor_docker_compose_file}.
+El contenedor se define en el archivo \texttt{Dockerfile} \cite{qtensor_dockerfile}, donde se especifican la imagen base, las dependencias requeridas y los comandos a ejecutar para configurar el entorno. Asimismo, se utilizó \texttt{docker-compose} \cite{docker_compose} para facilitar la gestión del contenedor y permitir la ejecución de comandos específicos dentro de él, así como para disponer de dos variantes: con y sin soporte para GPU \cite{qtensor_docker_compose_file}.
 
-Dado que la biblioteca se beneficia ampliamente del uso de una GPU para acelerar el entrenamiento de los modelos, se configuraron dos versiones del contenedor. En el desarrollo local se utiliza la versión con soporte para GPU, basada en la imagen oficial de \texttt{TensorFlow} con soporte para GPU mediante \texttt{nvidia container toolkit} \cite{nvidia_container_toolkit}, ya que permite acelerar significativamente el entrenamiento durante la experimentación. En contraste, para la integración continua (explicada en la sección \ref{sec:integracion_continua}), se utiliza la versión sin soporte para GPU, ya que las máquinas virtuales utilizadas no cuentan con GPU disponibles.
+Dado que la biblioteca se beneficia ampliamente del uso de una GPU para acelerar el entrenamiento de los modelos, se configuraron dos versiones del contenedor. En el desarrollo local se utiliza la versión con soporte para GPU, basada en la imagen oficial de \texttt{TensorFlow} con soporte para GPU mediante \texttt{nvidia container toolkit} \cite{nvidia_container_toolkit}, ya que permite acelerar significativamente el entrenamiento durante la experimentación. En contraste, para la integración continua (explicada en la sección \ref{sec:integracion_continua}) se utiliza la versión sin soporte para GPU, ya que las máquinas virtuales disponibles no cuentan con aceleración gráfica.
 
 \subsubsection{Integración continua}
 \label{sec:integracion_continua}
 Para asegurar la calidad del código y la funcionalidad de la biblioteca, se implementó un \textit{pipeline} de integración continua (CI, por sus siglas en inglés \textit{Continuous Integration}) \cite{fowler2006ci} mediante \texttt{GitHub Actions} \cite{github_actions}. Este \textit{pipeline} se ejecuta automáticamente en \textit{pull requests} y ante cualquier actualización en la rama de desarrollo. También se ejecuta al realizar un \textit{push} a la rama principal (\texttt{main}) para asegurar que la rama principal siempre esté en un estado funcional y para detectar condiciones de carrera al momento de fusionar ramas.
 
-Este \textit{pipeline} construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración como está descrito en \cite{qtensor_github_action}. Si alguna de estas etapas falla, el \textit{pipeline} marca el \textit{pull request} o el \textit{push} como fallido y bloquea la fusión de la rama hasta que se resuelvan los problemas.
+Este \textit{pipeline} construye el contenedor de desarrollo y ejecuta las pruebas unitarias y de integración según lo descrito en \cite{qtensor_github_action}. Si alguna de estas etapas falla, el \textit{pipeline} marca el \textit{pull request} o el \textit{push} como fallido y bloquea la fusión de la rama hasta que se resuelvan los problemas.
 
 \subsection{Análisis de las capacidades y limitaciones de \texttt{TFMOT}}
 \label{sec:analisis_tfmot}
-Como punto de partida para el diseño de \texttt{QTensor}, resulta fundamental comprender las capacidades y limitaciones de \texttt{TFMOT}. Si bien esta biblioteca satisface un caso básico de esquema de cuantización uniforme de 8 bits para todo el modelo, presenta limitaciones significativas y poca ergonomía para definir esquemas de cuantización personalizados (los cuales serán detallados en la sección \ref{sec:implementation_configs}). Esta limitación dificulta la experimentación con diferentes esquemas de cuantización, lo cual es uno de los objetivos principales de la biblioteca \texttt{QTensor}. No obstante, \texttt{TFMOT} presenta una interfaz que se ha adaptado en la biblioteca \texttt{QTensor} para permitir la definición de esquemas de cuantización personalizados de manera más sencilla e intuitiva, como se detalla en la sección \ref{sec:implementation_configs}.
+Como punto de partida para el diseño de \texttt{QTensor}, resulta fundamental comprender las capacidades y limitaciones de \texttt{TFMOT}. Si bien esta biblioteca satisface un caso básico de esquema de cuantización uniforme de 8 bits para todo el modelo, presenta limitaciones significativas y poca ergonomía para definir esquemas de cuantización personalizados (que serán detallados en la sección \ref{sec:implementation_configs}). Estas limitaciones dificultan la experimentación con diferentes esquemas de cuantización, uno de los objetivos principales de la biblioteca \texttt{QTensor}. No obstante, \texttt{TFMOT} presenta una interfaz que se adaptó en \texttt{QTensor} para permitir la definición de esquemas de cuantización personalizados de manera más sencilla e intuitiva, como se detalla en la sección \ref{sec:implementation_configs}.
 
-Por otra parte, los cuantizadores provistos por \texttt{TFMOT} son estáticos, es decir, no cuentan con parámetros entrenables, lo que impide la optimización conjunta de los pesos y los parámetros de cuantización durante el entrenamiento con QAT. A pesar de esta limitación, \texttt{TFMOT} ofrece una base sólida para la cuantización de modelos de \texttt{TensorFlow/Keras} y proporciona una serie de interfaces que es posible reutilizar y extender para implementar cuantizadores personalizados con parámetros entrenables, cuya implementación se detalla en la sección \ref{sec:implementation_quantizers}.
+Por otra parte, los cuantizadores provistos por \texttt{TFMOT} son estáticos, sin parámetros entrenables, lo que impide la optimización conjunta de los pesos y los parámetros de cuantización durante el entrenamiento con QAT. A pesar de esta limitación, \texttt{TFMOT} ofrece una base sólida para la cuantización de modelos de \texttt{TensorFlow/Keras} y proporciona una serie de interfaces que pueden reutilizarse y ampliarse para implementar cuantizadores personalizados con parámetros entrenables, cuya implementación se detalla en la sección \ref{sec:implementation_quantizers}.
 
-Finalmente, \texttt{TFMOT} no presenta herramientas para el cómputo de complejidad espacial teórica de modelos cuantizados, funcionalidad que \texttt{QTensor} implementa, como se detalla en la sección \ref{sec:implementation_evaluation}.
+Finalmente, \texttt{TFMOT} no presenta herramientas para el cómputo de complejidad espacial teórica de modelos cuantizados. \texttt{QTensor} incluye esta funcionalidad, tal como se detalla en la sección \ref{sec:implementation_evaluation}.
 
 \subsection{Arquitectura de la biblioteca \texttt{QTensor}}
 \label{sec:implementation_arquitectura}
 Una vez analizadas las capacidades y limitaciones de \texttt{TFMOT}, se procedió al diseño de la arquitectura de \texttt{QTensor}. Como se desarrolló en la sección \ref{sec:tensorflow_model_optimization}, la biblioteca \texttt{TFMOT} disponibiliza herramientas para la cuantización de modelos de \texttt{TensorFlow/Keras} con soporte para QAT. Sin embargo, \texttt{TFMOT} no satisface completamente los requisitos funcionales planteados en la sección \ref{sec:requerimientos_funcionales} ni los atributos de calidad definidos en la sección \ref{sec:atributos_calidad}. Por consiguiente, se decidió desarrollar una nueva biblioteca, denominada \texttt{QTensor}, que extienda las funcionalidades de \texttt{TFMOT} y permita cumplir con los objetivos planteados.
 
-La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}. La \reffig{qtensor_modules} presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}, donde se observa que \texttt{QTensor} reutiliza las funcionalidades de \texttt{TFMOT} para la cuantización de modelos y las funcionalidades de \texttt{Keras} y \texttt{TensorFlow} para la definición, entrenamiento y evaluación de modelos.
+La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \texttt{TFMOT}, con el fin de ampliar sus funcionalidades y satisfacer los requisitos descritos en la sección \ref{sec:requerimientos_funcionales}.
+
+La \reffig{qtensor_modules} presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}, donde se observa que \texttt{QTensor} reutiliza las funcionalidades de \texttt{TFMOT} para la cuantización de modelos y las funcionalidades de \texttt{Keras} y \texttt{TensorFlow} para la definición, entrenamiento y evaluación de modelos.
 
 \defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Grafo de dependencias entre las bibliotecas.}{qtensor_modules}{1}
 
