@@ -155,8 +155,13 @@ Se ilustra el proceso de PTQ en la \reffig{ptq_process}.
 
 \defaultdiagram{cuantizacion/ptq_process}{Cuantización post-entrenamiento (PTQ).}{ptq_process}{0.8}
 
-La definición de los parámetros de cuantización es crítica, puesto que una calibración no representativa puede ocasionar pérdidas de precisión significativas.
-\TODO{Mostrar distribucion en una figura}
+La definición de los parámetros de cuantización es crítica, puesto que una calibración no representativa puede ocasionar pérdidas de desempeño significativas. La distribución de pesos en las redes neuronales suele concentrarse alrededor de cero, con una distribución aproximadamente normal \cite{Krishnamoorthi2018}, como se muestra en la primera gráfica de la \reffig{calibration_strategies}.
+
+Una estrategia común para determinar el rango del cuantizador uniforme es la estrategia Min/Max \cite{nagel2019datafree}, que utiliza el valor mínimo y máximo absolutos de la distribución. Sin embargo, este enfoque puede presentar problemas cuando existen valores atípicos (\textit{outliers}) \cite{banner2018post}. Estos valores extremos, aunque representan una proporción mínima de los datos, pueden expandir significativamente el rango de cuantización. Como se observa en la segunda gráfica de la \reffig{calibration_strategies} para el caso de un cuantizador uniforme de 3 bits, la estrategia Min/Max preserva todos los valores, pero define un tamaño de paso grande y, por ende, disminuye la resolución en la región principal donde se concentran la mayoría de los pesos.
+
+Para mitigar este problema, se puede utilizar una estrategia con \textit{clipping} \cite{choukroun2019low}, donde se emplean percentiles para definir el rango de cuantización en lugar de los extremos absolutos. Como se ilustra en la tercera gráfica de la \reffig{calibration_strategies}, esta estrategia sacrifica los valores extremos (que son saturados o \textit{clipped}) a cambio de obtener un paso significativamente menor y, por ende, mayor resolución en la región principal de la distribución. Esta estrategia suele proporcionar mejores resultados en términos de precisión del modelo cuantizado, ya que la pérdida de información en los outliers se compensa con la mejora en la representación de la mayoría de los valores.
+
+\defaultfigure{cuantizacion/calibration_strategies}{Comparación de estrategias de calibración: Min/Max naive vs clipping.}{calibration_strategies}
 
 \subsubsection{Estrategia QAT}
 \label{sec:qat}
