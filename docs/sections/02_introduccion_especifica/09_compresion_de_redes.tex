@@ -104,7 +104,9 @@ Otra característica importante, especialmente para el caso de la cuantización 
 
 Es importante recalcar que toda cuantización introduce un error de cuantización, que es la diferencia entre el valor original y su representación cuantizada. Este error se busca minimizar para preservar la precisión de la representación original. En el caso, por ejemplo, de una cuantización uniforme de 8 niveles, el error de cuantización máximo es la mitad del tamaño del intervalo entre niveles consecutivos \cite{sayood2017introduction}.
 
-\TODO{Agregar figura de error de cuantización}
+Para ilustrar este concepto, la \reffig{quantization_error} muestra el efecto de la cuantización sobre una señal senoidal continua. En la parte superior se observa la señal original junto con su versión cuantizada, donde los valores continuos son mapeados a niveles discretos. En la parte inferior se presenta el error de cuantización resultante, es decir, la diferencia entre ambas señales.
+
+\defaultfigure{cuantizacion/quantization_error_simple}{Error de cuantización en una señal senoidal.}{quantization_error}
 
 A diferencia de otras aplicaciones donde una métrica crítica es el error de cuantización, en la cuantización de redes neuronales el objetivo principal es minimizar el impacto de este error en la precisión del modelo, que si bien está correlacionado con el mismo, no es equivalente. \cite{gholami2021surveyquantizationmethodsefficient} asocia esta característica a la cantidad de redundancia presente en los modelos de redes neuronales dada por la gran cantidad de parámetros que poseen. En este caso, el objetivo no es mantener la representación exacta de los pesos, si no una versión equivalente de la distribución de los pesos a efectos de la precisión del modelo. De manera análoga, a las compresiones de audio donde lo importante es mantener la calidad percibida y no la representación exacta de la señal original, con la ventaja de que en este caso se cuenta con un valor cuantitativo para medir la calidad de la compresión: la precisión del modelo.
 
