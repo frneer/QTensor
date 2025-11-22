@@ -11,13 +11,13 @@
     \node[block, left=of create_model] (create_model_params) {tamaño de entrada\\ número de clases};
 
     \node[block, below=of create_model] (training) {Entrenamiento};
-    \node[block, left=of training] (training_params) {épocas\\ $\eta$\\ tamaño de lote\\ \textit{dataset}};
+    \node[block, left=of training] (training_params) {épocas\\ $\eta$\\ \textit{batch size}\\ \textit{dataset}};
 
     \node[block, below=of training] (quantization) {Cuantización};
     \node[block, left=of quantization] (quantization_params) {\texttt{qconfig}};
 
     \node[block, below=of quantization] (qat) {QAT};
-    \node[block, left=of qat] (qat_params) {épocas\\ $\eta$\\ tamaño de lote\\ \textit{dataset}};
+    \node[block, left=of qat] (qat_params) {épocas\\ $\eta$\\ \textit{batch size}\\ \textit{dataset}};
 
     \node[block, below=of qat] (evaluation) {Evaluación};
     \node[block, left=of evaluation] (evaluation_params) {\textit{dataset}};
