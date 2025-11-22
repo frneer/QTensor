@@ -6,3 +6,11 @@ old/
 build/
 
 *.mp4
+<<<<<<< Updated upstream
+=======
+
+checkpoints/
+old_checkpoints/
+
+article/
+>>>>>>> Stashed changes

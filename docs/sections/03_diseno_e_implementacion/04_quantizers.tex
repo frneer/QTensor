@@ -98,7 +98,40 @@ def quantize(x, alpha):
   return q, grad
 \end{lstlisting}
 
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
+\paragraph{Ejemplo de entrenamiento del cuantizador uniforme}
+
+Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador uniforme de 3 bits a los pesos de la capa oculta y a sus activaciones mediante la definición del diccionario \texttt{qconfig}, aplicando luego la cuantización mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_uniform}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
+
+La figura \ref{fig:uniform_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y del parámetro $\alpha$ del cuantizador aplicado a la capa oculta a lo largo del entrenamiento.
+
+\begin{lstlisting}[language=Python,label=code:modelo_utilizado_uniform,caption={Definición de un modelo MLP de una sola capa oculta con Keras, utilizando el cuantizador uniforme}]
+    layer_1 = Flatten(input_shape=(28, 28), name="input")
+    layer_2 = Dense(128, activation="relu", name="hidden")
+    layer_3 = Dense(10, activation="softmax", name="output")
+    model = Sequential([layer_1, layer_2, layer_3])
+
+    qconfig = {
+        "hidden": {
+            "weights": {
+                "kernel": UniformQuantizer(bits=3, signed=True)
+            },
+            "activations": {
+                "activation": UniformQuantizer(bits=3, signed=False)
+            },
+        }
+    }
+
+    qmodel = quantize_model(model, qconfig)
+\end{lstlisting}
+
+\vspace{-1cm}
+\input{sections/03_diseno_e_implementacion/04_fig_uniform_training}
+
+De manera complementaria, la figura \ref{fig:uniform_quantizer_snapshots} presenta la evolución de la función de cuantización de la capa oculta en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7, 10.
+
+\input{sections/03_diseno_e_implementacion/04_fig_uniform_snapshots}
+
+Como se puede observar en las figuras \ref{fig:uniform_quantizer_training} y \ref{fig:uniform_quantizer_snapshots}, el cuantizador uniforme ajusta su parámetro $\alpha$ en conjunto con el entrenamiento del modelo logrando una minimización efectiva de la función de pérdida.
 
 \subsubsection{Implementación del cuantizador flexible}
 
@@ -114,7 +147,7 @@ Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f
 
 De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descrito en \eqref{eq:flexible_quantizer_dq_dt}, también requiere acumulación debido a la discrepancia dimensional entre $x$ y $t$. En este caso, cada umbral $t_i$ afecta a un subconjunto específico de valores de entrada: aquellos que caen dentro del rango definido por los umbrales adyacentes $t_{i-1}$ y $t_{i+1}$. Por lo tanto, se calcula un gradiente para cada valor $x_j$ en ese rango con respecto a $t_i$, y luego se suman. Para esto, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo los valores relevantes, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar sus gradientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados.]
+\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados]
 def quantize(x, alpha, levels, thresholds):
   # Cuantizar los niveles usando cuantizacion uniforme
   qlevels = uniform_quantizer(levels)
@@ -168,4 +201,40 @@ def quantize(x, alpha, levels, thresholds):
   return q, grad
 \end{lstlisting}
 
-\TODO{Mostrar entrenamiento, gif copado y evolucion comun}
+\paragraph{Ejemplo de entrenamiento del cuantizador flexible}
+
+Para ilustrar el comportamiento del cuantizador flexible durante el entrenamiento, se define un modelo MLP de una sola capa oculta donde se aplica el cuantizador flexible de 4 bits y 8 niveles a los pesos de la capa oculta, y uno uniforme de 3 bits a sus activaciones, mediante la definición del diccionario \texttt{qconfig}, aplicando luego la cuantización mediante \texttt{quantize\_model}, como se presenta en el fragmento de código \ref{code:modelo_utilizado_flexible}. El modelo se entrena con el dataset MNIST \cite{LeCun1998} durante 10 épocas.
+
+La figura \ref{fig:flexible_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y de los parámetros $\alpha$, niveles $l$ y umbrales $t$ del cuantizador flexible aplicado a la capa oculta a lo largo del entrenamiento.
+
+\begin{lstlisting}[language=Python,label=code:modelo_utilizado_flexible,caption={Definición de un modelo MLP de una sola capa oculta con Keras, utilizando el cuantizador flexible}]
+    layer_1 = Flatten(input_shape=(28, 28), name="input")
+    layer_2 = Dense(128, activation="relu", name="hidden")
+    layer_3 = Dense(10, activation="softmax", name="output")
+    model = Sequential([layer_1, layer_2, layer_3])
+
+    qconfig = {
+        "hidden": {
+            "weights": {
+                "kernel": FlexQuantizer(
+                    bits=4, n_levels=8, signed=True
+                )
+            },
+            "activations": {
+                "activation": UniformQuantizer(bits=3, signed=False)
+            },
+        }
+    }
+
+    qmodel = quantize_model(model, qconfig)
+\end{lstlisting}
+
+
+\vspace{-1cm}
+\input{sections/03_diseno_e_implementacion/04_fig_flexible_training}
+
+De manera complementaria, la figura \ref{fig:flexible_quantizer_snapshots} presenta la evolución de la función de cuantización flexible en diferentes momentos del entrenamiento: previo al entrenamiento y en las épocas 3, 7 y 10. En estas capturas se muestran los niveles antes de ser cuantizados.
+
+\input{sections/03_diseno_e_implementacion/04_fig_flexible_snapshots}
+
+Como se puede observar en las figuras \ref{fig:flexible_quantizer_training} y \ref{fig:flexible_quantizer_snapshots}, el cuantizador flexible ajusta sus niveles y umbrales durante el entrenamiento y se logra una optimización conjunta para minimizar la función de pérdida del modelo.
