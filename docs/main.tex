@@ -114,7 +114,14 @@
     filecolor=magenta,
     urlcolor=blue,
 }
+
+% Permite partir URLs largas en cualquier carácter
+\usepackage{xurl}
 \urlstyle{same}
+
+% Permitir partir DOIs largos
+\usepackage{doi}
+\renewcommand{\doitext}{DOI:\,}
 
 \usepackage{siunitx}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
@@ -124,6 +131,10 @@
 
 % Custom commands
 \input{commands}
+
+% Configuración de biblatex para manejar URLs largas
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
