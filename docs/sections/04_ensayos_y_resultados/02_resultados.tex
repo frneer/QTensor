@@ -29,7 +29,7 @@ Los resultados obtenidos para el esquema uniforme se resumen a continuación:
 
 \item A partir de 5 o 6 bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de rendimiento cercana al valor del modelo original. Lo cual sugiere que incrementar la cantidad de bits más allá de este punto no aporta mejoras significativas en precisión.
 
-\item En algunas configuraciones, la precisión superó la del modelo original debido a que el ruido introducido por la cuantización actuó como un mecanismo de regularización, lo que favorece la generalización y reduce el sobreajuste \cite{Choi2019} \cite{Banner2018Regularization}.
+\item En algunas configuraciones, la precisión superó la del modelo original debido a que el ruido introducido por la cuantización actuó como un mecanismo de regularización, lo que favorece la generalización y reduce el sobreajuste \cite{Choi2019} \cite{banner2019posttraining4bitquantizationconvolution}.
 \end{itemize}
 
 % Los resultados mostraron que el esquema de cuantización uniforme presenta capacidad de compresión aceptable hasta compresiones de $\approx8\times$, con una precisión del $99.49\%$ respecto del modelo original. Con $8$ bits se alcanzó una precisión máxima de $102.51\%$ en comparación con el modelo original, con una tasa de compresión de $4.00\times$. Con $10$ y $16$ bits se obtuvieron valores relativos de precisión de $102.38\%$ y $102.41\%$, con compresiones de $3.20\times$ y $2.00\times$, respectivamente. Sin embargo, a medida que el número de bits disminuye, la precisión decrece de forma significativa: al utilizar $3$ bits la precisión descendió a $86.03\%$ respecto del modelo original. Estos resultados indican que la cuantización uniforme no es adecuada para compresiones agresivas.
