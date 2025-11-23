@@ -31,7 +31,7 @@ La compresión también mejora la eficiencia energética del modelo, ya que el a
 Dado el alcance de esta investigación, este trabajo se enfoca en evaluar el impacto sobre la complejidad espacial, dado que constituye el factor determinante para el despliegue de modelos en dispositivos con memoria limitada. Si bien se evalúan esquemas de cuantización que también impactan en la complejidad temporal, no se realizaron mediciones formales de esta última, ya que su exploración cuantitativa está fuera del alcance del presente trabajo.
 
 \subsection{Técnicas de compresión}
-Existen múltiples técnicas de compresión de redes neuronales, las cuales permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
+Existen múltiples técnicas de compresión de redes neuronales, que permiten reducir la cantidad de parámetros y operaciones necesarias para la inferencia, sin afectar significativamente la precisión del modelo. Algunas de las técnicas más comunes son:
 
 \begin{itemize}
     \item Compartición de pesos (\textit{Weight Sharing} en inglés): se agrupan los pesos de la red en un conjunto reducido de valores, lo que permite una representación más compacta sin afectar demasiado la capacidad de generalización \cite{8253600}.
@@ -46,11 +46,11 @@ Cada técnica posee ventajas y desventajas y la elección de la técnica adecuad
 \subsubsection{Cuantización}
 \label{sec:cuantizacion}
 
-La cuantización es una compresión con perdida y tiene su origen en el procesamiento de señales digitales, donde se utiliza para representar señales continuas en un formato discreto. En el dominio analógico, las señales pueden tomar cualquier valor dentro de un rango continuo, mientras que en el dominio digital, estas señales deben ser representadas mediante un conjunto finito de valores discretos, la transformación específica de estos valores depende de la función de cuantización.
+La cuantización es una compresión con pérdida y tiene su origen en el procesamiento de señales digitales, donde se utiliza para representar señales continuas en un formato discreto. En el dominio analógico, las señales pueden tomar cualquier valor dentro de un rango continuo, mientras que en el dominio digital, estas señales deben ser representadas mediante un conjunto finito de valores discretos, la transformación específica de estos valores depende de la función de cuantización.
 
 La función de cuantización $q(x)$ mapea un valor continuo de entrada $x$ a un conjunto discreto de salida $y$. Esta función queda definida por dos series de parámetros: los niveles de cuantización $\mathbf{l}$, que definen los valores posibles de salida y los umbrales de cuantización $\mathbf{t}$ que delimitan el espacio de entrada en m\'ultiples intervalos y se asigna a cada uno de ellos un nivel de cuantización específico \cite{sayood2017introduction}.
 
-Por ejemplo, se puede definir una función de cuantización de $8$ niveles, con $8$ intervalos como se muestra en la tabla \ref{tab:quantization_example}.
+Por ejemplo, se puede definir una función de cuantización de $8$ niveles, con $8$ intervalos, tal como se muestra en la tabla \ref{tab:quantization_example}.
 
 \begin{table}[H]
     \centering
@@ -72,7 +72,7 @@ Por ejemplo, se puede definir una función de cuantización de $8$ niveles, con 
     \label{tab:quantization_example}
 \end{table}
 
-La tabla \ref{tab:quantization_example} define una función $q(x)$ que, por ejemplo, para un valor de entrada $x = 2.3$, devuelve un valor de salida $y = q(2.3) = 2$, ya que $2.3$ se encuentra en el intervalo $[1.5, 2.5)$, el cual está asociado al nivel de cuantización $2$.
+La tabla \ref{tab:quantization_example} define una función $q(x)$ que, por ejemplo, para un valor de entrada $x = 2.3$, devuelve un valor de salida $y = q(2.3) = 2$, ya que $2.3$ se encuentra en el intervalo $[1.5, 2.5)$, que está asociado al nivel de cuantización $2$.
 
 En este caso los umbrales de cuantización quedan definidos por \eqref{eq:quantization_thresholds_example}.
 \begin{equation}
@@ -96,7 +96,7 @@ En la \reffig{uniform_vs_non_uniform} se muestra un ejemplo para cada tipo de cu
 
 \defaultdiagram{cuantizacion/uniform_vs_non_uniform}{Cuantización uniforme y no uniforme.}{uniform_vs_non_uniform}{0.925}
 
-Otra característica importante, especialmente para el caso de la cuantización uniforme, es que la misma puede ser signada o no signada. En la cuantización signada, el rango de valores se divide en partes iguales alrededor de cero, mientras que en la cuantización no signada, los niveles de cuantización son siempre positivos, en donde se mejora la precisión para el rango positivo de valores. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits, donde se puede ver que a pesar de utilizar el mismo número de bits, el caso sin signo presenta una mejor resolución.
+Otra característica importante, especialmente para el caso de la cuantización uniforme, es que puede ser signada o no signada. En la cuantización signada, el rango de valores se divide en partes iguales alrededor de cero, mientras que en la cuantización no signada, los niveles de cuantización son siempre positivos, en donde se mejora la precisión para el rango positivo de valores. En la \reffig{sym_vs_asym} se muestra un ejemplo de ambos tipos de cuantización para un cuantizador uniforme de 3 bits, donde se puede ver que a pesar de utilizar el mismo número de bits, el caso sin signo presenta una mejor resolución.
 
 \defaultdiagram{cuantizacion/signed_vs_non_signed}{Cuantización signada y no signada.}{sym_vs_asym}{0.925}
 
@@ -108,9 +108,9 @@ Para ilustrar este concepto, la \reffig{quantization_error} muestra el efecto de
 
 A diferencia de otras aplicaciones donde una métrica crítica es el error de cuantización, en la cuantización de redes neuronales el objetivo principal es minimizar el impacto de este error en la precisión del modelo, que si bien está correlacionado con el mismo, no es equivalente. \cite{gholami2021surveyquantizationmethodsefficient} asocia esta característica a la cantidad de redundancia presente en los modelos de redes neuronales dada por la gran cantidad de parámetros que poseen. En este caso, el objetivo no es mantener la representación exacta de los pesos, si no una versión equivalente de la distribución de los pesos a efectos de la precisión del modelo. De manera análoga, a las compresiones de audio donde lo importante es mantener la calidad percibida y no la representación exacta de la señal original, con la ventaja de que en este caso se cuenta con un valor cuantitativo para medir la calidad de la compresión: la precisión del modelo.
 
-Un aspecto importante, pero que no esta directamente definido por la función de cuantización es la representación numérica utilizada para almacenar los valores cuantizados. Generalmente se utiliza la notación \texttt{INT<X>} para referirse a representación en un formato de enteros (\textit{integer} en inglés) de \texttt{X} bits. Y la notación \texttt{FP<Y>} para referirse a la representación en punto flotante (\textit{floating point} en inglés) de \texttt{Y} bits.
+Un aspecto importante, pero que no está directamente definido por la función de cuantización es la representación numérica utilizada para almacenar los valores cuantizados. Generalmente se utiliza la notación \texttt{INT<X>} para referirse a representación en un formato de enteros (\textit{integer} en inglés) de \texttt{X} bits. Y la notación \texttt{FP<Y>} para referirse a la representación en punto flotante (\textit{floating point} en inglés) de \texttt{Y} bits.
 
-En el contexto de la cuantización de redes neuronales es necesaria una alta precisión numérica durante el entrenamiento de las mismas por lo que este proceso se realiza generalmente en \texttt{FP32}, como fue explicado en la sección \ref{sec:motivacion}. Luego, al aplicar cuantizaciones se suelen utilizar representaciones en punto fijo, las cuales suelen ser implementadas con aritmetica entera en hardware (\texttt{INT8}, \texttt{INT4}).
+En el contexto de la cuantización de redes neuronales es necesaria una alta precisión numérica durante el entrenamiento de estas, por lo que este proceso se realiza generalmente en \texttt{FP32}, como fue explicado en la sección \ref{sec:motivacion}. Luego, al aplicar cuantizaciones se suelen utilizar representaciones en punto fijo, que suelen ser implementadas con aritmética entera en hardware (\texttt{INT8}, \texttt{INT4}).
 
 En particular, la cuantización de redes neuronales consiste en representar los parámetros de la red con menor precisión numérica, mediante la conversión de sus parámetros $\theta$ representados originalmente en \texttt{FP32} a formatos de menor precisión, como \texttt{INT8} o \texttt{INT4}.
 
@@ -155,7 +155,7 @@ Se ilustra el proceso de PTQ en la \reffig{ptq_process}.
 
 La definición de los parámetros de cuantización es crítica, puesto que una calibración no representativa puede ocasionar pérdidas de desempeño significativas \cite{Nagel2020}.
 
-La distribución de pesos en las redes neuronales suele concentrarse alrededor de cero, con una distribución aproximadamente normal \cite{Krishnamoorthi2018}, como se muestra en la primera gráfica de la \reffig{calibration_strategies}.
+La distribución de pesos en las redes neuronales suele concentrarse alrededor de cero, con una distribución aproximadamente normal \cite{Krishnamoorthi2018}, tal como se muestra en la primera gráfica de la \reffig{calibration_strategies}.
 
 Una estrategia común para determinar el rango del cuantizador uniforme es la estrategia Min/Max \cite{nagel2019datafree}, que utiliza los valores mínimo y máximo absolutos de la distribución. Sin embargo, este enfoque puede presentar problemas cuando existen valores atípicos (\textit{outliers}) \cite{banner2019posttraining4bitquantizationconvolution}. Estos valores extremos, aunque representan una proporción mínima de los datos, pueden expandir significativamente el rango de cuantización. Como se observa en la segunda gráfica de la \reffig{calibration_strategies} para un caso de un cuantizador uniforme de 3 bits. La estrategia Min/Max preserva todos los valores, pero define un tamaño de paso grande y, por ende, disminuye la resolución en la región principal donde se concentran la mayoría de los pesos.
 
@@ -175,13 +175,13 @@ Una técnica para emular estos efectos consiste en realizar una operación de cu
 
 \defaultdiagram{cuantizacion/quant_dequant}{Cuantización y descuantización.}{quant_dequant}{0.9}
 
-Otra técnica muy utilizada es \textit{fake-quantization} \cite{dai2024trainablefixedpointquantizationdeep}, que consiste en aplicar la función de cuantización durante el \textit{forward pass}, pero mantiene la representación numerica de los tensores en punto flotante. De esta manera, se utilizan valores numericos ajustados a los efectos de la cuantización, pero sin el costo computacional de realizar multiples operaciones de cuantización y descuantización. En este trabajo se utiliza la técnica de \textit{fake-quantization} para emular la cuantización durante el entrenamiento. Con esta técnica, no es necesaria la operación de descuantización, como se muestra en la \reffig{fake_quantization}, pues la representación numérica permanece en punto flotante.
+Otra técnica muy utilizada es \textit{fake-quantization} \cite{dai2024trainablefixedpointquantizationdeep}, que consiste en aplicar la función de cuantización durante el \textit{forward pass}, pero mantiene la representación numerica de los tensores en punto flotante. De esta manera, se utilizan valores numericos ajustados a los efectos de la cuantización, pero sin el costo computacional de realizar multiples operaciones de cuantización y descuantización. En este trabajo se utiliza la técnica de \textit{fake-quantization} para emular la cuantización durante el entrenamiento. Con esta técnica, no es necesaria la operación de descuantización, tal como se muestra en la \reffig{fake_quantization}, pues la representación numérica permanece en punto flotante.
 
 \defaultdiagram{cuantizacion/fake_quantization}{Emulación de la cuantización (\textit{fake-quantization}).}{fake_quantization}{0.9}
 %  Sin embargo, incrementa el coste computacional y la duración del entrenamiento, ya que requiere de un reentrenamiento o ajuste fino (ajuste fino (fine-tuning)).
 % \defaultdiagram{cuantizacion/qat_process}{Cuantización durante el entrenamiento (QAT)}{qat_process}{0.8}
 
-La QAT consiste en modificar el proceso de entrenamiento tradicional \cite{Jacob2018}, explicado en la sección \ref{sec:entrenamiento_redes_neuronales} y que se muestra en la \reffig{training}. La QAT incorpora el uso de \textit{fake-quantization} para obtener una inferencia con los efectos de la cuantización, y luego, utilizar la representación sin cuantizar para realizar \textit{backpropagation} para preservar la precisión del gradiente, como se muestra en la \reffig{qat}.
+La QAT consiste en modificar el proceso de entrenamiento tradicional \cite{Jacob2018}, explicado en la sección \ref{sec:entrenamiento_redes_neuronales} y que se muestra en la \reffig{training}. La QAT incorpora el uso de \textit{fake-quantization} para obtener una inferencia con los efectos de la cuantización, y luego, utilizar la representación sin cuantizar para realizar \textit{backpropagation} para preservar la precisión del gradiente, tal como se muestra en la \reffig{qat}.
 
 \defaultdiagram{cuantizacion/training}{Entrenamiento simple.}{training}{1}
 \defaultdiagram{cuantizacion/training_qat}{Entrenamiento con cuantización.}{qat}{1}
@@ -194,13 +194,13 @@ En la figura \ref{fig:full_network_training} se muestra un diagrama simplificado
 
 \defaultdiagram{cuantizacion/full_network_training}{Red neuronal con múltiples capas.}{full_network_training}{0.7}
 
-Cada capa $L_{i}$ tiene como salida una activación $a_{i}$ que, a su vez, es la entrada de la siguiente capa $L_{i+1}$. A excepcion de la primera capa, que recibe como entrada los datos de entrada $x$ y de la última capa $L_{N}$ que produce la salida final $\hat{y}$. En la salida, se calcula la función de pérdida $\mathcal{L}$, y se propagan hacia atrás los gradientes de la función de pérdida con respecto a las activaciones de cada capa $\frac{\partial \mathcal{L}}{\partial a_{i}}$. En la última capa, $a_{N}$ coincide con la salida $\hat{y}$.
+Cada capa $L_{i}$ tiene como salida una activación $a_{i}$ que, a su vez, es la entrada de la siguiente capa $L_{i+1}$. A excepción de la primera capa, que recibe como entrada los datos de entrada $x$ y de la última capa $L_{N}$ que produce la salida final $\hat{y}$. En la salida, se calcula la función de pérdida $\mathcal{L}$, y se propagan hacia atrás los gradientes de la función de pérdida con respecto a las activaciones de cada capa $\frac{\partial \mathcal{L}}{\partial a_{i}}$. En la última capa, $a_{N}$ coincide con la salida $\hat{y}$.
 
-La figura \ref{fig:single_layer_training} muestra un diagrama para la capa $m$. La misma se compone de una función lineal $z(u, v)$ que representa la operación de la capa y la función de activación $\phi(w)$. También, se detalla el proceso realizado en el \textit{backward pass}. Notar que cada función en el \textit{forward pass} tiene asociado su gradiente en el \textit{backward pass}. Para $z(u, v)$ su gradiente es $\nabla_z = \begin{bmatrix}\frac{\partial z}{\partial u}\\ \frac{\partial z}{\partial v}\end{bmatrix}$ y para $\phi(w)$ su gradiente es $\nabla_\phi = \frac{d\phi}{dw} = \phi'$.
+La figura \ref{fig:single_layer_training} muestra un diagrama para la capa $m$. Esta se compone de una función lineal $z(u, v)$ que representa la operación de la capa y la función de activación $\phi(w)$. También, se detalla el proceso realizado en el \textit{backward pass}. Notar que cada función en el \textit{forward pass} tiene asociado su gradiente en el \textit{backward pass}. Para $z(u, v)$ su gradiente es $\nabla_z = \begin{bmatrix}\frac{\partial z}{\partial u}\\ \frac{\partial z}{\partial v}\end{bmatrix}$ y para $\phi(w)$ su gradiente es $\nabla_\phi = \frac{d\phi}{dw} = \phi'$.
 
 \defaultdiagram{cuantizacion/single_layer_training}{Entrenamiento de una capa de red neuronal.}{single_layer_training}{1}
 
-La salida de la capa se representa como en \eqref{eq:single_layer_forward} y el gradiente con respecto a los pesos $\theta$ como en \eqref{eq:single_layer_backward} Y, de manera similar, para propagar el gradiente hacia la capa anterior ($m-1$) se tiene \eqref{eq:single_layer_backward_activation}.
+La salida de la capa se representa como en \eqref{eq:single_layer_forward} y el gradiente con respecto a los pesos $\theta$ como en \eqref{eq:single_layer_backward}. De manera similar, para propagar el gradiente hacia la capa anterior ($m-1$) se tiene \eqref{eq:single_layer_backward_activation}.
 
 \begin{equation}
     \label{eq:single_layer_forward}
@@ -239,7 +239,7 @@ La salida de la capa se representa como en \eqref{eq:single_layer_forward} y el 
 
 Tanto en \eqref{eq:single_layer_backward} y \eqref{eq:single_layer_backward_activation}  está presente el término $\overline{y_m} = \frac{\partial \mathcal{L}}{\partial a_{m}}$, este representa el valor del gradiente acumulado hasta la capa $m$, y es conocido como \textit{upstream gradient} o simplemente, \textit{upstream}. Por otro lado, los términos restantes son específicos de la capa $m$ y dependen de la función de activación y la operación realizada en la capa, y son conocidos como \textit{local gradients} o simplemente, \textit{local}. Si se analiza cada término del \textit{local gradient}, se observa que cada uno corresponde a una función en el \textit{forward pass}.
 
-Al introducir la cuantización, el diagrama de la capa $m$ queda como se muestra en la \reffig{single_layer_training_quantizer}, donde se han agregado dos bloques de cuantización: uno para cuantizar los pesos de la capa $q_{\theta}()$ y otro para cuantizar la activación de salida $q_{\phi}()$, como se puede observar eso implica agregar dos bloques adicionales en el \textit{backward pass} correspondientes a las derivadas de las mismas.
+Al introducir la cuantización, el diagrama de la capa $m$ queda como se muestra en la \reffig{single_layer_training_quantizer}, donde se han agregado dos bloques de cuantización: uno para cuantizar los pesos de la capa $q_{\theta}()$ y otro para cuantizar la activación de salida $q_{\phi}()$, como se puede observar eso implica agregar dos bloques adicionales en el \textit{backward pass} correspondientes a las derivadas de estas.
 
 \defaultdiagram{cuantizacion/single_layer_training_quantizer}{Entrenamiento de una capa de red neuronal con \textit{fake quantization}.}{single_layer_training_quantizer}{0.8}
 
@@ -262,7 +262,7 @@ Por lo tanto, las funciones de cuantización son parte también del camino del g
         \frac{\partial z}{\partial \theta} \cdot \,
 \end{equation}
 
-Si se reordenan los términos como \eqref{eq:single_layer_backward_quantizer_reordered}, la estructura revela una relación fundamental: el gradiente es idéntico al caso sin cuantizar, pero multiplicado por las derivadas de las funciones de cuantización. Pues $\frac{\partial z}{\partial \theta}$ es simplemente la derivada de $z$ con respecto a la variable de entrada de los par\'ametros, y es equivalente al del caso no cuantizado.
+Si se reordenan los términos como en \eqref{eq:single_layer_backward_quantizer_reordered}, la estructura revela una relación fundamental: el gradiente es idéntico al caso sin cuantizar, pero multiplicado por las derivadas de las funciones de cuantización. Pues $\frac{\partial z}{\partial \theta}$ es simplemente la derivada de $z$ con respecto a la variable de entrada de los par\'ametros, y es equivalente al del caso no cuantizado.
 
 \begin{equation}
     \label{eq:single_layer_backward_quantizer_reordered}
@@ -270,7 +270,7 @@ Si se reordenan los términos como \eqref{eq:single_layer_backward_quantizer_reo
     \underbrace{\overline{y_{m}\,}\dfrac{\partial z}{\partial \theta}\,\phi'}_{\text{\tiny Equivalente a la expresión \eqref{eq:single_layer_backward}}}\!\cdot\!\underbrace{q_{\phi}'\,q_{\theta}'\vphantom{\dfrac{\partial z}{\partial \theta}}}_{\text{\tiny Términos de cuantización}}
 \end{equation}
 
-En conclusión, la cuantización afecta el cálculo del gradiente mediante la introducción de los términos $\nabla_{q_{\theta}}$ y $\nabla_{q_{\phi}}$, que representan las derivadas de las funciones de cuantización. Estos términos modifican el gradiente original, lo que impacta en la actualización de los pesos durante el entrenamiento.
+La cuantización afecta el cálculo del gradiente mediante la introducción de los términos $\nabla_{q_{\theta}}$ y $\nabla_{q_{\phi}}$, que representan las derivadas de las funciones de cuantización. Estos términos modifican el gradiente original, lo que impacta en la actualización de los pesos durante el entrenamiento.
 
 Ahora bien, si se analizan las funciones de cuantización presentadas en la sección \ref{sec:funciones_de_cuantizacion}, se observa que estas funciones tienen puntos no diferenciables y derivada nula en el resto de su dominio. Esto es un problema, ya que si se tiene un gradiente nulo de la función de cuantización, el gradiente total se anula, lo que impiede la propagación del gradiente e inhibe el entrenamiento de la red. Esto también se un problema de gradiente desvaneciente.
 
@@ -290,7 +290,7 @@ Para solucionarlo, se utilizan aproximaciones de las funciones de cuantización 
 
 Existen diversas variantes de aproximaciones STE, que buscan mejorar la estabilidad del entrenamiento y la precisión del modelo cuantizado \cite{schoenbauer2024customgradientestimatorsstraightthrough}.
 
-Uno de ellos, utilizados en este trabajo, es el \textit{Piece-Wise STE} \cite{jeong2025discretenessfinitesampleanalysisstraightthrough} que utiliza una aproximación por tramos para la derivada de la función de cuantización, permitiendo un control más preciso sobre el comportamiento del gradiente en diferentes regiones de la función.
+Uno de ellos, utilizado en este trabajo, es el \textit{Piece-Wise STE} \cite{jeong2025discretenessfinitesampleanalysisstraightthrough} que emplea una aproximación por tramos para la derivada de la función de cuantización, permitiendo un control más preciso sobre el comportamiento del gradiente en diferentes regiones de la función.
 
 En la \reffig{piecewise_ste} se muestra un ejemplo de una función de cuantización no uniforme y su aproximación mediante \textit{Piece-Wise STE}.
 

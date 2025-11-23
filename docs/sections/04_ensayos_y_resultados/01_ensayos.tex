@@ -74,7 +74,7 @@ Se evaluaron dos esquemas de cuantización representativos para comparar los res
 Ambos esquemas comparten las siguientes características:
 \begin{itemize}
 \item Los \textit{biases} se cuantizaron con cuantizadores uniformes signados de 8 bits.
-\item Las activaciones se cuantizaron con cuantizadores uniformes no signados de 16 bits. La selección de los parámetros de cuantización para las activaciones requieren especial cuidado y una estrategia de búsqueda robusta. No obstante, como se explicó, este experimento dejó de lado la exploración en profundidad de los hiperparámetros, por ello, se decidió emplear una cuantización poco agresiva para permitir comparar los esquemas definidos sin interferencias. En particular, la activación de la última capa densa (\texttt{dense\_1}) no se cuantizó para preservar la precisión de la salida: ello resultó fundamental para no alterar el entrenamiento de la red, puesto que la derivada de la función de activación suele ser muy cercana a $0$ y, por tanto, el gradiente puede desvanecerse, lo que impediría el aprendizaje efectivo del modelo. Tras el entrenamiento, la activación de esta capa puede cuantizarse sin afectar de forma significativa la precisión. Además, este trabajo se centró en evaluar los beneficios de la cuantización sobre la complejidad espacial del modelo, la cuantización de las activaciones no tiene un impacto directo en el tamaño del modelo, pero si en la precisión.
+\item Las activaciones se cuantizaron con cuantizadores uniformes no signados de 16 bits. La selección de los parámetros de cuantización para las activaciones requieren especial cuidado y una estrategia de búsqueda robusta. No obstante, como se explicó, este experimento dejó de lado la exploración en profundidad de los hiperparámetros, por ello, se decidió emplear una cuantización poco agresiva para permitir comparar los esquemas definidos sin interferencias. En particular, la activación de la última capa densa (\texttt{dense\_1}) no se cuantizó para preservar la precisión de la salida: ello resultó fundamental para no alterar el entrenamiento de la red, puesto que la derivada de la función de activación suele ser muy cercana a $0$ y, por tanto, el gradiente puede desvanecerse, lo que impediría el aprendizaje efectivo del modelo. Tras el entrenamiento, la activación de esta capa puede cuantizarse sin afectar de forma significativa la precisión. Además, este trabajo se centró en evaluar los beneficios de la cuantización sobre la complejidad espacial del modelo, la cuantización de las activaciones no tiene un impacto directo en el tamaño del modelo, pero s\'i en la precisión.
 \end{itemize}
 
 La diferencia entre los grupos radica en la cuantización de los pesos de las capas convolucionales y densas.
@@ -105,7 +105,7 @@ Los detalles de ambos esquemas aparecen en la tabla \ref{tab:quant_layouts_final
     >{\raggedright\arraybackslash}m{0.13\textwidth}  % <-- 'm' en lugar de 'p'
 @{} }
 \toprule
- & & \multicolumn{2}{c}{\textbf{Esquema 1: Uniforme}} & \multicolumn{2}{c}{\textbf{Esquema 2: Flexible}} \\
+ & & \multicolumn{2}{c}{\textbf{Esquema 1 - Uniforme}} & \multicolumn{2}{c}{\textbf{Esquema 2 - Flexible}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
 \textbf{Capa} & \textbf{Componente} & \textbf{Tipo} & \textbf{Parámetros} & \textbf{Tipo} & \textbf{Parámetros} \\
 \midrule

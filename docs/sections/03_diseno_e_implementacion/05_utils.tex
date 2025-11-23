@@ -3,14 +3,14 @@
 
 Como se desarrolló en la sección \ref{sec:analisis_tfmot}, \texttt{TFMOT} no proporciona herramientas para calcular la complejidad espacial teórica de modelos cuantizados, y menos aún para el caso de la cuantización flexible, que asume una codificación asintótica de Huffman \cite{huffman1952method}. Esta funcionalidad es fundamental para evaluar el impacto de diferentes esquemas de cuantización en el tamaño del modelo y para comparar la eficiencia de distintos cuantizadores. Por ello, se implementó en el módulo \texttt{utils} un conjunto de funciones para calcular la complejidad espacial de modelos tanto sin cuantizar como cuantizados, que considera tanto los esquemas de cuantización uniforme, como los de cuantización flexible.
 
-La complejidad espacial de un modelo $S_{M}$ se calcula mediante la acumulación de la complejidad espacial de cada capa, como se muestra en \eqref{eq:space_complexity_model}, donde $N_{L}$ representa la cantidad de capas del modelo.
+La complejidad espacial de un modelo $S_{M}$ se calcula mediante la acumulación de la complejidad espacial de cada capa, tal como se muestra en \eqref{eq:space_complexity_model}, donde $N_{L}$ representa la cantidad de capas del modelo.
 
 \begin{equation}
   \label{eq:space_complexity_model}
   S_{M} = \sum_{i=1}^{N_{L}} S_{L_i}
 \end{equation}
 
-A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, como se muestra en \eqref{eq:space_complexity_layer}, donde $N_{\theta}$ representa la cantidad de parámetros de la capa.
+A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula la complejidad espacial de cada parámetro $\theta_j$, tal como se muestra en \eqref{eq:space_complexity_layer}, donde $N_{\theta}$ representa la cantidad de parámetros de la capa.
 
 \begin{equation}
   \label{eq:space_complexity_layer}
@@ -19,7 +19,7 @@ A su vez, para calcular la complejidad espacial de una capa $S_{L}$, se acumula 
 
 Como se desarrolló anteriormente en la sección \ref{sec:implementation_configs}, la granularidad de los esquemas de cuantización en \texttt{QTensor} es a nivel de parámetro, y la complejidad espacial depende del tipo de cuantización aplicada.
 
-En el caso de un parámetro sin cuantización, la complejidad espacial en bits se calcula como el tamaño del tipo de dato del parámetro multiplicado por la cantidad de elementos del tensor, como se muestra en \eqref{eq:space_complexity_no_quantized}.
+En el caso de un parámetro sin cuantización, la complejidad espacial en bits se calcula como el tamaño del tipo de dato del parámetro multiplicado por la cantidad de elementos del tensor, tal como se muestra en \eqref{eq:space_complexity_no_quantized}.
 
 \begin{equation}
   \label{eq:space_complexity_no_quantized}
@@ -28,7 +28,7 @@ En el caso de un parámetro sin cuantización, la complejidad espacial en bits s
 
 donde $P$ es el tamaño en bits del tipo de dato del parámetro y $k$ es la cantidad de elementos del tensor.
 
-En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es análoga a la de un parámetro sin cuantización, pero en este caso $P$ corresponde al número de bits utilizado en la cuantización $b$, como se muestra en \eqref{eq:space_complexity_uniform}.
+En el caso de un parámetro cuantizado con cuantización uniforme, la expresión es análoga a la de un parámetro sin cuantización, pero en este caso $P$ corresponde al número de bits utilizado en la cuantización $b$, tal como se muestra en \eqref{eq:space_complexity_uniform}.
 
 \begin{equation}
   \label{eq:space_complexity_uniform}
@@ -48,14 +48,14 @@ La complejidad espacial de los índices $S_{\mathcal{I}}$ se calcula como la com
     S_{\mathcal{I}} = k \cdot H
 \end{equation}
 
-Por otra parte, en la implementación planteada no se considera que los valores de los niveles se almacenen dentro del chip, sino que se almacenan en memoria externa. Por esta razón, es necesario sumarlos a la complejidad espacial. La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, como se muestra en \eqref{eq:space_complexity_flexible_levels}.
+Por otra parte, en la implementación planteada no se considera que los valores de los niveles se almacenen dentro del chip, sino que se almacenan en memoria externa. Por esta razón, es necesario sumarlos a la complejidad espacial. La complejidad espacial de los niveles del cuantizador $S_{l}$ se calcula como el número de niveles $N_{l}$ multiplicado por el tamaño en bits utilizado por el cuantizador, tal como se muestra en \eqref{eq:space_complexity_flexible_levels}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible_levels}
     S_{l} = N_{l} \cdot b
 \end{equation}
 
-En consecuencia, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, como se muestra en \eqref{eq:space_complexity_flexible}.
+En consecuencia, la complejidad espacial total de un parámetro cuantizado con un cuantizador flexible $S_{\theta_{q_{f}}}$ se calcula como la suma de las complejidades espaciales de los niveles y los índices, tal como se muestra en \eqref{eq:space_complexity_flexible}.
 
 \begin{equation}
   \label{eq:space_complexity_flexible}

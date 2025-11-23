@@ -3,12 +3,12 @@
 
 Como se determinó en la sección \ref{sec:qat}, para realizar QAT es necesario definir las derivadas de las funciones de cuantización con respecto a las entradas para evitar el desvanecimiento del gradiente y derivadas no definidas.
 
-Luego, para implementar cuantizadores con parámetros entrenables, es necesario definir las derivadas con respecto a sus parámetros. En esta sección se describen los gradientes definidos para el cuantizador uniforme y el cuantizador flexible, descriptos en las secciones \ref{sec:uniform} y \ref{sec:flex} respectivamente.
+Luego, para implementar cuantizadores con parámetros entrenables, es necesario definir las derivadas con respecto a sus parámetros. En esta sección se describen los gradientes definidos para el cuantizador uniforme y el cuantizador flexible, descriptos en las secciones \ref{sec:uniform} y \ref{sec:flex}, respectivamente.
 
 \subsection{Gradiente del cuantizador uniforme}
 \label{sec:uniform_quantizer_gradient}
 
-En el caso del cuantizador uniforme, la función depende de la entrada $x$ y del parámetro $\alpha$. Por lo tanto, su gradiente consta de dos componentes: la derivada con respecto a la entrada $\frac{\partial q_u}{\partial x}$ y la derivada con respecto al parámetro $\alpha$ $\frac{\partial q_u}{\partial \alpha}$ como se muestra en \eqref{eq:uniform_quantizer_gradient_generic}.
+En el caso del cuantizador uniforme, la función depende de la entrada $x$ y del parámetro $\alpha$. Por lo tanto, su gradiente consta de dos componentes: la derivada con respecto a la entrada $\frac{\partial q_u}{\partial x}$ y la derivada con respecto al parámetro $\alpha$ $\frac{\partial q_u}{\partial \alpha}$, tal como se muestra en \eqref{eq:uniform_quantizer_gradient_generic}.
 
 \begin{equation}
     \label{eq:uniform_quantizer_gradient_generic}
@@ -91,7 +91,7 @@ La derivada con respecto a la entrada se aproxima mediante el STE, al igual que 
 \defaultfigurecustomsize{quantizers/flex/q_ste.png}{Aproximación de la cuantización flexible signada con STE.}{flexible_signed_ste}{0.75}
 
 \subsubsection{Derivada con respecto al rango de cuantización}
-La derivada con respecto a $\alpha$, $\frac{\partial q_f}{\partial \alpha}$, también se puede aproximar de la misma manera que en el caso del cuantizador uniforme, como se muestra en \eqref{eq:uniform_quantizer_dq_dalpha}.
+La derivada con respecto a $\alpha$, $\frac{\partial q_f}{\partial \alpha}$, también se puede aproximar de la misma manera que en el caso del cuantizador uniforme, tal como se muestra en \eqref{eq:uniform_quantizer_dq_dalpha}.
 
 \subsubsection{Derivada con respecto a los niveles}
 La derivada con respecto a los niveles se puede deducir a partir de la proyección de la función de cuantización sobre el nivel $l_i$ para un $x$ fijo dentro del intervalo definido por los umbrales $t_i$ y $t_{i+1}$, $x \in \left[t_i, t_{i+1}\right]$, donde $q(x) = l_i$.

@@ -10,27 +10,27 @@ El modelo de regresión logística se utiliza en problemas de clasificación bin
 
 El valor de salida $\hat{y}$ pertenece al intervalo $\left[0, 1\right]$ y representa la probabilidad de que la observación pertenezca a la clase 1. En la práctica, se utiliza un umbral (comúnmente $0.5$). Si $\hat{y} \geq 0.5$, la observación se asigna a la clase 1, en caso contrario, a la clase 0. La \reffig{logistic_regression} ilustra el comportamiento de la función sigmoide en un problema de regresión logística con una sola variable independiente.
 
-\defaultfigurecustomsize{regression/logistic_regression.png}{Regresión Logística.}{logistic_regression}{1}
+\defaultfigurecustomsize{regression/logistic_regression.png}{Regresión logística.}{logistic_regression}{1}
 
 En este modelo, el objetivo es clasificar correctamente las observaciones en sus respectivas clases. Para lograr esto, la regresión logística no predice una clase directamente, sino que modela la probabilidad $\mathbb{P}(y_i \mid x_i)$ de que cada observación pertenezca a su clase correspondiente. Intuitivamente, un modelo bien ajustado es aquel que asigna una alta probabilidad a los resultados que realmente se observaron en $\mathcal{D}$ \cite{Bishop2006}.
 
-Este principio se formaliza mediante la función de verosimilitud $V(\theta)$, la cual mide la probabilidad conjunta de observar todos los datos de la muestra (de tamaño $n$) dados los parámetros $\theta$, y se expresa como el producto de las probabilidades individuales \eqref{eq:likelihood} \cite{Bishop2006}.
+Este principio se formaliza mediante la función de verosimilitud $V(\theta)$, que mide la probabilidad conjunta de observar todos los datos de la muestra (de tamaño $n$) dados los parámetros $\theta$, y se expresa como el producto de las probabilidades individuales \eqref{eq:likelihood} \cite{Bishop2006}.
 
 \begin{equation}
     \label{eq:likelihood}
       V(\theta) = \prod_{i=1}^{n} \mathbb{P}(y_i \mid x_i)
 \end{equation}
 
-Por conveniencia computacional, se trabaja con el logaritmo de la función de verosimilitud, conocido como log-verosimilitud, que convierte el producto en una suma, como se muestra \eqref{eq:log_likelihood}.
+Por conveniencia computacional, se trabaja con el logaritmo de la función de verosimilitud, conocido como log-ve\-ro\-si\-mi\-li\-tud, que convierte el producto en una suma, tal como se muestra \eqref{eq:log_likelihood}.
 
 \begin{equation}
     \label{eq:log_likelihood}
       \ell(\theta) = \sum_{i=1}^{n} \left[ y_i \log(\mathbb{P}(y_i \mid x_i)) + (1 - y_i) \log(1 - \mathbb{P}(y_i \mid x_i)) \right]
 \end{equation}
 
-En consecuencia, la función de costo se define como el negativo de la log-verosimilitud; por lo tanto, el problema se plantea como la minimización de dicha función (equivalente a maximizar la log-verosimilitud) con respecto a los parámetros $\theta$.
+En consecuencia, la función de costo se define como el negativo de la log-ve\-ro\-si\-mi\-li\-tud; por lo tanto, el problema se plantea como la minimización de dicha función (equivalente a maximizar la log-ve\-ro\-si\-mi\-li\-tud) con respecto a los parámetros $\theta$.
 
-En este problema, no existe una solución cerrada para optimizar la función de costo, por lo que se deben emplear métodos numéricos iterativos. Entre estos métodos, destacan los algoritmos de optimización basados en utilizar el gradiente de la función de costo \cite{Nocedal2006}, estos serán detallados en la sección \ref{sec:algoritmos_de_optimizacion}.
+En este problema, no existe una solución cerrada para optimizar la función de costo, por lo que se deben emplear métodos numéricos iterativos. Entre estos métodos, destacan los algoritmos de optimización basados en la utilización del gradiente de la función de costo \cite{Nocedal2006}, estos serán detallados en la sección \ref{sec:algoritmos_de_optimizacion}.
 
 % En este problema, no existe una solución cerrada para optimizar la función de costo, por lo que se deben emplear métodos numéricos iterativos. Entre estos métodos, destacan los algoritmos de optimización basados en utilizar el gradiente de la función de costo \cite{Nocedal2006}.
 

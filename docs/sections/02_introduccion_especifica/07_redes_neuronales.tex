@@ -1,6 +1,6 @@
 \section{Redes neuronales}
 \label{sec:redes_neuronales}
-Una red neuronal es un modelo matemático inspirado en la estructura y el funcionamiento del cerebro humano. La unidad básica de una red neuronal está representada por el modelo de perceptrón, el cual simula el comportamiento de una neurona biológica \cite{rosenblatt1958perceptron}.
+Una red neuronal es un modelo matemático inspirado en la estructura y el funcionamiento del cerebro humano. La unidad básica de una red neuronal está representada por el modelo de perceptrón, que simula el comportamiento de una neurona biológica \cite{rosenblatt1958perceptron}.
 
 \subsection{Perceptrón}
 \label{sec:perceptron}
@@ -50,7 +50,7 @@ Para lograr entrenar estos modelos profundos, generalmente se requieren grandes 
 \subsubsection{Ciclo básico de entrenamiento}
 \label{sec:ciclo_entrenamiento}
 
-De manera simplificada una iteración o época del algoritmo de entrenamiento de una red neuronal consta de los siguientes pasos:
+De manera simplificada, una iteración o época del algoritmo de entrenamiento de una red neuronal consta de los siguientes pasos:
 
 \begin{itemize}
     \item Inferencia: se calcula la salida de la red para el conjunto de datos de entrada $\mathcal{D}$ con los parámetros actuales de la red $\theta$.
@@ -59,7 +59,7 @@ De manera simplificada una iteración o época del algoritmo de entrenamiento de
     \item Actualización de parámetros: los parámetros de la red se actualizan mediante el algoritmo de optimización seleccionado, como por ejemplo GD, SGD o Adam.
 \end{itemize}
 
-La \reffig{simple_training_loop} muestra un diagrama del ciclo (\textit{loop}) de entrenamiento de una red neuronal. Este ciclo se repite sobre el mismo conjunto de datos hasta cumplir con algún criterio de parada, el cual puede basarse, por ejemplo, en un número fijo de épocas y otros criterios que se detallan en la sección \ref{sec:conjuntos_de_datos}.
+La \reffig{simple_training_loop} muestra un diagrama del ciclo (\textit{loop}) de entrenamiento de una red neuronal. Este ciclo se repite sobre el mismo conjunto de datos hasta cumplir con algún criterio de parada, que puede basarse, por ejemplo, en un número fijo de épocas y otros criterios que se detallan en la sección \ref{sec:conjuntos_de_datos}.
 
 \defaultdiagram{training/simple_training_loop}{\textit{Loop} de entrenamiento de una red neuronal.}{simple_training_loop}{1}
 
@@ -85,7 +85,7 @@ En el algoritmo \ref{alg:training_loop} se presenta un ejemplo de un ciclo de en
 \begin{algorithm}[H]
     \caption[Ciclo de entrenamiento con guardado del mejor modelo]{Ciclo de entrenamiento con guardado del mejor modelo.}
   \label{alg:training_loop}
-  \KwIn{Conjunto de entrenamiento $\mathcal{D}_{\mathrm{train}}$, conjunto de validación $\mathcal{D}_{\mathrm{val}}$, parámetros iniciales $\theta$, modelo $f(\cdot;\theta)$,  número de épocas $E$, tasa de aprendizaje $\eta$}
+  \KwIn{conjunto de entrenamiento $\mathcal{D}_{\mathrm{train}}$, conjunto de validación $\mathcal{D}_{\mathrm{val}}$, parámetros iniciales $\theta$, modelo $f(\cdot;\theta)$,  número de épocas $E$, tasa de aprendizaje $\eta$}
   \BlankLine
   mejor\_pérdida\_val $\leftarrow \infty$\;
   $\theta_{\text{best}} \leftarrow \theta$\;
@@ -156,7 +156,7 @@ Sin embargo, las capacidades de las redes neuronales profundas trascienden ampli
 
 En conjunto, estas arquitecturas ilustran el enorme potencial de las redes neuronales profundas para abordar problemas complejos en una amplia gama de dominios. Sin embargo, su uso presenta limitaciones prácticas, una de ellas es la necesidad de grandes volúmenes de datos etiquetados para ajustar los pesos \cite{Goodfellow2016}.
 
-Además, modelar sistemas más complejos suele exigir arquitecturas más profundas (más capas), más anchas (más canales o neuronas por capa) y con entradas más grandes, por ejemplo la arquitectura \textit{EfficientNet} \cite{tan2020efficientnetrethinkingmodelscaling}. Como resultado, aumentan tanto el número de parámetros a ajustar como el coste computacional de las operaciones. A modo de ilustración, en la \reffig{model_complexity_over_time} se muestra la evolución de la complejidad de los modelos a lo largo del tiempo, lo que evidencia la tendencia exponencial en el número de parámetros.
+Además, modelar sistemas más complejos suele exigir arquitecturas más profundas (más capas), más anchas (más canales o neuronas por capa) y con entradas más grandes, por ejemplo la arquitectura \textit{EfficientNet} \cite{tan2020efficientnetrethinkingmodelscaling}. Como resultado, aumentan tanto el número de parámetros a ajustar como el costo computacional de las operaciones. A modo de ilustración, en la \reffig{model_complexity_over_time} se muestra la evolución de la complejidad de los modelos a lo largo del tiempo, lo que evidencia la tendencia exponencial en el número de parámetros.
 
 \defaultfigure{redes/model_complexity_over_time.png}{Evolución de la complejidad de los modelos en el tiempo.\protect\footnotemark}{model_complexity_over_time}
 \footnotetext{Imagen tomada de Our World in Data (2023), \textit{Exponential growth of parameters in notable AI systems}. Disponible en: \url{https://ourworldindata.org/grapher/exponential-growth-of-parameters-in-notable-ai-systems}, bajo licencia Creative Commons BY 4.0.}

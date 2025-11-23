@@ -3,7 +3,7 @@
 
 Como parte de la arquitectura modular de \texttt{QTensor} descrita en la sección \ref{sec:implementation_arquitectura}, el módulo \texttt{stages} proporciona componentes para definir y orquestar las etapas del flujo de trabajo de entrenamiento y cuantización. Este módulo surge de la necesidad de gestionar eficientemente los experimentos de cuantización, donde es común probar múltiples esquemas sobre un mismo modelo pre-entrenado, lo que representa un desafío computacional significativo si no se implementa un sistema de gestión adecuado.
 
-Para comprender mejor esta problemática, conviene primero describir el flujo típico de trabajo en QAT con cuantizadores personalizados, el cual consta de los siguientes pasos:
+Para comprender mejor esta problemática, conviene primero describir el flujo típico de trabajo en QAT con cuantizadores personalizados, que consta de los siguientes pasos:
 
 \begin{enumerate}
     \item Definir el modelo a cuantizar.

@@ -9,7 +9,7 @@ El desarrollo de \texttt{QTensor} brinda una herramienta para la compresión de 
 
 La biblioteca \texttt{QTensor} se desarrolló exitosamente sobre \texttt{TensorFlow} y \texttt{Keras}, y cumplió con los 17 requisitos funcionales establecidos. Estos requisitos se organizaron en cuatro categorías principales alineadas con los objetivos específicos: diseño y API (RF1.1-RF1.4), cuantizador uniforme (RF2.1-RF2.4), cuantizador flexible (RF3.1-RF3.4) y evaluación y experimentación (RF4.1-RF4.5). A continuación se analiza el cumplimiento de cada uno de los objetivos específicos planteados.
 
-\subsection{Objetivo 1: Diseño e implementación de la biblioteca}
+\subsection{Objetivo 1 - Diseño e implementación de la biblioteca}
 
 Se diseñó e implementó una biblioteca modular y extensible que satisface los requisitos funcionales de diseño y API (RF1.1-RF1.4), así como los atributos de calidad (RNF1.1, RNF2.1, RNF3.1 y RNF3.2). Los aspectos destacados de la implementación incluyen:
 
@@ -30,7 +30,7 @@ Adicionalmente, los atributos de calidad definidos se cumplieron satisfactoriame
     \item Modularidad (RNF3.2): la arquitectura modular de \texttt{QTensor} facilita la incorporación de nuevos cuantizadores y funcionalidades sin afectar componentes existentes.
 \end{itemize}
 
-\subsection{Objetivo 2: implementación de cuantización uniforme con parámetros adaptables}
+\subsection{Objetivo 2 - Implementación de cuantización uniforme con parámetros adaptables}
 
 Se implementó exitosamente el cuantizador uniforme con parámetros entrenables, que cumple con los requisitos funcionales RF2.1-RF2.4. La implementación soporta modos signados y no signados, con número arbitrario de bits, e incluye:
 
@@ -41,7 +41,7 @@ Se implementó exitosamente el cuantizador uniforme con parámetros entrenables,
     \item Mecanismos de inicialización configurables para el parámetro $\alpha$.
 \end{itemize}
 
-\subsection{Objetivo 3: implementación de cuantización flexible con parámetros adaptables}
+\subsection{Objetivo 3 - Implementación de cuantización flexible con parámetros adaptables}
 
 Se extendió el esquema de cuantización flexible propuesto en \cite{electronics13101923}, mediante la incorporación de cuantizadores con parámetros entrenables, que cumple con los requisitos funcionales RF3.1-RF3.4, lo que repesenta una contribución original. La implementación incluye:
 
@@ -53,7 +53,7 @@ Se extendió el esquema de cuantización flexible propuesto en \cite{electronics
     \item Mecanismos de inicialización para los parámetros del cuantizador.
 \end{itemize}
 
-\subsection{Objetivo 4: evaluación y comparación de esquemas de cuantización}
+\subsection{Objetivo 4 - Evaluación y comparación de esquemas de cuantización}
 
 Se desarrollaron herramientas de evaluación y experimentación que satisfacen los requisitos funcionales RF4.1-RF4.5. Estas herramientas incluyen utilidades para calcular la complejidad espacial teórica (que considera codificación de Huffman para esquemas flexibles), visualizar la evolución de los parámetros de cuantización durante el entrenamiento, y el módulo \texttt{stages} que permite definir flujos de trabajo experimentales de manera modular y reproducible.
 

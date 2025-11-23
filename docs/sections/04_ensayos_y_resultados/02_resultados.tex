@@ -27,7 +27,7 @@ Los resultados obtenidos para el esquema uniforme se resumen a continuación:
 
 \item A medida que disminuye el número de bits, la precisión se reduce de forma significativa: con 3 bits, descendió a $86.03\%$ respecto del modelo original. Lo que indica que la cuantización uniforme no resulta adecuada para compresiones agresivas, ya que la precisión presenta alta variabilidad en configuraciones de baja resolución.
 
-\item A partir de 5 o 6 bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de rendimiento cercana al valor del modelo original. Lo cual sugiere que incrementar la cantidad de bits más allá de este punto no aporta mejoras significativas en precisión.
+\item A partir de 5 o 6 bits, la ganancia en precisión se vuelve marginal, observándose una meseta en la curva de rendimiento cercana al valor del modelo original. Esto sugiere que incrementar la cantidad de bits más allá de este punto no aporta mejoras significativas en precisión.
 
 \item En algunas configuraciones, la precisión superó la del modelo original debido a que el ruido introducido por la cuantización actuó como un mecanismo de regularización, lo que favorece la generalización y reduce el sobreajuste \cite{Choi2019} \cite{banner2019posttraining4bitquantizationconvolution}.
 \end{itemize}
