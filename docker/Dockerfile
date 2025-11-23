@@ -9,6 +9,7 @@ RUN pip3 install \
 
 # Set backward compatibility for tfmot
 RUN pip3 install tf_keras --no-deps
+RUN pip3 install "tf_keras~=2.17.0" --no-deps
 ENV TF_USE_LEGACY_KERAS=1
 
 # Install linting tools
