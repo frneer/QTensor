@@ -69,7 +69,6 @@ class UniformQuantizer(_QuantizeHelper, Quantizer):
         alpha = layer.add_weight(
             name=f"{name}{self.name_suffix}_alpha",
             initializer=self.initializer,
-            # shape=(1,),
             trainable=True,
             dtype=tf.float32,
             regularizer=self.regularizer,

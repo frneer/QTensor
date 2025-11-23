@@ -5,7 +5,8 @@ RUN pip3 install \
     matplotlib \
     scikit-learn \
     tensorflow-model-optimization \
-    kagglehub
+    kagglehub \
+    pandas
 
 # Set backward compatibility for tfmot
 RUN pip3 install tf_keras --no-deps

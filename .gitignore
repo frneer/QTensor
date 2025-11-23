@@ -6,3 +6,5 @@ old/
 build/
 
 *.mp4
+
+checkpoints/

@@ -16,9 +16,10 @@ def plot_flex_snapshot(
     # NOTE(Fran): Big assumption here that the keys are always the same
     # TODO(Fran): Also it seems activations aren't being stored as model weights
     # ...
-    alpha_history = layer_history[f"{layer_name}/alpha:0"]
-    level_history = layer_history[f"{layer_name}/levels:0"]
-    threshold_history = layer_history[f"{layer_name}/thresholds:0"]
+    print(layer_history.keys())
+    alpha_history = layer_history[f"{layer_name}/kernel_alpha:0"]
+    level_history = layer_history[f"{layer_name}/kernel_levels:0"]
+    threshold_history = layer_history[f"{layer_name}/kernel_thresholds:0"]
     bits = quantizer.bits
     signed = quantizer.signed
 

@@ -157,10 +157,8 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             ##### dq_dx uses STE #####
             dq_dx = tf.where(
                 tf.logical_and(
-                    tf.greater_equal(x, self.thresholds[0]),
-                    tf.less_equal(
-                        x, self.thresholds[-1]
-                    ),  # should it be alpha?
+                    tf.greater_equal(x, thresholds[0]),
+                    tf.less_equal(x, thresholds[-1]),  # should it be alpha?
                 ),
                 upstream,
                 tf.zeros_like(x),
@@ -207,7 +205,7 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
             ##### dq_dthresholds using piecewise-STE #####
             dq_dthresholds = tf.zeros_like(thresholds)
 
-            for i in range(1, self.thresholds.shape[0] - 1):
+            for i in range(1, thresholds.shape[0] - 1):
                 delta_y = qlevels[i - 1] - qlevels[i]
                 delta_x = thresholds[i + 1] - thresholds[i - 1]
 
@@ -215,8 +213,8 @@ class FlexQuantizer(_QuantizeHelper, Quantizer):
                 # Fall within the range of the two borderline levels
                 masked_upstream = tf.where(
                     tf.logical_and(
-                        tf.greater_equal(x, self.thresholds[i - 1]),
-                        tf.less_equal(x, self.thresholds[i + 1]),
+                        tf.greater_equal(x, thresholds[i - 1]),
+                        tf.less_equal(x, thresholds[i + 1]),
                     ),
                     upstream,
                     tf.zeros_like(x),
