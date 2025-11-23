@@ -11,7 +11,7 @@ Para los ensayos se empleó el conjunto CIFAR-10 \cite{krizhevsky2009learning}, 
 
 El \textit{dataset} CIFAR-10 se consideró adecuado por su tamaño moderado y por la diversidad de clases, lo que permitió evaluar técnicas de cuantización sin requerir recursos computacionales excesivos. En la \reffig{cifar10} se muestran ejemplos representativos de cada clase del conjunto.
 
-\defaultfigurecustomsize{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}{0.85}
+\defaultfigurecustomsize{datasets/cifar10}{Ejemplos del conjunto de datos CIFAR-10.}{cifar10}{0.75}
 
 \subsection{Modelo}
 \label{sec:model}
@@ -22,6 +22,7 @@ La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizad
 \begin{table}[H]
     \centering
     \caption{Arquitectura del modelo utilizado.}
+    \footnotesize
     \begin{tabularx}{\textwidth}{l l c c >{\centering\arraybackslash}X}
             \toprule
         Tipo & Detalles & Tamaño de salida & Activación & Parámetros \\

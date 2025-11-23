@@ -32,7 +32,8 @@ La derivada respecto a la entrada se aproxima mediante el STE explicado en la se
     \end{cases}
 \end{equation}
 
-\defaultfigure{quantizers/uniform/q_ste.png}{Aproximación de la cuantización uniforme signada con STE.}{uniform_signed_ste}
+\vspace{-0.5cm}
+\defaultfigurecustomsize{quantizers/uniform/q_ste.png}{Aproximación de la cuantización uniforme signada con STE.}{uniform_signed_ste}{0.75}
 
 Por ende, la derivada $\frac{\partial q_u}{\partial x}$ se aproxima como la derivada de $\frac{\partial \hat{q_u}}{\partial x}$, tal como se muestra en \eqref{eq:uniform_quantizer_ste_signed_derivative}.
 
@@ -86,8 +87,8 @@ donde $\nabla_{q_{f_\mathbf{t}}}$ y $\nabla_{q_{f_\mathbf{l}}}$ se definen en \e
 \subsubsection{Derivada con respecto a la entrada}
 La derivada con respecto a la entrada se aproxima mediante el STE, al igual que en el caso del cuantizador uniforme. Como puede observarse en la \reffig{flexible_signed_ste}, la aproximación es idéntica a la definida en \eqref{eq:uniform_quantizer_ste_signed} y su derivada es la misma que la definida en \eqref{eq:uniform_quantizer_ste_signed_derivative}. Si bien en el cuantizador flexible la aproximación resulta menos precisa que en el caso uniforme, cumple adecuadamente su función: permitir la propagación del gradiente durante el entrenamiento.
 
-\defaultfigure{quantizers/flex/q_ste.png}{Aproximación de la cuantización flexible signada con STE.}{flexible_signed_ste}
-
+\vspace{-0.4cm}
+\defaultfigurecustomsize{quantizers/flex/q_ste.png}{Aproximación de la cuantización flexible signada con STE.}{flexible_signed_ste}{0.75}
 
 \subsubsection{Derivada con respecto al rango de cuantización}
 La derivada con respecto a $\alpha$, $\frac{\partial q_f}{\partial \alpha}$, también se puede aproximar de la misma manera que en el caso del cuantizador uniforme, como se muestra en \eqref{eq:uniform_quantizer_dq_dalpha}.

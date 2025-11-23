@@ -29,11 +29,13 @@ Para implementar este comportamiento se utilizó la interfaz de \texttt{Keras} \
 
 Como ejemplo, el fragmento de código \ref{code:quantizer_constraints} muestra la implementación de la restricción \texttt{PositiveConstraint}, donde se utiliza la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value} para limitar los valores del tensor entre un valor mínimo (en este caso, un valor muy pequeño positivo definido por \texttt{tf.keras.backend.epsilon()} \cite{tensorflow_epsilon_api}) y el infinito positivo. Es necesario utilizar un valor mínimo mayor a cero para evitar divisiones por cero en los cálculos posteriores y asegurar la estabilidad numérica.
 
+\vspace{0.2cm}
 \begin{lstlisting}[language=Python,label=code:quantizer_constraints,caption=Definición de restricciones para parámetros entrenables.]
   class PositiveConstraint(tf.keras.constraints.Constraint):
     def __call__(self, w):
         return tf.clip_by_value(w, tf.keras.backend.epsilon(), np.inf)
 \end{lstlisting}
+\vspace{-0.3cm}
 
 \paragraph{Inicialización y regularización}
 
@@ -75,6 +77,7 @@ En particular, \texttt{grad} define el gradiente de la función de cuantización
 
 Por otra parte, el gradiente con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definido en \eqref{eq:uniform_quantizer_dq_dalpha}, se calcula de manera diferente. A diferencia del caso anterior, donde existe un gradiente para cada elemento de $x$, aquí $\alpha$ es un único escalar que afecta a todos los elementos del tensor de entrada. Por lo tanto, se calcula un gradiente para cada elemento $x_i$ con respecto a $\alpha$, y luego se suman todos estos gradientes para obtener el gradiente total mediante \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum}.
 
+\newpage
 \begin{lstlisting}[language=Python,label=code:uniform_quantizer_full,caption=Implementación completa del cuantizador uniforme con gradientes personalizados.]
 @tf.custom_gradient
 def quantize(x, alpha):
@@ -104,6 +107,7 @@ Para ilustrar el comportamiento del cuantizador uniforme durante el entrenamient
 
 La figura \ref{fig:uniform_quantizer_training} muestra la evolución de la función de pérdida $\mathcal{L}$ y del parámetro $\alpha$ del cuantizador aplicado a la capa oculta a lo largo del entrenamiento.
 
+\vspace{0.2cm}
 \begin{lstlisting}[language=Python,label=code:modelo_utilizado_uniform,caption={Definición de un modelo MLP de una sola capa oculta con Keras, con cuantización uniforme}]
     layer_1 = Flatten(input_shape=(28, 28), name="input")
     layer_2 = Dense(128, activation="relu", name="hidden")
@@ -147,7 +151,9 @@ Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f
 
 De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descrito en \eqref{eq:flexible_quantizer_dq_dt}, también requiere calcular y acumular el gradiente para cada uno de los elementos de entrada $x_j$. En este caso, cada umbral $t_i$ afecta a un subconjunto específico de valores de entrada: aquellos que caen dentro del rango definido por los umbrales adyacentes $t_{i-1}$ y $t_{i+1}$. Por lo tanto, se calcula un gradiente para cada valor $x_j$ en ese rango con respecto a $t_i$, y luego se suman. Para esto, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo los valores relevantes, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar sus gradientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
+\newpage
 \begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados, basicstyle=\ttfamily\scriptsize]
+@tf.custom_gradient
 def quantize(x, alpha, levels, thresholds):
   # Cuantizar los niveles usando cuantizacion uniforme
   qlevels = uniform_quantizer(levels)

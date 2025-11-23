@@ -71,13 +71,13 @@ La biblioteca \texttt{QTensor} se diseñó como una capa de abstracción sobre \
 
 La \reffig{qtensor_modules} presenta la interacción entre \texttt{QTensor}, \texttt{TFMOT}, \texttt{Keras} y \texttt{TensorFlow}, donde se observa que \texttt{QTensor} reutiliza las funcionalidades de \texttt{TFMOT} para la cuantización de modelos y las funcionalidades de \texttt{Keras} y \texttt{TensorFlow} para la definición, entrenamiento y evaluación de modelos.
 
-\defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Grafo de dependencias entre las bibliotecas.}{qtensor_modules}{1}
+\defaultdiagram{implementacion/tf_tfmot_qtensor_interaction}{Grafo de dependencias entre las bibliotecas.}{qtensor_modules}{0.85}
 
 El diseño de \texttt{QTensor} es modular, es decir, se compone de módulos con funcionalidades específicas, lo que facilita la incorporación de nuevas características, mejora la mantenibilidad del código y favorece la adaptación a distintos casos de uso. Asimismo, esta característica respalda el atributo de calidad RNF3.2 definido en la sección \ref{sec:atributos_calidad}.
 
 La \reffig{qtensor_overview} presenta la estructura general de la biblioteca y sus módulos principales. Cada módulo se encarga de una funcionalidad específica y está diseñado para satisfacer un conjunto de requisitos funcionales definidos en la sección \ref{sec:requerimientos_funcionales}:
 
-\defaultdiagram{implementacion/qtensor_modules}{Módulos y dependencias de la biblioteca \texttt{QTensor}.}{qtensor_overview}{1}
+\defaultdiagram{implementacion/qtensor_modules}{Módulos y dependencias de la biblioteca \texttt{QTensor}.}{qtensor_overview}{0.85}
 
 \begin{itemize}
   \item \texttt{configs}: proporciona abstracciones para describir esquemas de cuantización mediante diccionarios. Este módulo satisface los requisitos funcionales RF1.1, RF1.2, RF1.3 y RF1.4.

@@ -31,7 +31,9 @@ El entrenamiento del modelo consiste en definir el conjunto de datos de entrenam
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 model.fit(x_train, y_train, epochs=5)
 \end{lstlisting}
-\vspace{-0.4cm}
+
+\newpage
+
 \subsubsection{Grafo de ejecución}
 \label{sec:tensorflow_graph}
 El modelo de ejecución de \texttt{TensorFlow} se basa en la construcción y ejecución de grafos computacionales, llamados \texttt{tf.Graph} \cite{tensorflow_graph}. Este grafo está compuesto principalmente por los siguientes componentes:
@@ -83,10 +85,10 @@ Por ejemplo, en la multiplicación de dos tensores \texttt{a} y \texttt{b} del f
 
 \begin{equation}
 \label{eq:custom_gradient_grads_normal}
-\\nabla=\begin{bmatrix}\frac{\partial y}{\partial a} \\ \frac{\partial y}{\partial b} \end{bmatrix} = \begin{bmatrix} b \\ a \end{bmatrix}
+\nabla=\begin{bmatrix}\frac{\partial y}{\partial a} \\ \frac{\partial y}{\partial b} \end{bmatrix} = \begin{bmatrix} b \\ a \end{bmatrix}
 \end{equation}
 
-\vspace{0.cm}
+\newpage
 \begin{lstlisting}[language=Python,label=code:mul,caption=Definición de la operación mul (gradiente automático) en TensorFlow.]
 # Operacion
 def mul(a, b):
@@ -118,7 +120,7 @@ Esta funcionalidad resulta clave para implementar las derivadas de los cuantizad
 
 El decorador \cite{pep318} \texttt{@tf.custom\_gradient} \cite{tensorflow_custom_gradient} es el que permite este flujo de trabajo. Al aplicarlo sobre una función de N argumentos: \texttt{arg1}, \texttt{arg2}, $\ldots$, \texttt{argN}, la función debe devolver una tupla, \texttt{y, grad}, donde \texttt{y} es el resultado de la operación y \texttt{grad} un \texttt{callable} \cite{python_callable} que devuelve la tupla \cite{python_datastructures} de gradientes con respecto a cada argumento, en el ejemplo del fragmento de código \ref{code:customgradient}, los gradientes son \texttt{da} y \texttt{db}.
 
-\vspace{0.4cm}
+\newpage
 \begin{lstlisting}[language=Python,label=code:customgradient,caption=Definición de una operación con gradiente personalizado en TensorFlow.]
 # Operacion con gradiente personalizado
 @tf.custom_gradient

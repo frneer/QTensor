@@ -107,13 +107,13 @@ La función de cuantización flexible se define \eqref{eq:flexible_quantizer}
     \end{cases}
 \end{equation}
 
-donde $q_{u}$ es la función de cuantización uniforme definida \eqref{eq:uniform_quantizer}. El gráfico de la función de cuantización flexible se muestra en la \reffig{flexible_signed_q}.
+donde $q_{u}$ es la función de cuantización uniforme definida \eqref{eq:uniform_quantizer}.
 
-\vspace{-0.5cm}
-\defaultfigure{quantizers/flex/q_q.png}{Función de cuantización flexible signada.}{flexible_signed_q}
-
-La \reffig{flexible_signed_q} muestra, en amarillo, los niveles previos a la aplicación del cuantizador uniforme y, en azul, los niveles finales tras aplicar dicho cuantizador.
+El gráfico de la función de cuantización flexible se muestra en la \reffig{flexible_signed_q}, que muestra en amarillo, los niveles previos a la aplicación del cuantizador uniforme y, en azul, los niveles finales tras aplicar dicho cuantizador.
 
 La principal diferencia respecto al uniforme es que los niveles $n$ no dependen de la cantidad de bits, tanto $\mathbf{l}$ como $\mathbf{t}$ son parámetros del cuantizador. En otras palabras, se desacoplan los niveles de cuantización de la cantidad de bits.
 
 Este cuantizador aproxima la cuantización no uniforme mediante una función cuyos valores de salida son compatibles con la aritmética de punto fijo, por ello, permite una implementación eficiente en hardware en conjunto con la flexibilidad para adaptarse a distintas distribuciones de datos.
+
+% \vspace{-0.5cm}
+\defaultfigure{quantizers/flex/q_q.png}{Función de cuantización flexible signada.}{flexible_signed_q}
