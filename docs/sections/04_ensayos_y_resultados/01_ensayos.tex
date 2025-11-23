@@ -15,7 +15,7 @@ El \textit{dataset} CIFAR-10 se consideró adecuado por su tamaño moderado y po
 
 \subsection{Modelo}
 \label{sec:model}
-El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{LeCun1998}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) con una ventana de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa $0.5$ y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con \num{2175626} parámetros entrenables.
+El modelo empleado sigue una arquitectura inspirada en LeNet-5 \cite{lecun1998gradient}. Consiste en dos capas convolucionales con filtros $3\times3$, cada una seguida por una operación de submuestreo (\textit{max-pooling}) con una ventana de tamaño $2\times2$. Luego, para aplanar las dimensiones se utiliza una capa \textit{flatten}, para conectarlas a las subsecuentes capas densas. Se tiene una capa densa de 256 neuronas con activación ReLU, seguida de una capa de regularización por \textit{dropout} con tasa $0.5$ y, finalmente, una capa de salida de una capa densa con 10 neuronas y activación \textit{softmax}. La arquitectura cuenta con \num{2175626} parámetros entrenables.
 
 La tabla \ref{tab:model_architecture} resume la arquitectura del modelo utilizado y la \reffig{model_architecture} la ilustra.
 
@@ -50,7 +50,7 @@ A continuación se exponen las funciones principales de los tipos de capa emplea
 \begin{itemize}
     \item Capas convolucionales (\texttt{Conv2D}): extraen características espaciales de las imágenes mediante filtros deslizantes, comúnmente denominados \textit{kernels}. Estos \textit{kernels} realizan una operación de convolución entre sus pesos y las regiones locales de la entrada. A la salida de esta operación se le suma un parámetro denominado \textit{bias}, que es único para cada filtro (es decir, por cada canal o mapa de características de salida). Finalmente, el resultado (convolución + bias) procesa a través de una función de activación no lineal, de forma análoga a las capas densas. Este proceso genera mapas de características (\textit{feature maps}) que capturan patrones jerárquicos, como bordes, texturas y formas complejas \cite{Krizhevsky2012}.
 
-    \item Capas de submuestreo (\texttt{MaxPool2D}): reducen la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo en ventanas locales, lo que genera invarianza a pequeñas traslaciones y reduce el costo computacional \cite{LeCun1998}.
+    \item Capas de submuestreo (\texttt{MaxPool2D}): reducen la dimensionalidad espacial de los mapas de características mediante la selección del valor máximo en ventanas locales, lo que genera invarianza a pequeñas traslaciones y reduce el costo computacional \cite{lecun1998gradient}.
 
     \item Capa de aplanado (\texttt{Flatten}): transformó la salida tridimensional de las capas convolucionales en un vector unidimensional para conectarla con capas totalmente conectadas \cite{Goodfellow2016}.
 

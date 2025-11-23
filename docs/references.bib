@@ -216,7 +216,13 @@ author={
       url={https://arxiv.org/abs/2308.09728},
 }
 
-@article{Jin2019Rethinking,title={Rethinking Neural Network Quantization},author={Qing Jin and Linjie Yang and Zhenyu A. Liao},year={2019},doi={}}
+@misc{
+  jin2020rethinking,
+  title={Rethinking Neural Network Quantization},
+  author={Qing Jin and Linjie Yang and Zhenyu Liao},
+  year={2020},
+  url={https://openreview.net/forum?id=HygQ7TNtPr}
+}
 
 @inproceedings{chen2019layerwise,
   title     = {Deep Neural Network Quantization via Layer-Wise Optimization Using Limited Training Data},
@@ -368,24 +374,30 @@ DOI = {10.3390/e23081012}
 }
 
 @article{botchkarev2019performance,
-  title={Performance metrics (error measures) in machine learning regression, forecasting and predictive modeling: Properties and typology},
-  author={Botchkarev, Alex},
-  journal={Interdisciplinary Journal of Information, Knowledge, and Management},
-  volume={14},
-  pages={45--79},
-  year={2019},
-  url={https://consensus.app/papers/performance-metrics-comparison-model-evaluation-predictive-botchkarev/9a1eb4a38e9f553f81f90eb9c1b1340d/?utm_source=chatgpt}
-}
+   title={A New Typology Design of Performance Metrics to Measure Errors in Machine Learning Regression Algorithms},
+   volume={14},
+   ISSN={1555-1237},
+   url={http://dx.doi.org/10.28945/4184},
+   DOI={10.28945/4184},
+   journal={Interdisciplinary Journal of Information, Knowledge, and Management},
+   publisher={Informing Science Institute},
+   author={Botchkarev, Alexei},
+   year={2019},
+   pages={045–076} }
 
 @article{willmott2005advantages,
-  title={Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance},
-  author={Willmott, Cort J and Matsuura, Kenji},
-  journal={Climate Research},
-  volume={30},
-  number={1},
-  pages={79--82},
-  year={2005},
-  url={https://consensus.app/papers/advantages-mean-absolute-error-over-root-mean-square-willmott/ba298f8021d5557c89f35cde99b3a505/?utm_source=chatgpt}
+ ISSN = {0936577X, 16161572},
+ URL = {http://www.jstor.org/stable/24869236},
+ abstract = {ABSTRACT:The relative abilities of 2, dimensioned statistics—the root-mean-square error (RMSE) and the mean absolute error (MAE)—to describe average model-performance error are examined. The RMSE is of special interest because it is widely reported in the climatic and environmental literature; nevertheless, it is an inappropriate and misinterpreted measure of average error. RMSE is inappropriate because it is a function of 3 characteristics of a set of errors, rather than of one (the average error). RMSE varies with the variability within the distribution of error magnitudes and with the square root of the number of errors (n1/2), as well as with the average-error magnitude (MAE). Our findings indicate that MAE is a more natural measure of average error, and (unlike RMSE) is unambiguous. Dimensioned evaluations and inter-comparisons of average model-performance error, therefore, should be based on MAE.},
+ author = {Cort J. Willmott and Kenji Matsuura},
+ journal = {Climate Research},
+ number = {1},
+ pages = {79--82},
+ publisher = {Inter-Research Science Center},
+ title = {Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance},
+ urldate = {2025-11-23},
+ volume = {30},
+ year = {2005}
 }
 
 @article{alexander2016rsquared,
@@ -399,14 +411,18 @@ DOI = {10.3390/e23081012}
 }
 
 @article{sokolova2009systematic,
-  title={A systematic analysis of performance measures for classification tasks},
-  author={Sokolova, Marina and Lapalme, Guy},
-  journal={Information Processing \& Management},
-  volume={45},
-  number={4},
-  pages={427--437},
-  year={2009},
-  url={https://consensus.app/papers/systematic-analysis-performance-measures-applied-classification-sokolova/9a0a504dd49756cfac9a8a47a43c42ff/?utm_source=chatgpt}
+title = {A systematic analysis of performance measures for classification tasks},
+journal = {Information Processing \& Management},
+volume = {45},
+number = {4},
+pages = {427-437},
+year = {2009},
+issn = {0306-4573},
+doi = {https://doi.org/10.1016/j.ipm.2009.03.002},
+url = {https://www.sciencedirect.com/science/article/pii/S0306457309000259},
+author = {Marina Sokolova and Guy Lapalme},
+keywords = {Performance evaluation, Machine Learning, Text classification},
+abstract = {This paper presents a systematic analysis of twenty four performance measures used in the complete spectrum of Machine Learning classification tasks, i.e., binary, multi-class, multi-labelled, and hierarchical. For each classification task, the study relates a set of changes in a confusion matrix to specific characteristics of data. Then the analysis concentrates on the type of changes to a confusion matrix that do not change a measure, therefore, preserve a classifier’s evaluation (measure invariance). The result is the measure invariance taxonomy with respect to all relevant label distribution changes in a classification problem. This formal analysis is supported by examples of applications where invariance properties of measures lead to a more reliable evaluation of classifiers. Text classification supplements the discussion with several case studies.}
 }
 
 @article{powers2011evaluation,
@@ -610,19 +626,6 @@ https://docs.python.org/3/tutorial/datastructures.html
   keywords  = {artificial neural networks, perceptron, adaptive systems},
 }
 
-@article{LeCun1998,
-  author    = {Yann LeCun and Léon Bottou and Yoshua Bengio and Patrick Haffner},
-  title     = {Gradient-Based Learning Applied to Document Recognition},
-  journal   = {Proceedings of the IEEE},
-  year      = {1998},
-  volume    = {86},
-  number    = {11},
-  pages     = {2278--2324},
-  doi       = {10.1109/5.726791},
-  url       = {https://ieeexplore.ieee.org/document/726791},
-  keywords  = {LeNet-5, convolutional neural networks, document recognition, MNIST},
-}
-
 @inproceedings{Krizhevsky2012,
   author    = {Alex Krizhevsky and Ilya Sutskever and Geoffrey Hinton},
   title     = {ImageNet Classification with Deep Convolutional Neural Networks},
@@ -655,6 +658,24 @@ https://docs.python.org/3/tutorial/datastructures.html
   keywords  = {deep learning, mobile computing, embedded systems, edge AI},
 }
 
+@inproceedings{Lane2017,
+author = {Lane, Nicholas D. and Georgiev, Petko},
+title = {Can Deep Learning Revolutionize Mobile Sensing?},
+year = {2015},
+isbn = {9781450333917},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2699343.2699349},
+doi = {10.1145/2699343.2699349},
+abstract = {Sensor-equipped smartphones and wearables are transforming a variety of mobile apps ranging from health monitoring to digital assistants. However, reliably inferring user behavior and context from noisy and complex sensor data collected under mobile device constraints remains an open problem, and a key bottleneck to sensor app development. In recent years, advances in the field of deep learning have resulted in nearly unprecedented gains in related inference tasks such as speech and object recognition. However, although mobile sensing shares many of the same data modeling challenges, we have yet to see deep learning be systematically studied within the sensing domain. If deep learning could lead to significantly more robust and efficient mobile sensor inference it would revolutionize the field by rapidly expanding the number of sensor apps ready for mainstream usage.In this paper, we provide preliminary answers to this potentially game-changing question by prototyping a low-power Deep Neural Network (DNN) inference engine that exploits both the CPU and DSP of a mobile device SoC. We use this engine to study typical mobile sensing tasks (e.g., activity recognition) using DNNs, and compare results to learning techniques in more common usage. Our early findings provide illustrative examples of DNN usage that do not overburden modern mobile hardware, while also indicating how they can improve inference accuracy. Moreover, we show DNNs can gracefully scale to larger numbers of inference classes and can be flexibly partitioned across mobile and remote resources. Collectively, these results highlight the critical need for further exploration as to how the field of mobile sensing can best make use of advances in deep learning towards robust and efficient sensor inference.},
+booktitle = {Proceedings of the 16th International Workshop on Mobile Computing Systems and Applications},
+pages = {117–122},
+numpages = {6},
+keywords = {mobile sensing, deep neural network, deep learning, activity recognition},
+location = {Santa Fe, New Mexico, USA},
+series = {HotMobile '15}
+}
+
 @inproceedings{Gupta2015,
   author    = {Suyog Gupta and Ankur Agrawal and Kailash Gopalakrishnan and Pritish Narayanan},
   title     = {Deep Learning with Limited Numerical Precision},
@@ -678,15 +699,14 @@ https://docs.python.org/3/tutorial/datastructures.html
   keywords  = {deep learning, energy consumption, GPUs, TPUs, computational cost},
 }
 
-@inproceedings{Jacob2018,
-  author    = {Benoit Jacob and Skirmantas Kligys and Bo Chen and Menglong Zhu and Matthew Tang and Andrew Howard and Hartwig Adam and Dmitry Kalenichenko},
-  title     = {Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference},
-  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year      = {2018},
-  pages     = {2704--2713},
-  doi       = {10.1109/CVPR.2018.00286},
-  url       = {https://openaccess.thecvf.com/content_cvpr_2018/html/Jacob_Quantization_and_Training_CVPR_2018_paper.html},
-  keywords  = {quantization, integer arithmetic, low precision, inference, embedded systems},
+@misc{Jacob2018,
+      title={Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference},
+      author={Benoit Jacob and Skirmantas Kligys and Bo Chen and Menglong Zhu and Matthew Tang and Andrew Howard and Hartwig Adam and Dmitry Kalenichenko},
+      year={2017},
+      eprint={1712.05877},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1712.05877},
 }
 
 @misc{Krishnamoorthi2018,
@@ -700,15 +720,16 @@ https://docs.python.org/3/tutorial/datastructures.html
   keywords  = {quantization, uniform quantization, model compression, inference efficiency},
 }
 
-@inproceedings{Nagel2020,
-  author = {Markus Nagel and Mart van Baalen and Tijmen Blankevoort and Max Welling},
-  title = {Up or Down? Adaptive Rounding for Post-Training Quantization},
-  booktitle = {Proceedings of the 37th International Conference on Machine Learning (ICML)},
-  year = {2020},
-  pages = {7197--7206},
-  url = {https://consensus.app/papers/up-or-down-adaptive-rounding-posttraining-quantization-nagel/4b9a6e2c7e225c5b86bb3dc64b1b86f0/?utm_source=chatgpt},
-  keywords = {post-training quantization, model compression, neural networks, accuracy loss}
+@misc{Nagel2020,
+      title={Up or Down? Adaptive Rounding for Post-Training Quantization},
+      author={Markus Nagel and Rana Ali Amjad and Mart van Baalen and Christos Louizos and Tijmen Blankevoort},
+      year={2020},
+      eprint={2004.10568},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2004.10568},
 }
+
 @book{Goodfellow2016,
   author = {Ian Goodfellow and Yoshua Bengio and Aaron Courville},
   title = {Deep Learning},
@@ -764,15 +785,23 @@ https://docs.python.org/3/tutorial/datastructures.html
 }
 
 @inproceedings{vanderGoot2021,
-  author    = {Rob van der Goot},
-  title     = {We Need to Talk About train-dev-test Splits},
-  booktitle = {Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
-  pages     = {4485--4494},
-  year      = {2021},
-  doi       = {10.18653/v1/2021.emnlp-main.368},
-  url       = {https://consensus.app/papers/we-need-to-talk-about-traindevtest-splits-goot/b59584a25bb15d82922e984fa1f46614/?utm_source=chatgpt},
-  keywords  = {train-test split, model evaluation, overfitting, dataset design}
+    title = "We Need to Talk About train-dev-test Splits",
+    author = "van der Goot, Rob",
+    editor = "Moens, Marie-Francine  and
+      Huang, Xuanjing  and
+      Specia, Lucia  and
+      Yih, Scott Wen-tau",
+    booktitle = "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+    month = nov,
+    year = "2021",
+    address = "Online and Punta Cana, Dominican Republic",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.emnlp-main.368/",
+    doi = "10.18653/v1/2021.emnlp-main.368",
+    pages = "4485--4494",
+    abstract = "Standard train-dev-test splits used to benchmark multiple models against each other are ubiquitously used in Natural Language Processing (NLP). In this setup, the train data is used for training the model, the development set for evaluating different versions of the proposed model(s) during development, and the test set to confirm the answers to the main research question(s). However, the introduction of neural networks in NLP has led to a different use of these standard splits; the development set is now often used for model selection during the training procedure. Because of this, comparing multiple versions of the same model during development leads to overestimation on the development data. As an effect, people have started to compare an increasing amount of models on the test data, leading to faster overfitting and ``expiration'' of our test sets. We propose to use a tune-set when developing neural network methods, which can be used for model picking so that comparing the different versions of a new model can safely be done on the development data."
 }
+
 
 @misc{kingma2017adammethodstochasticoptimization,
       title={Adam: A Method for Stochastic Optimization},
@@ -846,18 +875,6 @@ https://docs.python.org/3/tutorial/datastructures.html
       url={https://arxiv.org/abs/2103.13630},
 }
 
-@misc{jacob2017quantizationtrainingneuralnetworks,
-      title={Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference},
-      author={Benoit Jacob and Skirmantas Kligys and Bo Chen and Menglong Zhu and Matthew Tang and Andrew Howard and Hartwig Adam and Dmitry Kalenichenko},
-      year={2017},
-      eprint={1712.05877},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/1712.05877},
-  url       = {https://www.deeplearningbook.org/},
-  keywords  = {deep learning, neural networks, flattening, dense layers}
-}
-
 @book{Bishop2006,
   author    = {Christopher M. Bishop},
   title     = {Pattern Recognition and Machine Learning},
@@ -914,14 +931,13 @@ year = {2021},
 publisher = {Pearson}
 }
 
-
-@misc{NVIDIA2022,
-  author       = {NVIDIA Corporation},
+@online{NVIDIA2022,
+  author       = {{NVIDIA Corporation}},
   title        = {Mixed Precision Training},
-  year         = {2022},
-  howpublished = {\url{https://developer.nvidia.com/mixed-precision-training}},
-  note         = {Technical Report},
-  keywords     = {FP32, FP16, TF32, FP8, floating point, mixed precision, GPU, deep learning}
+  year         = {2023},
+  url          = {https://docs.nvidia.com/deeplearning/performance/mixed-precision-training/index.html},
+  urldate      = {2025-11-23},
+  note         = {NVIDIA Developer Documentation}
 }
 
 @misc{Micikevicius2018,
@@ -934,25 +950,26 @@ publisher = {Pearson}
       url={https://arxiv.org/abs/1710.03740},
 }
 
-@inproceedings{Han2016,
-  author    = {Song Han and Xingyu Liu and Huizi Mao and Jing Pu and Ardavan Pedram and Mark A. Horowitz and William J. Dally},
-  title     = {EIE: Efficient Inference Engine on Compressed Deep Neural Network},
-  booktitle = {Proceedings of the 43rd International Symposium on Computer Architecture (ISCA)},
-  year      = {2016},
-  pages     = {243--254},
-  url       = {https://consensus.app/papers/eie-efficient-inference-engine-compressed-deep-han/efc6c06f4b2c5e8a8d4a94e3c17b71c2/?utm_source=chatgpt},
-  keywords  = {FPGA, ASIC, inference, compression, hardware optimization}
+@misc{Han2016,
+      title={EIE: Efficient Inference Engine on Compressed Deep Neural Network},
+      author={Song Han and Xingyu Liu and Huizi Mao and Jing Pu and Ardavan Pedram and Mark A. Horowitz and William J. Dally},
+      year={2016},
+      eprint={1602.01528},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/1602.01528},
 }
 
 @inproceedings{Choi2019,
-  author    = {Jungwook Choi and Zhuo Wang and Swagath Venkataramani and Pierce I.-J. Chuang and Vijayalakshmi Srinivasan and Kailash Gopalakrishnan},
-  title     = {Accurate and Efficient 2-bit Quantized Neural Networks},
-  booktitle = {Proceedings of the 2nd SysML Conference},
-  year      = {2019},
-  url       = {https://arxiv.org/abs/1809.04793},
-  keywords  = {quantization, regularization, generalization, low precision}
+ author = {Choi, Jungwook and Venkataramani, Swagath and Srinivasan, Vijayalakshmi (Viji) and Gopalakrishnan, Kailash and Wang, Zhuo and Chuang, Pierce},
+ booktitle = {Proceedings of Machine Learning and Systems},
+ editor = {A. Talwalkar and V. Smith and M. Zaharia},
+ pages = {348--359},
+ title = {Accurate and Efficient 2-bit Quantized Neural Networks},
+ url = {https://proceedings.mlsys.org/paper_files/paper/2019/file/c443e9d9fc984cda1c5cc447fe2c724d-Paper.pdf},
+ volume = {1},
+ year = {2019}
 }
-
 
 @book{Nocedal2006,
   author    = {Jorge Nocedal and Stephen J. Wright},
@@ -983,9 +1000,7 @@ publisher = {Pearson}
   number={11},
   pages={2278-2324},
   keywords={Neural networks;Pattern recognition;Machine learning;Optical character recognition software;Character recognition;Feature extraction;Multi-layer neural network;Optical computing;Hidden Markov models;Principal component analysis},
-  doi={10.1109/5.726791}
-}
-
+  doi={10.1109/5.726791}}
 
 @ARTICLE{hochreiter1997long,
   author={Hochreiter, Sepp and Schmidhuber, Jürgen},
@@ -1020,14 +1035,11 @@ publisher = {Pearson}
 }
 
 @article{brandenburg1999mp3,
-  author    = {Karlheinz Brandenburg},
-  title     = {MP3 and AAC Explained},
-  journal   = {Proceedings of the AES 17th International Conference on High-Quality Audio Coding},
-  year      = {1999},
-  pages     = {1--15},
-  publisher = {Audio Engineering Society},
-  url       = {https://www.aes.org/e-lib/browse.cfm?elib=9399},
-  keywords  = {audio compression, MP3, lossy, psychoacoustics, MPEG}
+author = {Br, Karlheinz and Mp, Enburg and Explained, Aac and Brandenburg, Karlheinz},
+year = {2001},
+month = {03},
+pages = {},
+title = {Mp3 And Aac Explained}
 }
 
 @inproceedings{barros2024scheduling,
@@ -1204,7 +1216,7 @@ publisher = {Pearson}
 
 @misc{tensorflow_clone_model,
   author       = {{TensorFlow Developers}},
-  title        = {TensorFlow Model Optimization API: Quantizer Class},
+  title        = {TensorFlow Model Optimization API: clone model},
   year         = {2025},
   howpublished = {\url{https://www.tensorflow.org/api_docs/python/tf/keras/models/clone_model}},
   note         = {Accessed: 2025-10-18}
@@ -1377,25 +1389,25 @@ publisher = {Pearson}
 }
 
 @online{qtensor_quantizers,
-  author       = {Zacchigna, Federico Giordano},
+  author       = {Rossi, Francisco and Zacchigna, Federico},
   title        = {QTensor Quantizers Module - Source Code},
-  year         = {2024},
+  year         = {2025},
   url          = {https://github.com/frneer/qtensor/tree/main/src/quantizers},
   urldate      = {2025-11-18}
 }
 
 @online{qtensor_uniform_quantizer,
-  author       = {Zacchigna, Federico Giordano},
+  author       = {Rossi, Francisco and Zacchigna, Federico},
   title        = {QTensor Uniform Quantizer Implementation},
-  year         = {2024},
+  year         = {2025},
   url          = {https://github.com/frneer/qtensor/blob/main/src/quantizers/uniform_quantizer.py},
   urldate      = {2025-11-18}
 }
 
 @online{qtensor_flexible_quantizer,
-  author       = {Zacchigna, Federico Giordano},
+  author       = {Rossi, Francisco and Zacchigna, Federico},
   title        = {QTensor Flexible Quantizer Implementation},
-  year         = {2024},
+  year         = {2025},
   url          = {https://github.com/frneer/qtensor/blob/main/src/quantizers/flex_quantizer.py},
   urldate      = {2025-11-18}
 }
@@ -1408,6 +1420,13 @@ publisher = {Pearson}
   urldate      = {2025-11-18}
 }
 
+@online{qtensor_stage,
+  author  = {Rossi, Francisco and Zacchigna, Federico},
+  title   = {QTensor: Stage class},
+  year    = {2025},
+  url     = {https://github.com/frneer/QTensor/blob/frn/model_checkpoints/src/stage/stage.py},
+  urldate = {2025-11-18}
+}
 
 @online{fowler2006ci,
   author    = {Fowler, Martin},
@@ -1429,13 +1448,15 @@ publisher = {Pearson}
   doi       = {10.1109/JRPROC.1952.273898}
 }
 
-@article{gauravaram2010cryptographic,
-  title     = {Cryptographic Hash Functions},
-  author    = {Gauravaram, Praveen and Knudsen, Lars R.},
-  journal   = {},
-  pages     = {59--79},
-  year      = {2010},
-  doi       = {10.1081/E-EIA-120047187}
+@inbook{gauravaram2010cryptographic,
+  author = {Gauravaram, Praveen and Knudsen, Lars},
+  year = {2010},
+  month = {01},
+  pages = {59-79},
+  title = {Cryptographic Hash Functions},
+  isbn = {978-3-642-04116-7},
+  journal = {European Transactions on Telecommunications - ETT},
+  doi = {10.1007/978-3-642-04117-4_4}
 }
 
 @online{python_dataclasses,
@@ -1454,24 +1475,15 @@ publisher = {Pearson}
   urldate = {2025-11-18}
 }
 
-@online{qtensor_stage,
-  author  = {{Zacchigna, Federico Giordano}},
-  title   = {QTensor: Stage class},
-  year    = {2024},
-  url     = {https://github.com/frneer/QTensor/blob/frn/model_checkpoints/src/stage/stage.py},
-  urldate = {2025-11-18}
-}
-
 @book{pareto1906manuale,
-  title     = {Manuale di economia politica},
-  author    = {Pareto, Vilfredo},
-  year      = {1906},
-  publisher = {Societ{\`a} Editrice Libraria},
-  address   = {Milano},
-  url       = {https://consensus.app/papers/manuale-economia-politica-pareto/7f10b3db4ab4583fa7a9c1b705bfc1c5/?utm_source=chatgpt},
-  note      = {Introducción del concepto de eficiencia y óptimo de Pareto}
+  author       = {Pareto, Vilfredo},
+  title        = {Manuale di economia politica},
+  year         = {1906},
+  address      = {Milano},
+  publisher    = {Società Editrice Libraria},
+  note         = {Introducción del concepto de eficiencia y óptimo de Pareto},
+  url          = {https://archive.org/details/manualedieconomi00pareuoft}
 }
-
 
 @inproceedings{ampatzoglou2019srp,
   author = {Ampatzoglou, Apostolos and Tsintzira, Angeliki-Agathi and Arvanitou, Elvira-Maria and Chatzigeorgiou, Alexander and Stamelos, Ioannis and Moga, Alexandru and Heb, Robert and Matei, Oliviu and Tsiridis, Nikolaos and Kehagias, Dionisis},
@@ -1614,18 +1626,22 @@ publisher = {Pearson}
   pages     = {1--11}
 }
 
-@inproceedings{nagel2019datafree,
-  title     = {Data-Free Quantization Through Weight Equalization and Bias Correction},
-  author    = {Nagel, Markus and van Baalen, Mart and Blankevoort, Tijmen and Welling, Max},
-  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
-  year      = {2019},
-  pages     = {1325--1334}
+@misc{nagel2019datafree,
+      title={Data-Free Quantization Through Weight Equalization and Bias Correction},
+      author={Markus Nagel and Mart van Baalen and Tijmen Blankevoort and Max Welling},
+      year={2019},
+      eprint={1906.04721},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1906.04721},
 }
 
-@inproceedings{choukroun2019low,
-  title     = {Low-Bit Quantization of Neural Networks for Efficient Inference},
-  author    = {Choukroun, Yoni and Kravchik, Eli and Yang, Fan and Kisilev, Pavel},
-  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision Workshops (ICCVW)},
-  year      = {2019},
-  pages     = {3009--3018}
+@misc{choukroun2019low,
+      title={Low-bit Quantization of Neural Networks for Efficient Inference},
+      author={Yoni Choukroun and Eli Kravchik and Fan Yang and Pavel Kisilev},
+      year={2019},
+      eprint={1902.06822},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1902.06822},
 }

@@ -58,7 +58,7 @@ Existen diferentes funciones de cuantización, entre las que se encuentran la cu
 
 \section{Estado del arte}
 \label{sec:estado_arte}
-La cuantización provee mejoras significativas en potencia, memoria y velocidad de cómputo. Sin embargo, también deteriora el desempeño de la red y, por ende, es crucial definir cuidadosamente cómo realizar la cuantización. Diversos trabajos han evidenciado que esta pérdida en la precisión de la red, debida a la cuantización, se puede acotar si se seleccionan adecuadamente los esquemas, funciones y parámetros de cuantización \cite{Jin2019Rethinking} \cite{chen2019layerwise}.
+La cuantización provee mejoras significativas en potencia, memoria y velocidad de cómputo. Sin embargo, también deteriora el desempeño de la red y, por ende, es crucial definir cuidadosamente cómo realizar la cuantización. Diversos trabajos han evidenciado que esta pérdida en la precisión de la red, debida a la cuantización, se puede acotar si se seleccionan adecuadamente los esquemas, funciones y parámetros de cuantización \cite{jin2020rethinking} \cite{chen2019layerwise}.
 
 A pesar de que los formatos en punto flotante restringen los valores numéricos a un rango fijo y por ende reducen el espacio necesario en memoria, no se los considera formatos cuantizados en la literatura. Los principales son \texttt{FP32}, \texttt{FP16}, \texttt{FP8}, \texttt{TF32} y \texttt{bfloat16}. Entre ellos, \texttt{FP8}, por su baja precisión y rango limitado, a veces se clasifica como una cuantización no uniforme \cite{NVIDIA2022}. En general, los formatos en punto flotante se emplean tanto en entrenamiento como en inferencia, mientras que los formatos en punto fijo se utilizan principalmente en inferencia \cite{NVIDIA2022}.
 
