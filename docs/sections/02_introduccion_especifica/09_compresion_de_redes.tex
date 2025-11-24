@@ -155,7 +155,7 @@ Se ilustra el proceso de PTQ en la \reffig{ptq_process}.
 
 La definición de los parámetros de cuantización es crítica, puesto que una calibración no representativa puede ocasionar pérdidas de desempeño significativas \cite{Nagel2020}.
 
-La distribución de pesos en las redes neuronales suele concentrarse alrededor de cero, con una distribución aproximadamente normal \cite{Krishnamoorthi2018}, tal como se muestra en la primera gráfica de la \reffig{calibration_strategies}.
+La distribución de pesos en las redes neuronales suele concentrarse alrededor de cero \cite{Krishnamoorthi2018}, tal como se muestra en la primera gráfica de la \reffig{calibration_strategies}.
 
 Una estrategia común para determinar el rango del cuantizador uniforme es la estrategia Min/Max \cite{nagel2019datafree}, que utiliza los valores mínimo y máximo absolutos de la distribución. Sin embargo, este enfoque puede presentar problemas cuando existen valores atípicos (\textit{outliers}) \cite{banner2019posttraining4bitquantizationconvolution}. Estos valores extremos, aunque representan una proporción mínima de los datos, pueden expandir significativamente el rango de cuantización. Como se observa en la segunda gráfica de la \reffig{calibration_strategies} para un caso de un cuantizador uniforme de 3 bits. La estrategia Min/Max preserva todos los valores, pero define un tamaño de paso grande y, por ende, disminuye la resolución en la región principal donde se concentran la mayoría de los pesos.
 

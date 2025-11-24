@@ -67,7 +67,7 @@ La tabla \ref{tab:quantizer_comparison} resume las diferencias estructurales ent
 
 \subsubsection{Implementación del cuantizador uniforme}
 
-El fragmento de código \ref{code:uniform_quantizer_full} muestra la implementación completa de la función de cuantización uniforme y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_uniform_quantizer}.
+El fragmento de código \ref{code:uniform_quantizer_full} muestra la implementación de la función de cuantización uniforme y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_uniform_quantizer}.
 
 La función de cuantización uniforme, definida en la ecuación \eqref{eq:uniform_quantizer} (sección \ref{sec:uniform}), primero limita los valores de entrada al rango definido por los niveles mínimo y máximo mediante la función \texttt{tf.clip\_by\_value} \cite{tensorflow_clip_by_value}, posteriormente aplica la cuantización mediante la operación de piso (\texttt{tf.math.floor} \cite{tensorflow_math_floor}).
 
@@ -78,7 +78,7 @@ En particular, \texttt{grad} define el gradiente de la función de cuantización
 Por otra parte, el gradiente con respecto al parámetro $\alpha$, $\frac{\partial q_{u}}{\partial \alpha}$, definido en \eqref{eq:uniform_quantizer_dq_dalpha}, se calcula de manera diferente. A diferencia del caso anterior, donde existe un gradiente para cada elemento de $x$, aquí $\alpha$ es un único escalar que afecta a todos los elementos del tensor de entrada. Por lo tanto, se calcula un gradiente para cada elemento $x_i$ con respecto a $\alpha$, y luego se suman todos estos gradientes para obtener el gradiente total mediante \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum}.
 
 \newpage
-\begin{lstlisting}[language=Python,label=code:uniform_quantizer_full,caption=Implementación completa del cuantizador uniforme con gradientes personalizados.]
+\begin{lstlisting}[language=Python,label=code:uniform_quantizer_full,caption=Implementación del cuantizador uniforme con gradientes personalizados.]
 @tf.custom_gradient
 def quantize(x, alpha):
   clipped_x = tf.clip_by_value(x, self.levels[0], self.levels[-1])
@@ -139,7 +139,7 @@ Como se puede observar en las figuras \ref{fig:uniform_quantizer_training} y \re
 
 \subsubsection{Implementación del cuantizador flexible}
 
-El fragmento de código \ref{code:flexible_quantizer_full} muestra la implementación completa de la función de cuantización flexible y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_flexible_quantizer}.
+El fragmento de código \ref{code:flexible_quantizer_full} muestra la implementación de la función de cuantización flexible y sus gradientes a manera ilustrativa, la implementación completa se encuentra en \cite{qtensor_flexible_quantizer}.
 
 La implementación de la función de cuantización flexible definida en \eqref{eq:flexible_quantizer} cuantiza primero los niveles mediante el cuantizador uniforme definido anteriormente, y luego cuantiza la entrada $x$ asignándole el nivel correspondiente según los umbrales definidos mediante la función \texttt{tf.where}.
 
@@ -152,7 +152,7 @@ Por otro lado, el gradiente con respecto a los niveles $l$, $\frac{\partial q_{f
 De manera similar, el gradiente con respecto a los umbrales $t$, $\frac{\partial q_{f}}{\partial t}$, descrito en \eqref{eq:flexible_quantizer_dq_dt}, también requiere calcular y acumular el gradiente para cada uno de los elementos de entrada $x_j$. En este caso, cada umbral $t_i$ afecta a un subconjunto específico de valores de entrada: aquellos que caen dentro del rango definido por los umbrales adyacentes $t_{i-1}$ y $t_{i+1}$. Por lo tanto, se calcula un gradiente para cada valor $x_j$ en ese rango con respecto a $t_i$, y luego se suman. Para esto, se utiliza \texttt{tf.where} \cite{tensorflow_where} para crear una máscara que seleccione solo los valores relevantes, luego \texttt{tf.reduce\_sum} \cite{tensorflow_reduce_sum} para sumar sus gradientes, y finalmente \texttt{tf.tensor\_scatter\_nd\_update} \cite{tensorflow_tensor_scatter_nd_update} para actualizar el valor del gradiente correspondiente al umbral $t_i$.
 
 \newpage
-\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación completa del cuantizador flexible con gradientes personalizados, basicstyle=\ttfamily\scriptsize]
+\begin{lstlisting}[language=Python,label=code:flexible_quantizer_full,caption=Implementación del cuantizador flexible con gradientes personalizados, basicstyle=\ttfamily\scriptsize]
 @tf.custom_gradient
 def quantize(x, alpha, levels, thresholds):
   # Cuantizar los niveles usando cuantizacion uniforme
