@@ -53,14 +53,17 @@ def plot_uniform_snapshot(
         plt.figure(figsize=(8, 8 / 1.2))
 
         # Set fixed axis limits based on first alpha value (for consistency across epochs)
-        first_alpha = alpha_hist[0]
+        alpha_hist[0]
         ax = plt.gca()
         # ax.set_xlim(min_value(first_alpha, signed), first_alpha)
         # ax.set_ylim(min_value(first_alpha, signed), first_alpha)
 
-        # Ticks and grid configuration with fixed positions
-        tick_positions = np.linspace(
-            min_value(first_alpha, signed), first_alpha, m_levels + 1
+        # Ticks and grid configuration showing the actual quantization levels
+        # These are the only possible output values after quantization
+        delta_v = delta(alpha, m_levels, signed)
+        min_val = min_value(alpha, signed)
+        tick_positions = np.array(
+            [min_val + i * delta_v for i in range(m_levels)]
         )
         ax.set_xticks(tick_positions)
         ax.set_yticks(tick_positions)
@@ -125,18 +128,21 @@ def plot_flex_snapshot(
         plt.figure(figsize=(8, 8 / 1.2))
 
         # Set fixed axis limits and ticks based on first alpha value (for consistency)
-        first_alpha = alpha_hist[0]
+        alpha_hist[0]
         ax = plt.gca()
 
-        # Ticks and grid configuration with fixed positions
-        tick_positions = np.linspace(
-            min_value(first_alpha, signed), first_alpha, m_levels + 1
+        # Ticks and grid configuration showing the actual quantization levels
+        # These are the only possible output values after quantization
+        delta_v = delta(alpha, m_levels, signed)
+        min_val = min_value(alpha, signed)
+        tick_positions = np.array(
+            [min_val + i * delta_v for i in range(m_levels)]
         )
         ax.set_xticks(tick_positions)
         ax.set_yticks(tick_positions)
         ax.tick_params(axis="x", rotation=45)
 
-        # Possible values of quantization
+        # Possible values of quantization (quantized levels using thresholds)
         quantized_levels = quantize(level, alpha, m_levels, signed)
         plt.step(
             threshold,
@@ -144,7 +150,7 @@ def plot_flex_snapshot(
             label=r"$q_f(x;\alpha, \mathbf{l}, \mathbf{t})$",
             where="post",
         )
-        # Actual levels
+        # Actual learned levels (not quantized) - same thresholds, different output levels
         plt.step(
             threshold,
             np.concatenate((level, [level[-1]])),
